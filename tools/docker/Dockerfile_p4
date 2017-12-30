@@ -1,0 +1,153 @@
+#
+# Dockerfile_p4
+# Builds docker container to build/run Juniper P4 Agent
+#
+# Created by Sandesh Kumar Sodhi, December 2017
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+FROM ubuntu:16.04
+LABEL maintainer "Sandesh Kumar Sodhi"
+
+#
+# Build
+#
+# [sudo] docker build -f Dockerfile_p4 -t juniper-p4 .
+#
+# Run:
+#
+# [sudo] docker run --name jnprp4 --privileged -i -t juniper-p4 /bin/bash
+#
+#
+#
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+ autoconf \
+ automake \
+ bsdmainutils \
+ build-essential \
+ ca-certificates \
+ curl \
+ ethtool \
+ expect \
+ g++ \
+ gdb \
+ git \
+ gdebi-core \
+ iputils-ping \
+ libboost-all-dev \
+ libevent-pthreads-2.0-5 \
+ libjsoncpp-dev \
+ libtool \
+ nmap \
+ openssh-client \
+ openssl \
+ pkg-config \
+ psmisc \
+ sed \
+ software-properties-common \
+ ssh \
+ sshpass \
+ tcpdump \
+ telnet \
+ tmux \
+ unzip \
+ vim \
+ wget
+
+# TBD:
+# tshark \
+#
+
+#
+# Packages needed for p4c
+#
+RUN apt-get update && apt-get install -y --no-install-recommends \
+ bison \
+ cmake \
+ flex \
+ libgc-dev \
+ libgmp-dev \
+ libfl-dev
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+ python \
+ pylint \
+ python-pip \
+ python-scapy
+
+RUN pip install --upgrade pip
+RUN pip install -U setuptools
+RUN pip install scapy
+RUN pip install ipaddr
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+ curl \
+ git
+
+RUN mkdir -p /root/downloads
+RUN cd /root/downloads && git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
+RUN cd /root/downloads/grpc && git fetch && git checkout v1.8.1
+RUN cd /root/downloads/grpc && git submodule update --init
+RUN cd /root/downloads/grpc && make
+RUN cd /root/downloads/grpc && make install
+RUN cd /root/downloads/grpc/third_party/protobuf/ && ./autogen.sh && ./configure && make && make install
+
+#
+# GTEST
+#
+RUN cd /root/downloads && wget https://github.com/google/googletest/archive/release-1.8.0.tar.gz
+RUN cd /root/downloads && tar xzf release-1.8.0.tar.gz
+
+#
+# p4c
+#
+RUN cd /root && git clone --recursive https://github.com/p4lang/p4c.git
+
+#
+# pyang
+#
+RUN cd /root/downloads && git clone https://github.com/mbj4668/pyang.git
+RUN cd /root/downloads/pyang && python setup.py install
+
+#
+# GO
+#
+RUN cd /root/downloads && wget https://redirector.gvt1.com/edgedl/go/go1.9.2.linux-amd64.tar.gz
+RUN cd /root/downloads && tar -C /usr/local -xzf go1.9.2.linux-amd64.tar.gz
+RUN mkdir -p /root/go
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOPATH=/root/go
+
+#
+# ygot
+#
+RUN cd /root/go && go get github.com/golang/protobuf/proto
+RUN cd /root/go && go get github.com/openconfig/gnmi; exit 0
+RUN cd /root/go && go get github.com/openconfig/goyang
+RUN cd /root/go && go get google.golang.org/grpc
+RUN cd /root/go && go get github.com/golang/glog
+RUN cd /root/go && go get github.com/kylelemons/godebug; exit 0
+RUN cd /root/go/src && go get github.com/openconfig/ygot; exit 0
+RUN cd /root/go/src/github.com/openconfig/ygot/proto_generator && go build
+
+COPY env/bash_aliases /root/.bash_aliases
+COPY env/vimrc        /root/.vimrc
+COPY env/tmux.conf    /root/.tmux.conf
+
+COPY entrypoint.sh /root/entrypoint.sh
+
+ENTRYPOINT ["/root/entrypoint.sh"]
+

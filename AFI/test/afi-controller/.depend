@@ -1,0 +1,12 @@
+base64.o: base64.cpp base64.h
+main.o: main.cpp ../yang/AFI/protos/juniper/afi_tree/afi_tree.pb.h \
+ ../yang/AFI/protos/ywrapper/ywrapper.pb.h \
+ ../yang/AFI/protos/yext/yext.pb.h base64.h
+afi_tree.pb.o: ../yang/AFI/protos/juniper/afi_tree/afi_tree.pb.cc \
+ ../yang/AFI/protos/juniper/afi_tree/afi_tree.pb.h \
+ ../yang/AFI/protos/ywrapper/ywrapper.pb.h \
+ ../yang/AFI/protos/yext/yext.pb.h
+yext.pb.o: ../yang/AFI/protos/yext/yext.pb.cc \
+ ../yang/AFI/protos/yext/yext.pb.h
+ywrapper.pb.o: ../yang/AFI/protos/ywrapper/ywrapper.pb.cc \
+ ../yang/AFI/protos/ywrapper/ywrapper.pb.h

@@ -1,0 +1,70 @@
+//
+// Copyright (c) 2017 Juniper Networks, Inc.
+// All rights reserved. 
+//
+
+module afi-fwd-sandbox {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-fwd-sandbox/junos/17.3";
+    prefix "afi-fwd-sb";
+
+    import afi-types  { prefix "afi-types"; }
+    import afi-common { prefix "afi-cmn"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sandesh Kumar Sodhi
+        sksodhi@juniper.net";
+
+    description
+      "This module provides data model for Juniper's Advanced Forwarding Interface";
+
+    revision 2017-12-02 {
+        description "Initial revision.";
+    }   
+ 
+    container fwd-sandbox {
+        description "Forwarding sandbox";
+
+        leaf sandbox-name {
+            description "Sandbox name";
+            type string;
+        }   
+
+        list input-port {
+            description "Forwarding sandbox input port";
+            key "port-index";
+            unique "port-name";
+
+            leaf port-index {
+                description "Port index";
+                type uint32;
+            }   
+
+            leaf port-name {
+                description "Port name";
+                type string;
+            }   
+        }   
+    
+        list output-port {
+            description "Forwarding sandbox ouput port";
+            key "port-index";
+            unique "port-name";
+
+            leaf port-index {
+                description "Port index";
+                type uint32;
+            }   
+
+            leaf port-name {
+                description "Port name";
+                type string;
+            }   
+        }   
+    }   
+}

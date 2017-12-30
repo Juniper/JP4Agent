@@ -1,0 +1,43 @@
+//
+// Copyright (c) 2017 Juniper Networks, Inc.
+// All rights reserved. 
+//
+
+module afi {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi/junos/17.3";
+    prefix "afi";
+
+    import afi-types  { prefix "afi-types"; }
+    import afi-common { prefix "afi-cmn"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sandesh Kumar Sodhi
+        sksodhi@juniper.net";
+
+    description
+      "Data model for Advanced Forwarding Interface";
+
+    revision 2017-12-02 {
+        description "Initial revision.";
+    }   
+ 
+    typedef port-state {
+        description "Port state";
+        type enumeration {
+             enum DOWN {
+                 description
+                     "Port state DOWN";
+             }
+             enum UP {
+                 description
+                     "Port state UP";
+             }
+        }
+    }   
+}

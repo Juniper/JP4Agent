@@ -1,0 +1,56 @@
+//
+// Copyright (c) 2017 Juniper Networks, Inc.
+// All rights reserved. 
+//
+
+module afi-types {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-types/junos/17.3";
+    prefix "afi-types";
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sandesh Kumar Sodhi
+        sksodhi@juniper.net";
+
+    description
+      "This module provides data model for Juniper's Advanced Forwarding Interface";
+
+    revision 2017-12-02 {
+        description "Initial revision.";
+    }
+ 
+    typedef aft-token {
+        description "Aft token";
+        type uint64;
+    }
+
+    typedef aft-type-index {
+        description "Aft type index";
+        type uint32;
+    }
+
+    typedef aft-protocol-index {
+        description "Protocol index";
+        type uint32;
+    }
+
+    typedef aft-field {
+        description "Aft field";
+        type enumeration {
+            enum packet-ip4-daddr {
+             description
+              "Packet IPv4 destination address";
+            }
+            enum packet-ip4-saddr {
+             description
+              "Packet IPv4 source address";
+            }
+        }
+    }
+}
+

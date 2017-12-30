@@ -1,0 +1,8 @@
+[
+   {
+      "afi-object" : "kpqfexIKEHBhY2tldC5pcDQuZGFkZHLq/aGPAgoKCGlwdjRfbHBtuqyoyAgCCAo=",
+      "afi-object-id" : 101,
+      "afi-object-name" : "ipv4_lpm",
+      "afi-object-type" : "afi-tree"
+   }
+]

@@ -1,0 +1,81 @@
+#!/usr/bin/expect
+#
+# Advanced Forwarding Interface : AFI client examples
+#
+# Created by Sandesh Kumar Sodhi, December  2017
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+source [file join [file dirname [info script]] lib.exp]
+
+#
+# This script connects to VFP console and
+# Restarts FPC 0
+#
+log_debug "Will connect to VCP via ssh and restart FPC 0"
+set script_name [file tail $argv0]
+
+proc display_usage {} {
+    global script_name
+    puts "Usage  : $script_name"
+    return 1
+}
+
+set spawn_id [login_vcp_ssh]
+
+#
+# timeout 1 minutes
+#
+set timeout 60
+
+expect "$vcp_prompt" { send "\r" }
+expect "$vcp_prompt" { send "cli restart fpc 0\r" }
+expect "$vcp_prompt" { send "cli\r" }
+puts re_cli_prompt=$re_cli_prompt
+expect "$re_cli_prompt" { send "show chassis fpc 0\r" }
+set total_wait 0
+while 1 {
+    expect "$re_cli_prompt" { send "show chassis fpc 0 | match Online | count\r" }
+    expect "$re_cli_prompt" 
+    log_debug "The output is '$expect_out(buffer)'."
+    set results $expect_out(buffer)
+    if {[regexp -nocase "Count: 1 lines" $results]} {
+            puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            puts "!!!!!!!!!!!FPC 0 is Online!!!!!!!!!!!"
+            puts "FPC 0 took $total_wait seconds to come online."
+            puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            send "\r"
+            break
+    } else {
+            puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            puts "FPC 0 is not online - will wait for FPC 0 to come up."
+            puts "Have waited $total_wait seconds till now."
+            puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    }
+    set wait_interval 5
+    sleep $wait_interval
+    set total_wait [expr {$total_wait + $wait_interval}]
+    send "\r"
+}
+
+expect "$re_cli_prompt" { send "show chassis fpc 0\r" }
+expect "$re_cli_prompt" { send "exit\r" }
+expect "$vcp_prompt" { send "exit\r" }
+close
+exit 0

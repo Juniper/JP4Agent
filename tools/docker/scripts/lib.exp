@@ -1,0 +1,404 @@
+#!/usr/bin/expect
+#
+# Advanced Forwarding Interface : AFI client examples
+#
+# Created by Sandesh Kumar Sodhi, January 2017
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+exp_internal -f exp_internal.log.txt 0;
+
+#
+# These VCP and VFP console port must match with 
+# console port configured in cfg/vmx.conf
+#
+set debug_level            1
+set vcp_console_port       8601
+set vcp_ip                 "172.18.0.10"
+set vcp_username           "root"
+set vcp_password           "JunAFI"
+set vcp_prompt             "#"
+set vfp_console_port       8602
+set vfp_ip                 "172.18.0.20"
+set vfp_username           "root"
+set vfp_password           "root"
+set vfp_prompt             "#"
+set re_cli_prompt          "root>"
+set re_cli_config_prompt   "root#"
+set host_prompt             "#"
+
+match_max 100
+
+proc log_debug {str} {
+    global debug_level
+    if {$debug_level != 0} {
+        puts "\r\[DEBUG\]___________\[script $::argv0 log\] $str"
+    }
+}
+
+proc log_error {str} {
+    puts "\r\[ERROR\]___________\[script $::argv0 log\] $str"
+}
+
+#
+# Host shell
+#
+proc host_shell {} {
+    global host_prompt
+    spawn /bin/bash
+    if {$spawn_id == 0} {
+        log_error "Hosh bash spawn_id $spawn_id returning"
+        set rez [display_usage $script_name ]
+        exit 1
+    }
+
+    expect "$host_prompt" { send "\r" }
+    expect "$host_prompt" { send "\r" }
+    log_debug "The output is '$expect_out(buffer)'."
+    set host_prompt [lindex [split $expect_out(buffer) "\n"] end]
+    log_debug "The prompt is '$host_prompt'"
+
+    return $spawn_id
+}
+
+
+#
+# Login to VCP console
+#
+proc login_vcp_console {} {
+    global vcp_prompt
+    global vcp_console_port
+    global vcp_username
+    global vcp_password
+    global re_cli_prompt
+    global re_cli_config_prompt
+    #
+    # Set 6000 seconds timeout to wait for VCP to come up, if not already up
+    #
+    set timeout 6000
+
+    spawn /usr/bin/telnet localhost $vcp_console_port
+    if {$spawn_id == 0} {
+        log_error "Telnet spawn_id $spawn_id returning"
+        set rez [display_usage $script_name ]
+        exit 1
+    }
+
+    log_debug "Telnet spawn_id $spawn_id"
+
+    send "\r"
+    send "\r"
+
+    #
+    # While loop to take care of 
+    # boot menu appearing multiple times
+    #
+    while true {
+        expect {
+            "Connection refused" {
+                log_error "Telnet didn't succeed!!"
+                exit 1
+            }
+            "Choice:" {
+                log_debug "Got boot menu"
+                #
+                # Choice 1
+                #
+                send "1\r"
+                #
+                # loop (while) again
+                #
+            }
+            "ogin:" {
+                log_debug "need to login"
+                send "$vcp_username\r"
+                expect {
+                    "assword:" {
+                        log_debug "Entering password"
+                        set re_cli_prompt          "root@vcp-vm>"
+                        set re_cli_config_prompt   "root@vcp-vm#"
+                        send "$vcp_password\r"
+                        expect {
+                            "#" {
+                                log_debug "got prompt after login (with password)"
+                                send "ls -l\r"
+                                #
+                                # break out of loop
+                                #
+                                break
+                            }
+                            timeout {
+                                log_error "login timeout (password entered)"
+                                close
+                                exit 1
+                            }
+                        }
+                    }
+                    "#" {
+                        log_debug "got prompt after login (passwordless)"
+                        send "ls -l\r"
+                        #
+                        # break out of loop
+                        #
+                        break
+                    }
+                    timeout {
+                        log_error "login timeout"
+                        close
+                        exit 1
+                    }
+                }
+            }
+            eof  {
+                log_error "telnet:eof"
+                exit 1
+            }
+            timeout {
+                log_error "telnet: timeout"
+                close
+                exit 1
+            }
+        }
+    }
+
+    expect "$vcp_prompt" { send "\r" }
+    expect "$vcp_prompt" { send "\r" }
+    log_debug "login_vcp_console: The output is '$expect_out(buffer)'."
+    set vcp_prompt [lindex [split $expect_out(buffer) "\n"] end]
+    log_debug "login_vcp_console: The prompt is '$vcp_prompt'"
+
+    return $spawn_id
+}
+
+#
+# ssh to VCP
+#
+proc login_vcp_ssh {} {
+    global vcp_prompt
+    global vcp_ip
+    global vcp_username
+    global vcp_password
+    global re_cli_prompt
+    global re_cli_config_prompt
+    set re_cli_prompt          "root@vcp-vm>"
+    set re_cli_config_prompt   "root@vcp-vm#"
+    #
+    # Set 10 seconds 
+    #
+    set timeout 10
+
+    spawn /usr/bin/ssh -oStrictHostKeyChecking=no $vcp_username@$vcp_ip
+    if {$spawn_id == 0} {
+        log_error "ssh spawn_id $spawn_id returning"
+        set rez [display_usage $script_name ]
+        exit 1
+    }
+
+    log_debug "ssh spawn_id $spawn_id"
+
+    send "\r"
+    send "\r"
+
+    expect {
+        "assword:" {
+            log_debug "Entering password"
+            send "$vcp_password\r"
+            expect {
+                "#" {
+                    log_debug "got prompt after login (with password)"
+                    send "ls -l\r"
+                }
+                timeout {
+                    log_error "login timeout (password entered)"
+                    close
+                    exit 1
+                }
+            }
+        }
+        eof  {
+            log_error "telnet:eof"
+            exit 1
+        }
+        timeout {
+            log_error "login timeout"
+            close
+            exit 1
+        }
+    }
+
+    expect "$vcp_prompt" { send "\r" }
+    expect "$vcp_prompt" { send "\r" }
+    log_debug "login_vcp_ssh: The output is '$expect_out(buffer)'."
+    set vcp_prompt [lindex [split $expect_out(buffer) "\n"] end]
+    log_debug "login_vcp_ssh: The prompt is '$vcp_prompt'"
+
+    return $spawn_id
+}
+
+#
+# Login to VFP console
+#
+proc login_vfp_console {} {
+    global vfp_prompt
+    global vfp_console_port
+    global vfp_username
+    global vfp_password
+    #
+    # Set 600 seconds timeout to wait for VFP to come up, if not already up
+    #
+    set timeout 600
+
+    spawn /usr/bin/telnet localhost $vfp_console_port
+    if {$spawn_id == 0} {
+        log_error "Telnet spawn_id $spawn_id returning"
+        set rez [display_usage $script_name ]
+        exit 1
+    }
+
+    log_debug "Telnet spawn_id $spawn_id"
+
+    send "\r"
+    send "\r"
+    expect {
+        "Connection refused" {
+            log_error "Telnet didn't succeed!!"
+            exit 1
+        }
+        "ogin:" {
+            log_debug "need to login"
+            send "$vfp_username\r"
+            expect {
+                "assword:" {
+                    log_debug "Entering password"
+                    send "$vfp_password\r"
+                    expect {
+                        "#" {
+                            log_debug "got prompt after login"
+                            send "ls -l\r"
+                        }
+                        timeout {
+                            log_error "login timeout (password entered)"
+                            close
+                            exit 1
+                        }
+                    }
+                }
+                timeout {
+                    log_error "login timeout (waiting for password prompt)"
+                    close
+                    exit 1
+                }
+            }
+        }
+        "#" {
+            log_debug "got prompt"
+            send "ls -l\r"
+        }
+        eof  {
+            log_error "telnet:eof"
+            exit 1
+        }
+        timeout {
+            log_error "telnet: timeout"
+            close
+            exit 1
+        }
+    }
+
+    send "\r"
+    send "\r"
+    expect {
+        "#" {
+            log_debug "got prompt"
+            send "\r"
+            send "ls -l\r"
+        }
+        timeout {
+            log_error "timeout_________"
+            close
+            exit 1
+        }
+    }
+
+    expect "$vfp_prompt" { send "\r" }
+    expect "$vfp_prompt" { send "\r" }
+    log_debug "login_vfp_console: The output is '$expect_out(buffer)'."
+    set vfp_prompt [lindex [split $expect_out(buffer) "\n"] end]
+    log_debug "login_vfp_console: The prompt is '$vfp_prompt'"
+
+    return $spawn_id
+}
+
+#
+# ssh to VFP
+#
+proc login_vfp_ssh {} {
+    global vfp_prompt
+    global vfp_ip
+    global vfp_username
+    global vfp_password
+    #
+    # Set 10 seconds 
+    #
+    set timeout 10
+
+    spawn /usr/bin/ssh -oStrictHostKeyChecking=no $vfp_username@$vfp_ip
+    if {$spawn_id == 0} {
+        log_error "ssh spawn_id $spawn_id returning"
+        set rez [display_usage $script_name ]
+        exit 1
+    }
+
+    log_debug "ssh spawn_id $spawn_id"
+
+    send "\r"
+    send "\r"
+
+    expect {
+        "assword:" {
+            log_debug "Entering password"
+            send "$vfp_password\r"
+            expect {
+                "#" {
+                    log_debug "got prompt after login (with password)"
+                    send "ls -l\r"
+                }
+                timeout {
+                    log_error "login timeout (password entered)"
+                    close
+                    exit 1
+                }
+            }
+        }
+        eof  {
+            log_error "telnet:eof"
+            exit 1
+        }
+        timeout {
+            log_error "login timeout"
+            close
+            exit 1
+        }
+    }
+
+    expect "$vfp_prompt" { send "\r" }
+    expect "$vfp_prompt" { send "\r" }
+    log_debug "login_vfp_ssh: The output is '$expect_out(buffer)'."
+    set vfp_prompt [lindex [split $expect_out(buffer) "\n"] end]
+    log_debug "login_vfp_ssh: The prompt is '$vfp_prompt'"
+
+    return $spawn_id
+}
+

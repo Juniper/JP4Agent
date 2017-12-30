@@ -1,0 +1,6 @@
+
+
+# To prevent accidents
+alias rm='rm -i'
+alias mv='mv -i'
+alias cp='cp -i'

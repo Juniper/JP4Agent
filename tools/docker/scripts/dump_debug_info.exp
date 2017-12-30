@@ -1,0 +1,113 @@
+#!/usr/bin/expect
+#
+# Advanced Forwarding Interface : AFI client examples
+#
+# Created by Sandesh Kumar Sodhi, January 2017
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+source [file join [file dirname [info script]] lib.exp]
+#
+# Disable inline ICMP
+#
+log_debug "Will connect to VFP console and disable inline icmp"
+set  script_name [file tail $argv0]
+
+proc display_usage {} {
+    global script_name
+    puts "Usage  : $script_name"
+    return 1
+}
+
+set spawn_id [login_vcp_ssh]
+
+#
+# timeout 30 seconds
+#
+set timeout 30
+
+
+expect "$vcp_prompt" { send "cli\r" }
+
+expect "$re_cli_prompt" { send "show version | no-more\r" }
+expect "$re_cli_prompt" { send "edit\r" }
+expect "$re_cli_config_prompt" { send "show | no-more\r" }
+expect "$re_cli_config_prompt" { send "exit\r" }
+expect "$re_cli_prompt" { send "exit\r" }
+expect "$vcp_prompt" { send "ls\r" }
+expect "$vcp_prompt" { send "cprod -A fpc0 -c \"show jnh sandbox\"\r" }
+expect "$vcp_prompt" { send "cprod -A fpc0 -c \"show jnh sandbox hostpath-stats\"\r" }
+expect "$vcp_prompt" { send "cprod -A fpc0 -c \"show ukern_trace handles\" | grep JNH-SANDBOX | awk '{ print \$1 }'\r" }
+expect "$vcp_prompt" { send "\r" }
+log_debug "The output is '$expect_out(buffer)'."
+set jnh_sandbox_ukern_trace_handle [lindex [split $expect_out(buffer) "\n"] end-1 ]
+set jnh_sandbox_ukern_trace_handle [string trim $jnh_sandbox_ukern_trace_handle]
+log_debug "jnh_sandbox_ukern_trace_handle: $jnh_sandbox_ukern_trace_handle hi"
+expect "$vcp_prompt" { send "cprod -A fpc0 -c \"show ukern_trace $jnh_sandbox_ukern_trace_handle\"\r" }
+expect "$vcp_prompt" { send "\r" }
+expect "$vcp_prompt" { send "\r" }
+expect "$vcp_prompt" { send "\r" }
+expect "$vcp_prompt" { send "\r" }
+send "exit\r"
+send "\r"
+close
+
+set spawn_id [login_vfp_ssh]
+
+#
+# timeout 30 seconds
+#
+set timeout 30
+
+expect "$vfp_prompt" { send "cat /etc/riot/runtime.conf\r" }
+expect "$vfp_prompt" { send "ifconfig\r" }
+expect "$vfp_prompt" { send "\r" }
+expect "$vfp_prompt" { send "\r" }
+expect "$vfp_prompt" { send "\r" }
+send "exit\r"
+
+close
+
+set spawn_id [host_shell]
+
+#
+# timeout 20 seconds
+#
+set timeout 20
+
+expect "$host_prompt" { send "brctl show\r" }
+expect "$host_prompt" { send "ifconfig\r" }
+#
+# Check connectivity to VFP
+#
+expect "$host_prompt" { send "ping -c 3 128.0.0.16\r" }
+#
+# VMXT AFI hostpath UDP port
+#
+expect "$host_prompt" { send "nmap -sU 128.0.0.16 -p 9002\r" }
+#
+# VMXT TCP sever port listening for connections from afi-server
+#
+expect "$host_prompt" { send "nmap -sS  -p7000 128.0.0.16\r" }
+#
+# AFI server control plane port
+#
+expect "$host_prompt" { send "nmap -sS  -p50051 128.0.0.16\r" }
+expect "$host_prompt" { send "\r" }
+send "exit\r"
+
+close
+
+exit 0

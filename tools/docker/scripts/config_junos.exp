@@ -1,0 +1,91 @@
+#!/usr/bin/expect
+#
+# Advanced Forwarding Interface : AFI client examples
+#
+# Created by Sandesh Kumar Sodhi, January 2017
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+source [file join [file dirname [info script]] lib.exp]
+
+#
+# This script connects to VCP console and
+# performs junos configurations
+#
+log_debug "Will connect to VCP via console and perform Junos configurations"
+
+set script_name [file tail $argv0]
+
+proc display_usage {} {
+    global script_name
+    puts "Usage  : $script_name"
+    return 1
+}
+
+set spawn_id [login_vcp_console]
+#
+# timeout 20 seconds
+#
+set timeout 20
+
+expect "$vcp_prompt" { send "\r" }
+expect "$vcp_prompt" { send "cli\r" }
+expect "$re_cli_prompt" { send "show version | no-more\r" }
+expect "$re_cli_prompt" { send "edit\r" }
+expect "$re_cli_config_prompt" { send "show | no-more\r" }
+# Sleep 5s
+#sleep 5
+expect "$re_cli_config_prompt" { send "set system root-authentication plain-text-password\r" }
+expect "New password:" { send "$vcp_password\r" }
+expect "Retype new password:" { send "$vcp_password\r" }
+expect "$re_cli_config_prompt" { send "commit\r" }
+expect "$re_cli_config_prompt" { send "\r" }
+
+# Sleep 5s
+#sleep 5
+
+set f [open "/root/JP4Agent/tools/docker/cfg/junos_config.txt"]
+set config_lines [split [read $f] "\n"]
+close $f
+
+foreach config_line $config_lines {
+    set comment_char #
+    if {[string match $comment_char* $config_line]} {
+        log_debug "Ignoring $config_line"
+    } else {
+        expect "$re_cli_config_prompt" { send "$config_line\r" }
+    }
+}
+
+expect "$re_cli_config_prompt" { send "show | compare | no-more\r" }
+#
+# Do not add anything after commit.
+# Commit changes the prompts so expect minimal prompts
+# 
+expect "$re_cli_config_prompt" { send "commit\r" }
+
+# Reboot vCP
+expect "$re_cli_config_prompt" { send "run request system reboot\r" }
+expect "Reboot the system" { send "yes\r" }
+
+#expect "#" { send "exit\r" }
+#expect ">" { send "exit\r" }
+#
+# Confing may change the prompt so exepct for "#"
+#
+#expect "#" { send "exit\r" }
+#send "\r"
+close
+exit 0

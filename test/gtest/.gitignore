@@ -1,0 +1,4 @@
+# Compiled binary #
+###################
+GTEST_*
+jp4agent-gtest*
