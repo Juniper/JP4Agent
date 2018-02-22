@@ -1,0 +1,6 @@
+{
+   "Note" : "Cofiguration file for target aft",
+   "AFTConfig" : {
+       "aft-server-address" : "0.0.0.0:50051"
+   }
+}

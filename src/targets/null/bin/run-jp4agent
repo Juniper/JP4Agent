@@ -1,0 +1,23 @@
+#!/bin/bash
+
+JP4AGENT_LOC=../../../..
+export LD_LIBRARY_PATH=/root/VMX/afi/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/jp4agent/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/utils/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/pi/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/afi/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/pi/protos
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/AFI
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/targets/null/null/obj
+ 
+if [ "$#" -eq 1 ]; then
+    #
+    # If provided first arguments is the log file
+    #
+    $JP4AGENT_LOC/src/targets/null/bin/jp4agent | tee $1
+else
+    #ldd $JP4AGENT_LOC/src/targets/null/obj/jp4agent
+    #LD_DEBUG=all $JP4AGENT_LOC/src/targets/null/obj/jp4agent
+    #gdb $JP4AGENT_LOC/src/targets/null/obj/jp4agent
+    $JP4AGENT_LOC/src/targets/null/bin/jp4agent
+fi

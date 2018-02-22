@@ -19,22 +19,43 @@
 # as noted in the Third-Party source code file.
 #
 
-
 PYANG=pyang
 PROTOG=/root/go/src/github.com/openconfig/ygot/proto_generator/proto_generator
 
+CXX = g++
+TARGET_LIB = libafi_yang.so
+RM = rm -f
+
+CXXFLAGS += -fPIC -g -O0 -std=c++14 
+
+CPPFLAGS += \
+	-I. \
+	-Iprotos \
+	-IAFI/protos/juniper \
+
+LDFLAGS = -shared
+
+all: $(TARGET_LIB)
+	@echo $(TARGET_LIB) compilation success!
 
 SRCS = \
 	protos/juniper/enums/enums.pb.cc \
 	protos/juniper/afi_tree/afi_tree.pb.cc \
+	protos/juniper/afi_tree_entry/afi_tree_entry.pb.cc \
 	protos/yext/yext.pb.cc \
 	protos/ywrapper/ywrapper.pb.cc
 
-all: generate $(SRCS)
+
+OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
+
+$(TARGET_LIB): $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $^
+
+srcs: generate_protobuf $(SRCS)
 	@echo Generated protobufs:
 	find protos
 
-generate: validate
+generate_protobuf: validate_yang
 	@echo Generating protobufs...
 	$(PROTOG) -output_dir ./protos/ \
 			-package_name juniper \
@@ -43,13 +64,9 @@ generate: validate
 			-add_schemapaths=false \
 			*.yang 
 
-validate:
+validate_yang:
 	@echo Validating...
 	$(PYANG) *.yang
-
-clean:
-	rm -rf protos/juniper protos/yext/yext.pb.* protos/ywrapper/ywrapper.pb.*
-
 
 PROTOC = protoc
 AFI_PROTOS_PATH = protos
@@ -67,8 +84,24 @@ protos/juniper/afi_tree/afi_tree.pb.cc: protos/juniper/afi_tree/afi_tree.proto
 	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;
 	find protos -name '*.pb.*' -exec sed -i 's/protobuf_juniper_2fenums_2fenums_2eproto/protobuf_enums_2eproto/g' {} \;
 
+protos/juniper/afi_tree_entry/afi_tree_entry.pb.cc: protos/juniper/afi_tree_entry/afi_tree_entry.proto
+	$(PROTOC) --proto_path=protos/juniper/afi_tree_entry/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_tree_entry/ $<
+	sleep 2
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_ywrapper_2fywrapper_2eproto/protobuf_ywrapper_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_juniper_2fenums_2fenums_2eproto/protobuf_enums_2eproto/g' {} \;
 
 protos/juniper/enums/enums.pb.cc: protos/juniper/enums/enums.proto
 	$(PROTOC) --proto_path=protos/juniper/enums/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/enums/ $<
 
+clean:
+	rm -rf protos/juniper protos/yext/yext.pb.* protos/ywrapper/ywrapper.pb.*
+	$(RM) -f $(OBJS) $(TARGET_LIB) ./.depend
 
+#depend: .depend
+#
+#.depend: $(SRCS)
+#	$(RM) -f ./.depend
+#	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -MM $^ >  ./.depend;
+#
+#include .depend

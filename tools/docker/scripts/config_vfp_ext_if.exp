@@ -1,8 +1,8 @@
 #!/usr/bin/expect
 #
-# Advanced Forwarding Interface : AFI client examples
+# VMX setup scripts
 #
-# Created by Sandesh Kumar Sodhi, January 2017
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -18,7 +18,7 @@
 # as noted in the Third-Party source code file.
 #
 
-source [file join [file dirname [info script]] lib.exp]
+source /root/JP4Agent/tools/docker/scripts/lib.exp
 
 #
 # Disable flow cache
@@ -41,8 +41,8 @@ set spawn_id [login_vfp_console]
 set timeout 60
 
 expect "$vfp_prompt" { send "\r" }
-expect "$vfp_prompt" { send "ifconfig ext 172.18.0.20 netmask 255.255.0.0 up\r" }
-expect "$vfp_prompt" { send "route add default gw 172.18.0.1 ext\r"  }
+expect "$vfp_prompt" { send "ifconfig ext REPLACE_WITH_VFP_IP netmask 255.255.0.0 up\r" }
+
 send "exit\r"
 
 close

@@ -31,6 +31,8 @@ LABEL maintainer "Sandesh Kumar Sodhi"
 #  [sudo] docker run --name jnprp4vmx --privileged -i -t juniper-p4-vmx /bin/bash
 #
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 #
 # Packages needed for VMX
 #
@@ -60,29 +62,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  rsyslog \
  net-tools \
  iproute2 \
- virtinst
-
-#
-# Steps needed to run VMX successfully
-#
-#RUN cp /etc/libvirt/qemu.conf /etc/libvirt/qemu.conf.orig
-#RUN sed -i -e 's/#user = "root"/user = "root"/g' /etc/libvirt/qemu.conf
-#RUN sed -i -e 's/#group = "root"/group = "kvm"/g' /etc/libvirt/qemu.conf
-#
-#diff qemu.conf.orig qemu.conf
-#229c229
-#< #user = "root"
-#---
-#> user = "root"
-#233c233
-#< #group = "root"
-#---
-#> group = "kvm"
-
-
-#COPY scripts  /root/scripts
-#COPY cfg      /root/cfg
-#COPY packages /root/packages
+ virtinst \
+ tshark
 
 #
 # Openconfig/NetConf related packages
@@ -90,6 +71,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN cd /root/go && go get github.com/Juniper/go-netconf/netconf
 RUN cd /root/go && go get github.com/spf13/pflag
 RUN cd /root/go && go get golang.org/x/sys/unix
+
 
 COPY entrypoint.sh /root/entrypoint.sh
 

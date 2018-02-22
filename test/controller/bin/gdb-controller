@@ -1,0 +1,6 @@
+#!/bin/bash
+
+
+JP4AGENT_LOC=../../..
+
+gdb $JP4AGENT_LOC/test/controller/obj/controller

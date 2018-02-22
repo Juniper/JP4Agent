@@ -1,8 +1,8 @@
 #!/usr/bin/expect
 #
-# Advanced Forwarding Interface : AFI client examples
+# VMX setup scripts
 #
-# Created by Sandesh Kumar Sodhi, January 2017
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -41,22 +41,21 @@ set spawn_id [login_vcp_console]
 set timeout 20
 
 expect "$vcp_prompt" { send "\r" }
+expect "ALERT:Auto image Upgrade will start" {send "\r"}
+sleep 10
+expect "Auto image Upgrade" {send "\r"}
 expect "$vcp_prompt" { send "cli\r" }
 expect "$re_cli_prompt" { send "show version | no-more\r" }
 expect "$re_cli_prompt" { send "edit\r" }
 expect "$re_cli_config_prompt" { send "show | no-more\r" }
-# Sleep 5s
-#sleep 5
+expect "$re_cli_config_prompt" { send "delete chassis auto-image-upgrade\r" }
 expect "$re_cli_config_prompt" { send "set system root-authentication plain-text-password\r" }
 expect "New password:" { send "$vcp_password\r" }
 expect "Retype new password:" { send "$vcp_password\r" }
 expect "$re_cli_config_prompt" { send "commit\r" }
 expect "$re_cli_config_prompt" { send "\r" }
 
-# Sleep 5s
-#sleep 5
-
-set f [open "/root/JP4Agent/tools/docker/cfg/junos_config.txt"]
+set f [open "/root/VMX/vmx/config/junos_config.txt"]
 set config_lines [split [read $f] "\n"]
 close $f
 
@@ -83,7 +82,7 @@ expect "Reboot the system" { send "yes\r" }
 #expect "#" { send "exit\r" }
 #expect ">" { send "exit\r" }
 #
-# Confing may change the prompt so exepct for "#"
+# Config may change the prompt so exepct for "#"
 #
 #expect "#" { send "exit\r" }
 #send "\r"

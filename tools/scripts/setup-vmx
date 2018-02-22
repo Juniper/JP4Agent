@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# Setup VMX
+#
+# Created by Sandesh Kumar Sodhi, January 2018
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+MY_DIR="$(dirname "$0")"
+source "$MY_DIR/cmn.sh"
+
+me=`basename "$0"`
+
+validate_vmx_config
+
+$ECHO ""
+$ECHO ""
+$ECHO "=================================================================="
+$DATE 
+$ECHO "STARTING VMX SETUP ($DATE_TAG)"
+$ECHO "=================================================================="
+
+VMX_SETUP_REPORT_DIR_NAME=${INDIVIDUAL_VMX_SETUP_DIR_NAME_PREFIX}_${DATE_TAG}
+VMX_SETUP_REPORT_DIR=$REGRESSION_REPORT_DIR/$VMX_SETUP_REPORT_DIR_NAME
+$MKDIR -p $VMX_SETUP_REPORT_DIR
+
+DOCKER_NAME=$(xmllint --xpath "//vmxConfig/dockerName/text()" $VMX_CONFIG_FILE)
+
+printf "DATE_TAG                   : $DATE_TAG\n"
+printf "REPO_DIR                   : $REPO_DIR\n"
+printf "DOCKER_NAME                : $DOCKER_NAME\n"
+printf "DOCKER_TAG                 : $DOCKER_TAG\n"
+printf "VMX_SETUP_REPORT_DIR_NAME  : $VMX_SETUP_REPORT_DIR_NAME\n"
+
+run_command ./docker_setup_vmx.exp $REPO_DIR $DOCKER_NAME $DOCKER_TAG $VMX_SETUP_REPORT_DIR_NAME
+
+$ECHO "=================================================================="
+$DATE 
+$ECHO "FINISHED VMX SETUP ($DATE_TAG)"
+$ECHO "=================================================================="
+$ECHO ""
+$ECHO ""

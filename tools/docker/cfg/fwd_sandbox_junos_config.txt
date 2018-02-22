@@ -1,0 +1,2 @@
+set forwarding-options forwarding-sandbox jp4agent port p1 interface xe-0/0/0:1
+set forwarding-options forwarding-sandbox jp4agent port p2 interface xe-0/0/0:2

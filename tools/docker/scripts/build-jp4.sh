@@ -18,7 +18,14 @@
 # as noted in the Third-Party source code file.
 #
 
-cd /root/JP4Agent/AFI/ ; make
-cd /root/JP4Agent/src/ ; make
+cd /root/JP4Agent/AFI/ ; make 
+cd /root/JP4Agent/src/ ; make -j4
 cd /root/JP4Agent/test/controller/ ; make
 cd /root/JP4Agent/test/gtest/ ; make
+
+#
+# Regression script 'docker_run_ut.expect' use this message to detect compilation status.
+# If you change this message, please make the same change in 'docker_run_ut.expect'.
+#
+echo "JP4Agent binaries compilation success!!"
+exit 0

@@ -33,6 +33,12 @@ LABEL maintainer "Sandesh Kumar Sodhi"
 #
 #
 
+ARG DEBIAN_FRONTEND=noninteractive
+
+# 
+# Note:
+# While adding new package to the list, maintain the alphanumeric sorted order.
+#
 RUN apt-get update && apt-get install -y --no-install-recommends \
  autoconf \
  automake \
@@ -47,15 +53,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  git \
  gdebi-core \
  iputils-ping \
+ less \
  libboost-all-dev \
  libevent-pthreads-2.0-5 \
  libjsoncpp-dev \
+ libnet1-dev \
+ libpcap-dev \
+ libssl-dev \
  libtool \
+ libxml2-utils \
+ libyaml-cpp-dev \
  nmap \
  openssh-client \
  openssl \
  pkg-config \
  psmisc \
+ python-lxml \
+ realpath \
  sed \
  software-properties-common \
  ssh \
@@ -63,13 +77,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  tcpdump \
  telnet \
  tmux \
+ tdom \
+ tree \
  unzip \
  vim \
  wget
 
-# TBD:
-# tshark \
-#
+
+# Clang related packages
+RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+RUN apt-add-repository -y "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main"
+RUN apt-get update && apt-get install -y --no-install-recommends clang-5.0 clang-format-5.0 clang-tidy-5.0
 
 #
 # Packages needed for p4c
@@ -86,12 +104,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  python \
  pylint \
  python-pip \
+ python3-pip \
  python-scapy
 
 RUN pip install --upgrade pip
 RUN pip install -U setuptools
 RUN pip install scapy
 RUN pip install ipaddr
+RUN pip install gcovr
+RUN pip install lxml
+RUN pip3 install grpcio-tools
+RUN pip3 install prompt-toolkit
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
  curl \
@@ -110,11 +133,6 @@ RUN cd /root/downloads/grpc/third_party/protobuf/ && ./autogen.sh && ./configure
 #
 RUN cd /root/downloads && wget https://github.com/google/googletest/archive/release-1.8.0.tar.gz
 RUN cd /root/downloads && tar xzf release-1.8.0.tar.gz
-
-#
-# p4c
-#
-RUN cd /root && git clone --recursive https://github.com/p4lang/p4c.git
 
 #
 # pyang
@@ -142,6 +160,34 @@ RUN cd /root/go && go get github.com/golang/glog
 RUN cd /root/go && go get github.com/kylelemons/godebug; exit 0
 RUN cd /root/go/src && go get github.com/openconfig/ygot; exit 0
 RUN cd /root/go/src/github.com/openconfig/ygot/proto_generator && go build
+
+#
+# Opentracing
+#
+RUN cd /root/downloads && git clone https://github.com/opentracing/opentracing-cpp
+RUN cd /root/downloads/opentracing-cpp && mkdir .build
+RUN cd /root/downloads/opentracing-cpp/.build && cmake ..
+RUN cd /root/downloads/opentracing-cpp/.build && make
+RUN cd /root/downloads/opentracing-cpp/.build && make install
+
+#
+# Jaeger
+#
+
+# Install thrift first
+RUN cd /root/downloads && git clone https://apache.googlesource.com/thrift
+RUN cd /root/downloads/thrift && ./bootstrap.sh
+RUN cd /root/downloads/thrift && ./configure
+RUN cd /root/downloads/thrift && make
+RUN cd /root/downloads/thrift && make install
+
+# Now install cpp client for Jaeger
+
+RUN cd /root/downloads && git clone https://github.com/jaegertracing/cpp-client
+RUN cd /root/downloads/cpp-client && mkdir .build
+RUN cd /root/downloads/cpp-client/.build && cmake ..
+RUN cd /root/downloads/cpp-client/.build && make
+RUN cd /root/downloads/cpp-client/.build && make install
 
 COPY env/bash_aliases /root/.bash_aliases
 COPY env/vimrc        /root/.vimrc

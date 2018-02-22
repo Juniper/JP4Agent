@@ -2,7 +2,7 @@
 #
 # VMX setup scripts
 #
-# Created by Sandesh Kumar Sodhi, January 2017
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -23,6 +23,8 @@ SCRIPTS_DIR=$JP4AGENT_DIR/tools/docker/scripts
 CFG_FILES_DIR=$JP4AGENT_DIR/tools/docker/cfg
 VMX_IMAGES_LOC=/root/VMX
 VMX_DIR=$VMX_IMAGES_LOC/vmx
+NEW_SCRIPTS_DIR=$VMX_IMAGES_LOC/vmx/config
+VMX_CONFIG_FILE=$JP4AGENT_DIR/tools/config/vmx-cfg.xml
 
 CP=/bin/cp
 PS=/bin/ps
@@ -36,6 +38,8 @@ BRCTL=/sbin/brctl
 VIRSH=/usr/bin/virsh
 ETHTOOL=/sbin/ethtool
 GREP=/bin/grep
+CRON=/usr/sbin/cron
+CRONTAB=/usr/bin/crontab
 
 me=`basename "$0"`
 #

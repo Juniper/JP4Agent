@@ -1,0 +1,26 @@
+<!ELEMENT testsuites (testsuite*)>
+<!ELEMENT testsuite (testcase*)>
+<!ELEMENT testcase (failure*)>
+<!ELEMENT failure (CDATA)>
+
+<!ATTLIST testsuites tests CDATA #REQUIRED>
+<!ATTLIST testsuites failures CDATA #REQUIRED>
+<!ATTLIST testsuites disabled CDATA #REQUIRED>
+<!ATTLIST testsuites errors CDATA #REQUIRED>
+<!ATTLIST testsuites time CDATA #REQUIRED>
+<!ATTLIST testsuites name CDATA #REQUIRED>
+
+<!ATTLIST testsuite tests CDATA #REQUIRED>
+<!ATTLIST testsuite failures CDATA #REQUIRED>
+<!ATTLIST testsuite disabled CDATA #REQUIRED>
+<!ATTLIST testsuite errors CDATA #REQUIRED>
+<!ATTLIST testsuite time CDATA #REQUIRED>
+<!ATTLIST testsuite name CDATA #REQUIRED>
+
+<!ATTLIST testcase name CDATA #REQUIRED>
+<!ATTLIST testcase status CDATA #REQUIRED>
+<!ATTLIST testcase time CDATA #REQUIRED>
+<!ATTLIST testcase classname CDATA #REQUIRED>
+
+<!ATTLIST failure message CDATA #REQUIRED>
+<!ATTLIST failure type CDATA #REQUIRED>

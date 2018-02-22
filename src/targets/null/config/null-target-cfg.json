@@ -1,0 +1,6 @@
+{
+   "Note" : "Cofiguration file for null target",
+   "NullConfig" : {
+       "device-log-fle" : "null-device.log"
+   }
+}

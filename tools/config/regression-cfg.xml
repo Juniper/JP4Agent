@@ -1,0 +1,64 @@
+<!--
+#
+# Regression scripts
+#
+# regression-cfg.xml: Regression configuration
+#
+# Created by Sandesh Kumar Sodhi, January 2018
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+-->
+
+<!--
+Regression configuration
+  run_regression: Global knob to enable/disable regression
+  1: Enabled
+  0: Disabled
+-->
+<regressionConfig run_regression='1'>
+    <doGitPull>no</doGitPull>
+
+    <!-- 
+    CreateNew: If you want regression script to come up with docker name
+    <dockerName></dockerName>
+    Examples:
+    <dockerName>CreateNew</dockerName>
+    <dockerName>jnprp4vmx</dockerName>
+    -->
+    <dockerName>jnprp4vmx</dockerName>
+
+    <!-- 
+    yes: VMX already running in Docker container.
+         Regression scrips will use that VMX
+    -->
+    <setupVMX>no</setupVMX>
+    <runGTESTs>yes</runGTESTs>
+
+    <!-- 
+    debugVMXContainer:
+        1:  Do not stop/exit vmx and container
+        0:  stop vmx and exit container
+    -->
+    <debugVMXContainer>1</debugVMXContainer>
+    <copyAFTpackage>1</copyAFTpackage>
+    <runCoverage>1</runCoverage>
+
+    <buildDockers>no</buildDockers>
+    <pushDockersToDockerHub>no</pushDockersToDockerHub>
+    <regressionReportHTTPServerPort>9000</regressionReportHTTPServerPort>
+
+    <!-- run cpplint? -->
+    <runCpplint>yes</runCpplint>
+</regressionConfig>

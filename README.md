@@ -14,23 +14,26 @@ JP4Agent GitHub Repository
 =====================
 This repository provides:
 * JP4Agent source code
-* Dockerfile(s) to build Docker container where VMX and JP4Agent run
+* Setup configuration and scripts
+* Test controller and gtest code
+* Dockerfile(s), configuration and scripts for Docker container where VMX and JP4Agent run
+* Regression scripts
 
 #### Repository Directory Structure
 ```
  -- JP4Agent
-    |-- LICENSE                     License 
-    |-- README.md                   This README file
-    |-- docs                        Documentation
-    |-- lib                         Library dependencies
-    |-- p4                          Sample p4 programs
-    |-- p4-backend                  P4 compiler backend for AFI
-    |-- src                         JP4Agent source
+    |-- LICENSE              License 
+    |-- README.md            This README file
+    |-- docs                 Documentation
+    |-- p4                   Sample p4 programs
+    |-- src                  JP4Agent source
     |-- test 
-    |   |-- controller              Test controller
-    |   `-- gtest                   GTests for JP4agent
+    |   |-- controller       Test controller
+    |   `-- gtest            GTests for JP4agent
     `-- tools
-        `-- docker                  Files/scripts to build/setup Docker container/s
+        |-- config           Setup configuration
+        |-- docker           Dockerfile(s), configuration and scripts for Docker
+        `-- scripts          Setup and regression scripts
 ```
 
 Requirements
@@ -41,7 +44,7 @@ VMX tarball provided by Juniper
 jnprP4vmx.tgz    : Contains all the images/packages needed to run VMX in a container
 ```
 Note: Please contact Juniper to get 'jnprP4vmx.tgz'. <br>
-Contacts listed at the bottom of this page.
+Contacts are listed at the bottom of this page.
 
 #### System Requirements
 ```
@@ -62,12 +65,14 @@ Storage:
 Software requirements
 =====================
 Operating system
-    Ubuntu 16.04 LTS
+    Ubuntu 14.04 LTS or 16.04 LTS
+Docker
+    Community Edition (CE) or Enterprise Edition (EE)
 ```
 
 <br>
 <br>
-<div style="text-align:center" align="center"> <img src="docs/resources/docker-setup.png" width="800"> </div>
+<div style="text-align:center" align="center"> <img src="docs/resources/docker-setup.png" width="600"> </div>
 <br>
 <br>
 
@@ -76,116 +81,114 @@ Please refer to instructions provided on the following page to install Docker en
 [https://docs.docker.com/engine/installation/linux/ubuntu/](https://docs.docker.com/engine/installation/linux/ubuntu/)
 
 
-### STEP 2. Set Docker options
-
-Add following line in /etc/default/docker file
+### STEP 2. Pull p4-vmx Docker image
+Note: Docker ID (https://hub.docker.com) is needed for this step. <br>
+Please create, if you do not already have one. <br>
+Contact Juniper to get access to the Docker image repo. <br>
+Contact is listed at the bottom of this page.
 ```
-DOCKER_OPTS="--bip=172.18.0.1/16"
-```
-
-and restart Docker service (sudo service docker restart)
-
-The option '--bip=$DOCKER0_BRIDGE_IP' makes sure that Docker container uses $DOCKER0_BRIDGE_IP as IP for "docker0" bridge.
-
-NOTE: 
-By default, Docker uses location '/var/lib/docker' to install images. You can use '-g <location>' option to specify the Docker image installation location.  Please make sure that the location has around 200GB of space available.
-
-
-### STEP 3. Build Docker container for JP4Agent and VMX
-```
-git clone git@github.com:Juniper/JP4Agent.git
-cd JP4Agent/tools/docker/ 
-Note: Please execute following steps in order.
-[sudo] docker build -f Dockerfile_p4 -t juniper-p4 .
-[sudo] docker build -f Dockerfile_p4_vmx -t juniper-p4-vmx .
+docker login
+<< Enter username and password when prompted
+[sudo] docker pull juniper/p4-vmx:latest
 ```
 
-### STEP 4. Get VMX tarball from Juniper and extract it
-Please drop an email to  sksodhi at juniper.net to get 'jnprP4vmx.tgz'.
+### STEP 3. Get VMX tarball from Juniper and extract it
 ```
-Get 'jnprP4vmx.tgz' tarball for Juniper and extract it to any 
-preferred folder on the host.
-E.g. -
-export DIR_PATH=$HOME/VMX
-mkdir $DIR_PATH
-cp jnprP4vmx.tgz $DIR_PATH
-cd $DIR_PATH
+Get 'jnprP4vmx.tgz' tarball from Juniper and extract it to any preferred location on the host.
+E.g.,
+export HOST_VMX_LOC=/home/sandesh/VMX
+mkdir $HOST_VMX_LOC
+mv jnprP4vmx.tgz $HOST_VMX_LOC
+cd $HOST_VMX_LOC
 tar xf jnprP4vmx.tgz
 ```
 
-### STEP 5. Run the container
+### STEP 4. Clone JP4Agent repo
 ```
-[sudo] docker run --name jnprp4vmx -v $DIR_PATH:/root/VMX --privileged -i -t juniper-p4-vmx
-Note:  $DIR_PATH is the absolute path of the folder where the tarball was extracted in previous step.
-Example -
-[sudo] docker run --name jnprp4vmx -v /home/sandesh/VMX:/root/VMX --privileged -i -t juniper-p4-vmx
-```
-#### After above step, you are in Docker container. Rest of the steps are performed inside the container
-
-### STEP 6. Clone JP4Agent (inside container)
-```
-cd /root/
+Clone JP4Agent to any preferred folder on the host. 
+E.g.,
+cd $HOME
 git clone git@github.com:Juniper/JP4Agent.git
 ```
 
-### STEP 7. Build all JP4Agent components and binaries
+### STEP 5. Set env variable JP4AGENT_REPO to JP4Agent repo location
 ```
-cd JP4Agent 
-./tools/docker/scripts/build-jp4.sh
+export JP4AGENT_REPO=$HOME/JP4Agent
 ```
 
-### STEP 8. Start VMX
+### STEP 6. Update VMX setup configuration
 ```
-cd /root/VMX
-../JP4Agent/tools/docker/scripts/setup_vmx.sh
+Update the configuration in file $JP4AGENT_REPO/tools/config/vmx-cfg.xml
+to modify the following:
+  1. The 2 host interfaces to use for traffic : by default eth1 & eth2
+  2. The management interface to use: by default eth0
+  3. Console ports for vCP & vFP: by default 8601 & 8602
+  4. Management IPs for vCP & vFP to ssh into it
+  5. Location where 'jnprP4vmx.tgz' tarball was extracted.
+
+```
+
+### STEP 7. Install required packages on host server
+```
+cd $JP4AGENT_REPO/tools/scripts
+[sudo] ./install_packages.sh
+```
+
+### STEP 8. Setup VMX
+
+NOTE: This step runs Docker with netwroking mode 'host' (--network=host), <br>
+to make all host interfaces availabe inside docker. <br>
+Please note this mode disables network isolation of the Docker container i.e. <br>
+container shares the networking namespace of the host.
+
+```
+cd $JP4AGENT_REPO/tools/scripts
+./setup-vmx
 ```
 Please wait for the following message to appear before proceeding with next step. <br>
 "VMX Setup Complete!" <br>
-Please allow around 15-20 minutes for VMX setup to complete. <br>
-
+Please login to the vCP using ssh and verify that interfaces xe-0/0/0:1 and xe-0/0/0:2 are up <br>
+<br>
 Note: Please go through "Working with VMX" section of '[**docs/README.md**](./docs/README.md)' to learn <br>
 how to work with VMX setup, viz.,  how to login to VCP and VFP, run Junos CLI commands etc.
+<br>
 
-### STEP 9. Load Openconfig package
+### STEP 9. Run regression
 ```
-First copy openconfig package to VCP
-scp /root/VMX/<junos-openconfig-xxx.tgz> root@172.18.0.10:/var/tmp
+cd $JP4AGENT_REPO/tools/scripts
+./run-regression
 
-Then run following Junos CLI command to add Junos openconfig package
-request system software add /var/tmp/<junos-openconfig-xxx.tgz>
 ```
+Please observe the output. When the output shows 'GTEST RESULT: PASS', you are good to go.
+You can open url `http://<host ip>:9000` in browser to see the regression results visually.
 
-### STEP 10. Add CLI configuration for sandbox and Openconfig
+### STEP 10. Connect external tester and send unidirectional traffic
 ```
-set forwarding-options forwarding-sandbox jp4agent port p1 interface xe-0/0/0:1
-set forwarding-options forwarding-sandbox jp4agent port p2 interface xe-0/0/0:2
-set system services netconf ssh
+Connect the 2 interfaces specified in vmx-cfg.xml with an external tester
+Configure Port 1: IP 103.30.120.3/24 and external gateway 103.30.120.2/24
+Configure Port 2: IP 103.30.130.3/24 and external gateway 103.30.130.2/24
 
-commit
-```
-<!--
-### STEP XX. Allow JP4Agent packets
-```
-From vFP shell,
-iptables -P INPUT ACCEPT
-```
-[Note: This needs to be improved to have a more specific rule]
--->
+In the example below,
+if1=eth2
+if2=eth3
 
-### STEP 11. Run jp4agent
 ```
-cd JP4Agent/src
-./run-jp4agent
-```
+<br>
+<br>
+<div style="text-align:center" align="center"> <img src="docs/resources/External-tester.png" width="600"> </div>
+<br>
+<br>
 
-### STEP 12. Run GTESTs
+### STEP 11. Before stopping docker container, shutdown vmx gracefully
 ```
-apt-get install -y tshark
-cd JP4Agent/test/gtest
-make
-./run-gtests
+cd /root/VMX
+../JP4Agent/tools/docker/scripts/stop_vmx.sh
+
+In case docker is stopped accidentally without graceful vmx shutdown, clean up from the host
+cd $JP4AGENT_REPO/tools/scripts
+[sudo] ./bridge_cleanup.sh
+
 ```
-Please observe the output of ./run-gtests and when the output shows '[ PASSED ]', you are good to go.
 
 Contact
 =======

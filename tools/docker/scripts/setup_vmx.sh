@@ -2,7 +2,9 @@
 #
 # VMX setup scripts
 #
-# Created by Sandesh Kumar Sodhi, January 2017
+# setup_vmx.sh: Setup VMX
+#
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -18,19 +20,96 @@
 # as noted in the Third-Party source code file.
 #
 
-#
-# Setup VMX
-# Sandesh Kumar Sodhi
-#
-
 MY_DIR="$(dirname "$0")"
 source "$MY_DIR/cmn.sh"
 
-me=`basename "$0"`
+scriptname=`basename "$0"`
+
+#
+# Regression scripts use this messagees to detect vmx setup status.
+# If you change this message, please make the same change in regression scripts.
+# Always echo one of these messages while exiting this script:
+#
+error_status="setup VMX: ___error___"
+success_status="setup VMX: ___success___"
+
+#
+# echo status and exit
+#
+function echo_status_and_exit {
+    if [ $1 -eq 0 ] 
+    then
+      $CRONTAB $CFG_FILES_DIR/cron.cfg
+      $CRONTAB -l
+      echo $success_status
+    else
+      echo $error_status
+    fi  
+    exit $1
+}
+
+#!/bin/bash
+print_usage()
+{
+    log_error "Incorrect Usage"
+    echo "Usage: setup_vmx"
+    echo "       setup_vmx [--if <if1> <if2> --vcp <vcp-ip> --vfp <vfp-ip>]"
+}
+
+ext_tester=0
+
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        --if)   if1=$2; if2=$3; shift; shift;
+                log_debug "if1=$if1, if2=$if2";;
+        --vcp)   vcp_ip=$2;  shift;
+                 log_debug "vcp_ip = $vcp_ip";;
+        --vfp)   vfp_ip=$2;  shift;
+                 log_debug "vfp_ip = $vfp_ip";;
+            *)   print_usage "$0";exit 0 ;;
+    esac
+    shift
+    ext_tester=1
+done
+
+if [ "$ext_tester" == 1 ];
+then
+    if [ "$if1" == "" ] || [ "$if2" == "" ] || [ "$vcp_ip" == "" ] || [ "$vfp_ip" == "" ] ;
+    then
+        print_usage "$0";exit 0;
+    fi
+else
+    vcp_ip=$(xmllint --xpath "string(//vmxConfig/vcp/@IP)" $VMX_CONFIG_FILE)
+    vfp_ip=$(xmllint --xpath "string(//vmxConfig/vfp/@IP)" $VMX_CONFIG_FILE)
+    vcp_console_port=$(xmllint --xpath "string(//vmxConfig/vcp/port)" $VMX_CONFIG_FILE)
+    vfp_console_port=$(xmllint --xpath "string(//vmxConfig/vfp/port)" $VMX_CONFIG_FILE)
+    vmx_mgmt_if=$(xmllint --xpath "string(//vmxConfig/mgmt-if)" $VMX_CONFIG_FILE)
+    if1=$(xmllint --xpath "string(//vmxConfig/IF1)" $VMX_CONFIG_FILE)
+    if2=$(xmllint --xpath "string(//vmxConfig/IF2)" $VMX_CONFIG_FILE)
+    log_debug "vcp_ip = $vcp_ip"
+    log_debug "vfp_ip = $vfp_ip"
+    log_debug "vcp_console_port = $vcp_console_port"
+    log_debug "vfp_console_port = $vfp_console_port"
+    log_debug "if1 = $if1"
+    log_debug "if2 = $if2"
+fi
 
 VMX_BUNDLE_IMAGE=`ls -1 $VMX_IMAGES_LOC | grep vmx | grep bundle | grep tgz`
 JUNOS_VMX_QCOW2_IMG=`ls -1 $VMX_IMAGES_LOC | grep qcow2`
 VFPC_IMG=`ls -1 $VMX_IMAGES_LOC | grep vFPC`
+
+
+#
+# Start cron
+#
+cron_status=`$PS -A | grep cron | wc -l`
+if [ "$cron_status" == "0" ]; then
+    log_debug "starting cron"
+    $CRON
+else
+    log_debug "cron already running"
+fi
 
 #
 # Start syslog server
@@ -62,7 +141,7 @@ if [ ! -d "$VMX_DIR" ]; then
     #
     if [ ! -d "$VMX_DIR" ]; then
         log_error "VMX bundle untar error"
-        exit 1
+        echo_status_and_exit 1
     fi
 fi
 
@@ -73,7 +152,7 @@ cd $VMX_DIR
 vmx_status=`./vmx.sh --status | grep "Check if vMX is running" | grep No | wc -l`
 if [ "$vmx_status" == "0" ]; then
     log_debug "VMX already running"
-    exit 0
+    echo_status_and_exit 0
 else 
     log_debug "VMX not running. Will start it..."
 fi
@@ -105,12 +184,6 @@ $APPARMOR_PARSER -q -R /etc/apparmor.d/usr.sbin.tcpdump  2> /dev/null
 $CHOWN root:kvm /dev/kvm
 
 #
-# Create/configure tap interfaces before starting VMX
-#
-run_command $SCRIPTS_DIR/config_tap_interfaces.sh
-
-
-#
 # VMX configuration
 #
 if [ ! -f "$VMX_DIR/config/" ]; then
@@ -125,6 +198,22 @@ $CP -f $CFG_FILES_DIR/vmx-junosdev.conf $VMX_DIR/config/
 $SED -i -e "s/REPLACE_WITH_JUNOS_VMX_QCOW2_IMAGE_NAME/$JUNOS_VMX_QCOW2_IMG/g" $VMX_DIR/config/vmx.conf
 $SED -i -e "s/REPLACE_WITH_VFPC_IMAGE_NAME/$VFPC_IMG/g" $VMX_DIR/config/vmx.conf
 
+$CP -f $SCRIPTS_DIR/config_vmx_links.sh $NEW_SCRIPTS_DIR/config_vmx_links.sh
+$CP -f $SCRIPTS_DIR/config_vfp_ext_if.exp $NEW_SCRIPTS_DIR/config_vfp_ext_if.exp
+$CP -f $CFG_FILES_DIR/junos_config.txt $NEW_SCRIPTS_DIR/junos_config.txt
+
+$CP -f $VMX_IMAGES_LOC/metadata-usb-re.img $VMX_DIR/images/
+
+$SED -i -e "s/REPLACE_WITH_VCP_IP/$vcp_ip/g" $VMX_DIR/config/vmx.conf
+$SED -i -e "s/REPLACE_WITH_VCP_PORT/$vcp_console_port/g" $VMX_DIR/config/vmx.conf
+$SED -i -e "s/REPLACE_WITH_VFP_IP/$vfp_ip/g" $VMX_DIR/config/vmx.conf
+$SED -i -e "s/REPLACE_WITH_VFP_PORT/$vfp_console_port/g" $VMX_DIR/config/vmx.conf
+$SED -i -e "s/REPLACE_WITH_MGMT_IF/$vmx_mgmt_if/g" $VMX_DIR/config/vmx.conf
+$SED -i -e "s/REPLACE_WITH_IF1/$if1/g" $VMX_DIR/config/vmx-junosdev.conf
+$SED -i -e "s/REPLACE_WITH_IF2/$if2/g" $VMX_DIR/config/vmx-junosdev.conf
+$SED -i -e "s/REPLACE_WITH_VFP_IP/$vfp_ip/g" $NEW_SCRIPTS_DIR/config_vfp_ext_if.exp
+$SED -i -e "s/REPLACE_WITH_VCP_IP/$vcp_ip/g" $NEW_SCRIPTS_DIR/junos_config.txt
+
 #
 #  Increase sleep in vmx_system_setup_restart_libvirt() to fix following issue
 #  Attempt to start libvirt-bin......................[OK]
@@ -137,8 +226,8 @@ $SED -i -e "s/REPLACE_WITH_VFPC_IMAGE_NAME/$VFPC_IMG/g" $VMX_DIR/config/vmx.conf
 if [ ! -f "$VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh" ]; then
     cp $VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh $VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh.orig
 fi
-$SED -i -e "s/Sleep 2 secs/Sleep 10 secs/g" $VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh
-$SED -i -e "s/sleep 2/sleep 10/g" $VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh
+$SED -i -e "s/Sleep 2 secs/Sleep 30 secs/g" $VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh
+$SED -i -e "s/sleep 2/sleep 30/g" $VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh
 
 diff $VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh.orig $VMX_DIR/scripts/kvm/common/vmx_kvm_system_setup.sh
 
@@ -172,18 +261,27 @@ service libvirt-bin status
 #
 # Start VMX
 #
-cd $VMX_DIR
+# Make sure default network is active
+default_network_status=`virsh net-list --all|grep default |awk '{print $2}'`
+if [ "$default_network_status" == "inactive" ]
+then
+    log_debug "Making default network active"
+    ifconfig virbr0 down
+    brctl delbr virbr0
+fi
+
 log_prominent "Cleanup previous VMX run, if any, ..." 
-./vmx.sh --stop
-./vmx.sh --cleanup
-./vmx.sh --unbind-dev
+$SCRIPTS_DIR/stop_vmx.sh
+
+cd $VMX_DIR
+
 log_prominent "Will start VMX now..." 
 ./vmx.sh -lv --install
 if [ $? -ne 0 ]; then
    log_error "VMX did not start successfully" 
   ./vmx.sh --stop
    log_prominent "VMX did not start successfully. Please resolve issue and try again" 
-   exit 1
+   echo_status_and_exit 1
 fi
 
 #
@@ -200,7 +298,7 @@ if [ "$vmx_status" == "0" ]; then
     if [ $? -ne 0 ]; then
        log_error "vmx.sh --bind-dev not successful" 
       ./vmx.sh --stop
-       exit 1
+       echo_status_and_exit 1
     fi
 
     ./vmx.sh --bind-check
@@ -213,42 +311,24 @@ if [ "$vmx_status" == "0" ]; then
     log_prominent "!!!!VMX started!!!!"
  
     log_prominent "VMX links configuration"
-    run_command $SCRIPTS_DIR/config_vmx_links.sh
- 
-    log_prominent "Junos configuration"
-    run_command $SCRIPTS_DIR/config_junos.exp
-# TODO: Connect again to vCP. Once up, check show interface terse
-# TODO: May need to copy an aft.tgz package here and restart vFPC 
+    run_command $NEW_SCRIPTS_DIR/config_vmx_links.sh
 
-    #
-    # Restart FPC 0 is needed to complete the
-    # flow cache disabling
-#    log_prominent "Restarting FPC0"
-#    run_command $SCRIPTS_DIR/restart_fpc0.exp
- 
-    #
-    # Give some more time FPC to restart
-    #
-#    SLEEP_SECONDS=5
-#    log_prominent "Sleeping for $SLEEP_SECONDS more seconds"
-#    sleep $SLEEP_SECONDS
- 
+    log_prominent "Waiting for prompt"
+    run_command $SCRIPTS_DIR/check_vmx.exp
+
     log_prominent "Config VFP ext interface"
-    run_command $SCRIPTS_DIR/config_vfp_ext_if.exp
+    run_command $NEW_SCRIPTS_DIR/config_vfp_ext_if.exp
  
     log_prominent "Configure br-int-vmx1 IP address"
     run_command $SCRIPTS_DIR/config_br-int-vmx1.sh
  
-#    log_prominent "Dump debug info"
-#    run_command $SCRIPTS_DIR/dump_debug_info.exp
-
-# TODO: Need to log in to vFP and make sure all relevant processes are up.
-
     log_prominent "VMX Setup Complete!"
+
+    echo_status_and_exit 0
 else 
     log_prominent "VMX did not start. Please resolve the issue"
-    exit 1
+    echo_status_and_exit 1
 fi
 
 #Normal script exit
-exit 0
+echo_status_and_exit 0

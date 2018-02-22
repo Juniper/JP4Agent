@@ -1,0 +1,165 @@
+#!/bin/bash
+#
+# Regression scripts
+#
+# Created by Sandesh Kumar Sodhi, January 2018
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+MY_DIR="$(dirname "$0")"
+source "$MY_DIR/cmn.sh"
+
+me=`basename "$0"`
+
+validate_regression_config
+
+$ECHO ""
+$ECHO ""
+$ECHO "=================================================================="
+$DATE 
+$ECHO "STARTING REGRESSION ($DATE_TAG)"
+$ECHO "=================================================================="
+run_command $DF -h .
+
+REGRESS_REPORT_DIR_NAME=${INDIVIDUAL_REGRESSION_REPORT_DIR_NAME_PREFIX}_${DATE_TAG}
+REGRESS_REPORT_DIR=$REGRESSION_REPORT_DIR/$REGRESS_REPORT_DIR_NAME
+REGRESS_LOG_FILE=$REGRESS_REPORT_DIR/$INDIVIDUAL_REGRESSION_LOG_FILE_NAME
+REGRESS_REPORT_FILE=$REGRESS_REPORT_DIR/$INDIVIDUAL_REGRESSION_REPORT_FILE_NAME
+$MKDIR -p $REGRESS_REPORT_DIR
+$TOUCH $REGRESS_LOG_FILE
+$CP $REGRESSION_REPORT_DIR/$GTEST_RESULT_DTD_FILENAME  $REGRESS_REPORT_DIR/
+$CP $REGRESSION_REPORT_DIR/$GTEST_RESULT_XSL_FILENAME  $REGRESS_REPORT_DIR/
+$CP $REGRESSION_REPORT_DIR/$GTEST_NOT_RUN_XML_FILENAME $REGRESS_REPORT_DIR/$GTEST_RESULT_XML_FILENAME
+
+DOCKER_NAME=$(xmllint --xpath "//regressionConfig/dockerName/text()" $REGRESSION_CONFIG_FILE)
+
+if [ "$DOCKER_NAME" == "CreateNew" ]; then
+DOCKER_NAME=${DOCKER_NAME_PREFIX}${DATE_TAG}
+fi
+
+printf "DATE_TAG            : $DATE_TAG\n"
+printf "REGRESS_REPORT_DIR  : $REGRESS_REPORT_DIR\n"
+printf "DOCKER_NAME         : $DOCKER_NAME\n\n"
+
+#: <<'__BLOCK_COMMENTS1_END__'
+
+cd $REPO_DIR
+REPO_HASH=`$GIT log -1` 
+REPO_HASH=$(echo $REPO_HASH|tr -d '\r')
+REPO_HASH=$(echo $REPO_HASH|tr -d '<')
+REPO_HASH=$(echo $REPO_HASH|tr -d '>')
+REPO_HASH=$(echo $REPO_HASH|tr -d '\n')
+
+#__BLOCK_COMMENTS1_END__
+
+echo "Running Regression...(log file: $REGRESS_LOG_FILE)"
+#$REGRESSION_SCRIPTS_DIR/regression.sh $DOCKER_NAME $REGRESS_REPORT_DIR >> $REGRESS_LOG_FILE 2>&1 < /dev/null
+$REGRESSION_SCRIPTS_DIR/regression.sh $DOCKER_NAME $REGRESS_REPORT_DIR_NAME >> $REGRESS_LOG_FILE 
+if [ $? -eq 0 ]
+then
+  regression_result=P
+  regression_status="Regression run: success"
+else
+  regression_result=F
+  regression_status="Regression run: failed"
+fi
+DATE_STR=`$DATE`
+printf "$regression_status\n\n"
+regression_log_url=$REGRESS_REPORT_DIR_NAME/$INDIVIDUAL_REGRESSION_LOG_FILE_NAME
+
+#
+#TBD: FIXME
+#
+VMX_VERSION=`echo $VMX_BUNDLE | $CUT -f3 -d- | $CUT -f1-2 -d.`
+VMX_GRN=--tbd--
+
+_gtest_failures=`$XMLLINT --xpath '//testsuites/@failures' $REGRESS_REPORT_DIR/$GTEST_RESULT_XML_FILENAME`
+_gtest_errors=`$XMLLINT --xpath '//testsuites/@errors' $REGRESS_REPORT_DIR/$GTEST_RESULT_XML_FILENAME`
+gtest_failures=`echo $_gtest_failures | $CUT -f2 -d= | $SED 's/\"//g'`
+gtest_errors=`echo $_gtest_errors | $CUT -f2 -d= | $SED 's/\"//g'`
+#echo $gtest_failures
+#echo $gtest_errors
+if ([ $gtest_failures == 0 ] && [ $gtest_errors == 0 ])
+then
+    gtest_result="P"
+    gtest_result_verbose="PASS"
+else
+    gtest_result="F"
+    gtest_result_verbose="FAIL"
+fi
+gtest_status=$REPO_HASH
+gtest_url=$REGRESS_REPORT_DIR_NAME/$GTEST_RESULT_XML_FILENAME
+
+echo  "<!-- Regression Report ($TIME) -->"             > $REGRESS_REPORT_FILE
+echo  "<regression"                                   >> $REGRESS_REPORT_FILE
+echo  "    repo_hash=\"$REPO_HASH\""                  >> $REGRESS_REPORT_FILE
+echo  "    vmx_version=\"$VMX_VERSION\""              >> $REGRESS_REPORT_FILE
+echo  "    vmx_grn=\"$VMX_GRN\""                      >> $REGRESS_REPORT_FILE
+echo  "    container_name=\"$DOCKER_NAME\""           >> $REGRESS_REPORT_FILE
+echo  "    time=\"$TIME\""                            >> $REGRESS_REPORT_FILE
+echo  "    report_dir=\"$REGRESS_REPORT_DIR_NAME\""   >> $REGRESS_REPORT_FILE
+echo  ">"                                             >> $REGRESS_REPORT_FILE
+echo  "    <step name=\"regress\""                    >> $REGRESS_REPORT_FILE
+echo  "          result=\"$regression_result\""       >> $REGRESS_REPORT_FILE
+echo  "          status=\"$regression_status\""       >> $REGRESS_REPORT_FILE  
+echo  "          url_link=\"$regression_log_url\">"   >> $REGRESS_REPORT_FILE 
+echo  "    </step>"                                   >> $REGRESS_REPORT_FILE
+echo  "    <step name=\"GTEST\""                      >> $REGRESS_REPORT_FILE 
+echo  "          result=\"$gtest_result\""            >> $REGRESS_REPORT_FILE 
+echo  "          status=\"$gtest_status\""            >> $REGRESS_REPORT_FILE 
+echo  "          url_link=\"$gtest_url\"> </step>"    >> $REGRESS_REPORT_FILE
+echo  "</regression>"                                 >> $REGRESS_REPORT_FILE
+
+
+cd $REGRESS_REPORT_DIR
+for _xml_f_ in `ls -1 $REGRESS_REPORT_DIR/*.xml`;
+do
+    log_debug "REGRESS_REPORT_DIR: Calling add_stylesheet_tag_to_xml_file $_xml_f_ "
+    add_stylesheet_tag_to_xml_file $_xml_f_
+done
+
+#
+# Delete old reports
+#
+$REGRESSION_SCRIPTS_DIR/delete_old_reports.sh
+
+#
+# Generate final report
+#
+$REGRESSION_SCRIPTS_DIR/generate_final_report.sh
+
+#
+# Generate cpplint report
+#
+
+if [ "$cfg_run_cpplint" == "yes" ]; then
+    $REGRESSION_SCRIPTS_DIR/cpplint.sh $REGRESS_REPORT_DIR
+fi
+
+run_command $DF -h .
+
+#
+# Starting HTTP server
+#
+$REGRESSION_SCRIPTS_DIR/start-http-server
+
+$ECHO "=================================================================="
+$DATE 
+$ECHO "FINISHED REGRESSION ($DATE_TAG)"
+$ECHO "GTEST RESULT: $gtest_result_verbose"
+$ECHO "=================================================================="
+$ECHO ""
+$ECHO ""
+

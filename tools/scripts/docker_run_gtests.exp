@@ -1,0 +1,397 @@
+#!/usr/bin/expect -f
+#
+# Regression scripts
+# 
+# docker_run_gtests.expect : Runs GTESTs
+#
+# Created by Sandesh Kumar Sodhi, January 2018
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+source [file join [file dirname [info script]] lib.exp]
+
+#
+# Usage
+#
+proc display_usage { sn } {
+    puts "Usage  : $sn <host-jp4agent-dir> <docker-name> <docker-tag> <regress-report-dir-name>"
+    return 1
+}
+
+set script_name [file tail $argv0]
+set total_num_args [llength $argv]
+puts "total_num_args : $total_num_args"
+
+if {$total_num_args != 4} {
+    set rez [display_usage $script_name ]
+    exit 1
+}
+
+set host_jp4agent_dir         [lindex $argv 0]
+set docker_name               [lindex $argv 1]
+set docker_tag                [lindex $argv 2]
+set regress_report_dir_name   [lindex $argv 3]
+
+set vmx_config_file         "$host_jp4agent_dir/tools/config/vmx-cfg.xml"
+set regression_config_file  "$host_jp4agent_dir/tools/config/regression-cfg.xml"
+set host_report_dir         "$host_jp4agent_dir/tools/report"
+set gtest_dir               "/root/JP4Agent/test/gtest"
+set report_dir              "/root/JP4Agent/tools/report"
+
+#
+# Read VMX configuration
+#
+
+set vmx_config_fd [open $vmx_config_file]
+set vmx_config_xml [read $vmx_config_fd]
+set vmx_config_doc [dom parse $vmx_config_xml]
+set vmx_config_root [$vmx_config_doc documentElement]
+
+set host_vmx_loc_node [$vmx_config_root selectNodes /vmxConfig/hostVMXLocation/text()] 
+set host_vmx_loc [$host_vmx_loc_node nodeValue]
+
+
+set vcpNode [$vmx_config_root selectNodes "/vmxConfig/vcp"]
+set vcp_ip [$vcpNode getAttribute  IP]
+
+set vfpNode [$vmx_config_root selectNodes "/vmxConfig/vfp"]
+set vfp_ip [$vcpNode getAttribute  IP]
+
+
+#
+# Read regression configuration
+#
+
+set regression_config_fd [open $regression_config_file]
+set regression_config_xml [read $regression_config_fd]
+set regression_config_doc [dom parse $regression_config_xml]
+set regression_config_root [$regression_config_doc documentElement]
+
+set debug_vmx_container_node [$regression_config_root selectNodes /regressionConfig/debugVMXContainer/text()] 
+set debug_vmx_container [$debug_vmx_container_node nodeValue]
+
+set cp_aft_pkg_node [$regression_config_root selectNodes /regressionConfig/copyAFTpackage/text()] 
+set cp_aft_pkg [$cp_aft_pkg_node nodeValue]
+
+set run_coverage_node [$regression_config_root selectNodes /regressionConfig/runCoverage/text()]
+set generate_coverage [$run_coverage_node nodeValue]
+
+#
+# Enable to debug this expect script
+#
+exp_internal -f $host_report_dir/$regress_report_dir_name/$script_name.log.txt 0;
+
+log_prominent "Will run docker container... (name: $docker_name tag: $docker_tag)"
+
+#
+# Docker exec should not take long.
+# Setting timeout to 10 seconds
+#
+set timeout 10
+set prompt #
+
+
+spawn /usr/bin/docker exec -it $docker_name /bin/bash
+if {$spawn_id == 0} {
+    log "Docker attach spawn_id $spawn_id returning"
+    set rez [display_usage $script_name ]
+    exit 1
+}
+
+log "docker run spawn_id $spawn_id"
+
+send "\r"
+send "\r"
+expect {
+    "#" {
+        log "got docker prompt"
+        send "ls\r"
+    }
+    eof  {
+        log "eof"
+        exit 1
+    }
+    timeout {
+        log "docker run: timeout"
+        close
+        exit 1
+    }
+}
+
+send "\r"
+#
+#change to home
+#
+expect "#" { send "cd\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect *   { send "\r" }
+unset expect_out(buffer)
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+puts "The (docker) output is '$expect_out(buffer)'."
+set prompt [lindex [split $expect_out(buffer) "\n"] end]
+puts "The docker prompt is '$prompt'"
+expect "$prompt" { send "ls\r" }
+expect "$prompt" { send "\r" }
+
+set compile_jp4agent       1
+set restart_fpc            1
+set reconfig_fwd_sandbox   1
+set start_jp4agent         1
+set run_gtests             1
+set shutdown_jp4agent      1
+
+if {$debug_vmx_container == 1} {
+    set stop_vmx         0
+    set exit_container   0
+} else {
+    set stop_vmx         1
+    set exit_container   1
+}
+
+expect "$prompt" { send "\r" }
+unset expect_out(buffer)
+set vmx_running  0
+set run_gtest_error 0
+
+set timeout 10
+log "Check if VMX is running:"
+expect "$prompt" { send "cd /root/VMX/vmx; ./vmx.sh --status | grep \"Check if vMX is running\" ; cd\r" }
+expect {
+    "Yes" {
+        log "VMX Running"
+        set vmx_running 1
+    }
+    "No" {
+        log "VMX Not Running"
+        set run_gtest_error 1
+    }
+    timeout {
+        log "Check if vMX is running: timeout"
+        set run_gtest_error 1
+    }
+}
+#send "\r"
+expect "$prompt" { send "\r" }
+
+log "vmx_running : $vmx_running"
+
+eat_extra_prompts $prompt
+#exp_internal -f $host_report_dir/$regress_report_dir_name/$script_name.log.txt 0;
+
+if {$vmx_running && $compile_jp4agent} {
+    log_prominent "Compiling JP4Agent..."
+    set timeout 600
+    if {$generate_coverage} {
+        expect "$prompt" { send "export COVERAGE=yes\r" }
+    }
+    expect "$prompt" { send "cd /root/JP4Agent; ./tools/docker/scripts/build-jp4.sh ; cd\r" }
+    
+    expect {
+        "JP4Agent binaries compilation success!!" {
+            log " Got \"JP4Agent binaries compilation success!!\""
+            send "\r\r\r"
+        }
+        timeout {
+            log "compile_jp4agent: timeout"
+            exit 1
+        }
+    }
+    expect "$prompt" { send "\r" }
+}
+
+if {$vmx_running && $cp_aft_pkg} {
+    log_prominent "Copying AFT package to VCP..."
+    set timeout 600
+    expect "$prompt" { send "cd /root/JP4Agent/tools/docker/scripts; ./cp_aft_pkg_to_vcp.exp; cd\r" }
+    
+    expect {
+        "Copy of aft package to vcp: success!!" {
+            log " Got \"Copy of aft package to vcp: success!!\""
+            send "\r\r\r"
+        }
+        "Copy of aft package to vcp: failed!!" {
+            log " Got \"Copy of aft package to vcp: failed!!\""
+            send "\r\r\r"
+        }
+        timeout {
+            log "cp_aft_pkg: timeout"
+            exit 1
+        }
+    }
+    expect "$prompt" { send "\r" }
+}
+
+if {$vmx_running && $restart_fpc} {
+    log_prominent "Restarting FPC..."
+    set timeout 600
+    expect "$prompt" { send "cd /root/JP4Agent/tools/docker/scripts; ./restart_fpc0.exp; cd\r" }
+    
+    expect {
+        "restart fpc 0: success!!" {
+            log " Got \"restart fpc 0: success!!\""
+            send "\r\r\r"
+        }
+        "restart fpc 0: failed!!" {
+            log " Got \"restart fpc 0: failed!!\""
+            send "\r\r\r"
+        }
+        timeout {
+            log "restart_fpc: timeout"
+            exit 1
+        }
+    }
+    expect "$prompt" { send "\r" }
+}
+
+if {$vmx_running && $reconfig_fwd_sandbox} {
+    log_prominent "Configuring forwarding sandbox..."
+    set timeout 600
+    expect "$prompt" { send "cd /root/JP4Agent/tools/docker/scripts; ./config_fwd_sandbox.exp; cd\r" }
+    
+    expect {
+        "Forwarding sandbox config: success!!" {
+            log " Got \"Forwarding sandbox config: success!!\""
+            send "\r\r\r"
+        }
+        "Forwarding sandbox config: failed!!" {
+            log " Got \"Forwarding sandbox config: failed!!\""
+            send "\r\r\r"
+        }
+        timeout {
+            log "reconfig_fwd_sandbox: timeout"
+            exit 1
+        }
+    }
+    expect "$prompt" { send "\r" }
+}
+
+if {$vmx_running && $start_jp4agent} {
+    log_prominent "Starting JP4Agent..."
+    set timeout 600
+    expect "$prompt" { send "ps auwx | grep jp4agent\r" }
+    expect "$prompt" { send "ps -ef | grep jp4agent | grep -v grep | awk '{print \$2}' | xargs kill -9\r" }
+    expect "$prompt" { send "ps auwx | grep jp4agent\r" }
+    sleep 3
+    expect "$prompt" { send "cd /root/JP4Agent/src ; tmux new-session -d -s jp4agent ./run-jp4agent $report_dir/$regress_report_dir_name/jp4agent.log.txt ; cd \r" }
+    expect "$prompt" { send "\r" }
+    expect "$prompt" { send "\r" }
+    expect "$prompt" { send "\r" }
+    sleep 5
+    expect "$prompt" { send "\r" }
+}
+
+if {$vmx_running && $run_gtests} {
+    set timeout 600
+
+    log_prominent "Running GTEST..."
+
+    expect "$prompt" { send "rm -rf $gtest_dir/GTEST_RESULT_*\r" }
+    expect "$prompt" { send "rm -rf $gtest_dir/jp4agent-gtest*.xml\r" }
+    expect "$prompt" { send "cd $gtest_dir ; ./run-gtests | tee $report_dir/$regress_report_dir_name/gtest.log.txt; cd \r" }
+    expect "$prompt" { send "mv -f $gtest_dir/jp4agent-gtest.xml $report_dir/$regress_report_dir_name/gtest.xml\r" }
+    expect "$prompt" { send "mv -f $gtest_dir/GTEST_RESULT_* $report_dir/$regress_report_dir_name/\r" }
+
+    expect "$prompt" { send "\r" }
+    expect "$prompt" { send "\r" }
+}
+
+# Shut down jp4agent
+if {$vmx_running && $shutdown_jp4agent } {
+    log_prominent "Stoping JP4Agent..."
+    set timeout 30
+
+    expect "$prompt" { send "cd /root/JP4Agent/tools/docker/scripts; ./shutdown_jp4agent.sh; cd \r" }
+    expect "$prompt" { send "\r" }
+}
+
+# Generate coverage report
+if {$vmx_running && $generate_coverage } {
+    log_prominent "Generating code coverage report..."
+    set timeout 30
+
+    expect "$prompt" { send "cd /root/JP4Agent/tools/docker/scripts; ./generate_coverage_report.sh $report_dir/$regress_report_dir_name/coverage.html; cd \r" }
+    expect "$prompt" { send "\r" }
+}
+
+
+if {$vmx_running && $stop_vmx} {
+    set timeout 30
+    log_prominent "Stopping VMX..."
+    expect "$prompt" { send "/root/scripts/stop_vmx.sh\r" }
+}
+
+eat_extra_prompts $prompt
+
+#send \x10
+#send \x11
+#interact
+if {$exit_container} {
+    #
+    # Exit container
+    #
+    set timeout 10
+    log_prominent "Exiting container..."
+    expect {
+        "$prompt" {
+            send "exit\r"
+            expect {
+                "$prompt" {
+                    log "Exiting container: (prompt $prompt)"
+                    if { $run_gtest_error } {
+                        log "Returning FAILURE"
+                        exit 1
+                    } else {
+                        log "Returning SUCCESS"
+                        exit 0
+                    }
+                }
+                timeout {
+                    log "Exiting container: timeout (valid case)"
+                    if { $run_gtest_error } {
+                        log "Returning FAILURE"
+                        exit 1
+                    } else {
+                        log "Returning SUCCESS"
+                        exit 0
+                    }
+                }
+            }
+        }
+        timeout {
+            log "Error exiting container: timeout. debug and fixme"
+        }
+    }
+}
+
+#
+# exit
+#
+if { $run_gtest_error } {
+    log "Returning FAILURE"
+    exit 1
+} else {
+    log "Returning SUCCESS"
+    exit 0
+}

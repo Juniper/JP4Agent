@@ -1,0 +1,6 @@
+# regression report #
+###################
+regression.xml
+regress_*
+vmxsetup_*
+

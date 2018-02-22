@@ -2,7 +2,7 @@
 #
 # Advanced Forwarding Interface : AFI client examples
 #
-# Created by Sandesh Kumar Sodhi, January 2017
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -18,6 +18,8 @@
 # as noted in the Third-Party source code file.
 #
 
+package require tdom
+
 exp_internal -f exp_internal.log.txt 0;
 
 #
@@ -25,19 +27,45 @@ exp_internal -f exp_internal.log.txt 0;
 # console port configured in cfg/vmx.conf
 #
 set debug_level            1
-set vcp_console_port       8601
-set vcp_ip                 "172.18.0.10"
-set vcp_username           "root"
-set vcp_password           "JunAFI"
 set vcp_prompt             "#"
-set vfp_console_port       8602
-set vfp_ip                 "172.18.0.20"
-set vfp_username           "root"
-set vfp_password           "root"
+set vfp_root_password      "root"
 set vfp_prompt             "#"
 set re_cli_prompt          "root>"
 set re_cli_config_prompt   "root#"
 set host_prompt             "#"
+set vmx_config_file        "/root/JP4Agent/tools/config/vmx-cfg.xml"
+
+#
+# Read configuration
+#
+set fd [open $vmx_config_file]
+set xml [read $fd]
+set doc [dom parse $xml]
+set root [$doc documentElement]
+
+set vcpNode [$root selectNodes "/vmxConfig/vcp"]
+set vcp_ip [$vcpNode getAttribute  IP]
+
+set vcpNode [$root selectNodes "/vmxConfig/vcp/username/text()"]
+set vcp_username [$vcpNode nodeValue]
+
+set vcpNode [$root selectNodes "/vmxConfig/vcp/password/text()"]
+set vcp_password [$vcpNode nodeValue]
+
+set vcpNode [$root selectNodes "/vmxConfig/vcp/port/text()"]
+set vcp_console_port [$vcpNode nodeValue]
+
+set vfpNode [$root selectNodes "/vmxConfig/vfp"]
+set vfp_ip [$vfpNode getAttribute  IP]
+
+set vfpNode [$root selectNodes "/vmxConfig/vfp/username/text()"]
+set vfp_username [$vfpNode nodeValue]
+
+set vfpNode [$root selectNodes "/vmxConfig/vfp/password/text()"]
+set vfp_password [$vfpNode nodeValue]
+
+set vfpNode [$root selectNodes "/vmxConfig/vfp/port/text()"]
+set vfp_console_port [$vfpNode nodeValue]
 
 match_max 100
 
@@ -247,14 +275,45 @@ proc login_vcp_ssh {} {
     return $spawn_id
 }
 
+
+#
+# cp file to VCP
+#
+proc cp_to_vcp {src dst} {
+    global vcp_ip
+    global vcp_username
+    global vcp_password
+    #
+    # Set 120 seconds 
+    #
+    set timeout 120
+
+    send "scp -oStrictHostKeyChecking=no $src $vcp_username@$vcp_ip:$dst \r"
+
+    expect {
+        "assword:" {
+            log_debug "cp_to_vcp: Entering password"
+            send "$vcp_password\r"
+        }
+        eof  {
+            log_error "cp_to_vcp: eof"
+            exit 1
+        }
+        timeout {
+            log_error "cp_to_vcp: timeout"
+            exit 1
+        }
+    }
+}
+
+
 #
 # Login to VFP console
 #
 proc login_vfp_console {} {
     global vfp_prompt
     global vfp_console_port
-    global vfp_username
-    global vfp_password
+    global vfp_root_password
     #
     # Set 600 seconds timeout to wait for VFP to come up, if not already up
     #
@@ -278,11 +337,11 @@ proc login_vfp_console {} {
         }
         "ogin:" {
             log_debug "need to login"
-            send "$vfp_username\r"
+            send "root\r"
             expect {
                 "assword:" {
                     log_debug "Entering password"
-                    send "$vfp_password\r"
+                    send "$vfp_root_password\r"
                     expect {
                         "#" {
                             log_debug "got prompt after login"
@@ -349,6 +408,7 @@ proc login_vfp_ssh {} {
     global vfp_ip
     global vfp_username
     global vfp_password
+    global vfp_root_password
     #
     # Set 10 seconds 
     #
@@ -369,14 +429,41 @@ proc login_vfp_ssh {} {
     expect {
         "assword:" {
             log_debug "Entering password"
-            send "$vfp_password\r"
+            send "$vfp_password\r\r"
             expect {
-                "#" {
-                    log_debug "got prompt after login (with password)"
-                    send "ls -l\r"
+                "$ " {
+                    log_debug "got prompt $ after login (with password)"
+                    send "su\r"
+
+                    expect {
+                        "assword:" {
+                            log_debug "Entering root password"
+                            send "$vfp_root_password\r"
+                            expect {
+                                "#" {
+                                    log_debug "got prompt # after su (with password)"
+                                    send "ls -l\r"
+                                }
+                                timeout {
+                                    log_error "su timeout (password entered)"
+                                    close
+                                    exit 1
+                                }
+                            }
+                        }
+                        eof  {
+                            log_error "(su)telnet:eof"
+                            exit 1
+                        }
+                        timeout {
+                            log_error "su timeout"
+                            close
+                            exit 1
+                        }
+                    }
                 }
                 timeout {
-                    log_error "login timeout (password entered)"
+                    log_error "$vfp_username login timeout (password entered)"
                     close
                     exit 1
                 }
@@ -387,7 +474,7 @@ proc login_vfp_ssh {} {
             exit 1
         }
         timeout {
-            log_error "login timeout"
+            log_error "ssh timeout"
             close
             exit 1
         }

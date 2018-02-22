@@ -1,8 +1,8 @@
 #!/usr/bin/expect
 #
-# Advanced Forwarding Interface : AFI client examples
+# VMX setup scripts
 #
-# Created by Sandesh Kumar Sodhi, January 2017
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -22,7 +22,7 @@ source [file join [file dirname [info script]] lib.exp]
 #
 # Disable inline ICMP
 #
-log_debug "Will connect to VFP console and disable inline icmp"
+log_debug "Will connect to VFP via ssh and disable inline icmp"
 set  script_name [file tail $argv0]
 
 proc display_usage {} {
@@ -47,17 +47,6 @@ expect "$re_cli_config_prompt" { send "show | no-more\r" }
 expect "$re_cli_config_prompt" { send "exit\r" }
 expect "$re_cli_prompt" { send "exit\r" }
 expect "$vcp_prompt" { send "ls\r" }
-expect "$vcp_prompt" { send "cprod -A fpc0 -c \"show jnh sandbox\"\r" }
-expect "$vcp_prompt" { send "cprod -A fpc0 -c \"show jnh sandbox hostpath-stats\"\r" }
-expect "$vcp_prompt" { send "cprod -A fpc0 -c \"show ukern_trace handles\" | grep JNH-SANDBOX | awk '{ print \$1 }'\r" }
-expect "$vcp_prompt" { send "\r" }
-log_debug "The output is '$expect_out(buffer)'."
-set jnh_sandbox_ukern_trace_handle [lindex [split $expect_out(buffer) "\n"] end-1 ]
-set jnh_sandbox_ukern_trace_handle [string trim $jnh_sandbox_ukern_trace_handle]
-log_debug "jnh_sandbox_ukern_trace_handle: $jnh_sandbox_ukern_trace_handle hi"
-expect "$vcp_prompt" { send "cprod -A fpc0 -c \"show ukern_trace $jnh_sandbox_ukern_trace_handle\"\r" }
-expect "$vcp_prompt" { send "\r" }
-expect "$vcp_prompt" { send "\r" }
 expect "$vcp_prompt" { send "\r" }
 expect "$vcp_prompt" { send "\r" }
 send "exit\r"
@@ -71,7 +60,6 @@ set spawn_id [login_vfp_ssh]
 #
 set timeout 30
 
-expect "$vfp_prompt" { send "cat /etc/riot/runtime.conf\r" }
 expect "$vfp_prompt" { send "ifconfig\r" }
 expect "$vfp_prompt" { send "\r" }
 expect "$vfp_prompt" { send "\r" }
@@ -94,15 +82,11 @@ expect "$host_prompt" { send "ifconfig\r" }
 #
 expect "$host_prompt" { send "ping -c 3 128.0.0.16\r" }
 #
-# VMXT AFI hostpath UDP port
+# PacketIO hostpath UDP port
 #
-expect "$host_prompt" { send "nmap -sU 128.0.0.16 -p 9002\r" }
+expect "$host_prompt" { send "nmap -sU 128.0.0.16 -p 64014\r" }
 #
-# VMXT TCP sever port listening for connections from afi-server
-#
-expect "$host_prompt" { send "nmap -sS  -p7000 128.0.0.16\r" }
-#
-# AFI server control plane port
+# AFT server control plane port
 #
 expect "$host_prompt" { send "nmap -sS  -p50051 128.0.0.16\r" }
 expect "$host_prompt" { send "\r" }

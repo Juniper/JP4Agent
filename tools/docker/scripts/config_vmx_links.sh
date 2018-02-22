@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Advanced Forwarding Interface : AFI client examples
+# VMX setup scripts
 #
-# Created by Sandesh Kumar Sodhi, January 2017
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -22,9 +22,7 @@
 # Configure vmx_link* interfaces
 #
 
-MY_DIR="$(dirname "$0")"
-source "$MY_DIR/cmn.sh"
-
+source "/root/JP4Agent/tools/docker/scripts/cmn.sh"
 me=`basename "$0"`
 
 
@@ -34,12 +32,13 @@ me=`basename "$0"`
 #
 
 MAC_ADDR_PREFIX="32:26:0A:2E:BB:F"
-COUNTER=0
-while [  $COUNTER -lt 4 ]; do
+COUNTER=10
+while [  $COUNTER -lt 14 ]; do
     #
     # ip link set vmx_link0 address 32:26:0A:2E:BB:F0
     #
-    run_command "ip link set vmx_link$COUNTER address $MAC_ADDR_PREFIX$COUNTER"
+    let MAC_SUFFIX=$COUNTER-10
+    run_command "ip link set vmx_link$COUNTER address $MAC_ADDR_PREFIX$MAC_SUFFIX"
     let COUNTER+=1
 done
 
@@ -47,8 +46,8 @@ IP_ADDR_PREFIX="103.30."
 IP_ADDR_POSTFIX="0.2"
 IP_ADDR_MASK="255.255.255.0"
 
-COUNTER=0
-while [  $COUNTER -lt 4 ]; do
+COUNTER=10
+while [  $COUNTER -lt 14 ]; do
     #
     # ifconfig vmx_link0 103.30.00.2 netmask 255.255.255.0 up 
     #

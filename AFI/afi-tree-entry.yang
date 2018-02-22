@@ -1,0 +1,61 @@
+//
+// Juniper AFI : AFI Tree Entry
+//
+// Created by Sandesh Kumar Sodhi, February 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-tree-entry {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-tree-entry/junos/17.3";
+    prefix "afi-tree-entry";
+
+    import afi-types  { prefix "afi-types"; }
+    import afi-common { prefix "afi-cmn"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sandesh Kumar Sodhi
+        sksodhi@juniper.net";
+
+    description
+      "This module provides data model for AFI Tree Entry in Juniper's Advanced Forwarding Interface";
+
+    revision 2018-02-12 {
+        description "Initial revision.";
+    }
+
+    container afi-tree-entry {
+        description "AFT Tree";
+
+        leaf name {
+            description "Name";
+            type string;
+        }   
+
+        leaf parent-name {
+            description "Parent name";
+            type string;
+        }   
+
+        leaf  prefix-bytes {
+            description "Prefix bytes";
+            type string;
+        }   
+
+        leaf  prefix-length {
+            description "Prefix length";
+            type uint16;
+        }   
+
+        leaf target-afi-object {
+            description "Target afi object to execute this entry matches";
+            type string;
+        }   
+    }
+}

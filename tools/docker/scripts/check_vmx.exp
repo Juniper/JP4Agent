@@ -1,0 +1,71 @@
+#!/usr/bin/expect
+#
+# VMX setup scripts
+#
+# Created by Sandesh Kumar Sodhi, December 2017
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+source [file join [file dirname [info script]] lib.exp]
+
+#
+# This script connects to VCP console and
+# checks if vmx is up. 
+#
+log_debug "Will connect to VCP via console and check if vmx is up"
+
+set script_name [file tail $argv0]
+
+proc display_usage {} {
+    global script_name
+    puts "Usage  : $script_name"
+    return 1
+}
+
+set spawn_id [login_vcp_console]
+#
+# timeout 20 seconds
+#
+set timeout 20
+
+sleep 10
+expect "$vcp_prompt" { send "cli\r" }
+expect ">" { send "edit\r" }
+expect "#" { send "\r" }
+
+set f [open "/root/VMX/vmx/config/junos_config.txt"]
+set config_lines [split [read $f] "\n"]
+close $f
+
+foreach config_line $config_lines {
+    set comment_char #
+    if {[string match $comment_char* $config_line]} {
+        log_debug "Ignoring $config_line"
+    } else {
+        expect "$re_cli_config_prompt" { send "$config_line\r" }
+    }
+}
+
+expect "$re_cli_config_prompt" { send "show | compare | no-more\r" }
+#
+# Do not add anything after commit.
+# Commit changes the prompts so expect minimal prompts
+# 
+expect "$re_cli_config_prompt" { send "commit\r" }
+
+puts "************* VMX is up *****************"
+
+close
+exit 0

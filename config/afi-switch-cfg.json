@@ -1,0 +1,10 @@
+{
+   "Note" : "This is AFI switch cofiguration file",
+   "AfiSwitchConfig" : {
+      "Interfaces" : {
+          "Note"      : "Interfaces config", 
+          "if1"       : "eth0",
+          "if2"       : "eth1"
+      }
+   }
+}

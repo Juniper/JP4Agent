@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Advanced Forwarding Interface : AFI client examples
+# VMX setup scripts
 #
-# Created by Sandesh Kumar Sodhi, January 2017
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -28,6 +28,13 @@ me=`basename "$0"`
 #
 cd $VMX_DIR
 ./vmx.sh --stop
+./vmx.sh --cleanup
+./vmx.sh --unbind-dev
+
+log_debug "Before bridge cleanup"
+brctl show
+ip link set br-int-vmx1 down
+brctl delbr br-int-vmx1
 
 
 $VIRSH net-undefine br-ext
@@ -35,4 +42,6 @@ $VIRSH net-undefine br-int-vmx1
 
 $BRCTL delbr br-ext
 
+log_debug "After bridge cleanup"
+brctl show
 exit 0

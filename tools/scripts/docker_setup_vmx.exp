@@ -1,0 +1,201 @@
+#!/usr/bin/expect -f
+#
+# Regression scripts
+#
+# docker_setup_vmx.exp
+# This script 
+#  - runs Docker container
+#  - bring up VMX (inside cotainer)
+#  - starts JP4Agent (inside cotainer)
+#
+# Created by Sandesh Kumar Sodhi, January 2018
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+source [file join [file dirname [info script]] lib.exp]
+
+#
+# Usage
+#
+proc display_usage { sn } {
+    puts "Usage  : $sn <host-jp4agent-dir> <docker-name> <docker-tag> <report-dir-name>"
+    return 1
+}
+
+set script_name [file tail $argv0]
+set total_num_args [llength $argv]
+puts "total_num_args : $total_num_args"
+
+if {$total_num_args != 4} {
+    set rez [display_usage $script_name ]
+    exit 1
+}
+
+set host_jp4agent_dir [lindex $argv 0]
+set docker_name       [lindex $argv 1]
+set docker_tag        [lindex $argv 2]
+set report_dir_name   [lindex $argv 3]
+
+
+set vmx_config_file   "$host_jp4agent_dir/tools/config/vmx-cfg.xml"
+
+#
+# Read configuration
+#
+set fd [open $vmx_config_file]
+set xml [read $fd]
+set doc [dom parse $xml]
+set root [$doc documentElement]
+
+set vcpNode [$root selectNodes "/vmxConfig/vcp"]
+set vcp_ip [$vcpNode getAttribute  IP]
+
+set vfpNode [$root selectNodes "/vmxConfig/vfp"]
+set vfp_ip [$vfpNode getAttribute  IP]
+
+set host_vmx_loc_node [$root selectNodes /vmxConfig/hostVMXLocation/text()] 
+set host_vmx_loc [$host_vmx_loc_node nodeValue]
+
+#
+# Enable to debug this expect script
+#
+exp_internal -f $host_jp4agent_dir/tools/report/$report_dir_name/$script_name.log.txt 0;
+
+log_prominent "Will run docker container... (name: $docker_name tag: $docker_tag)"
+
+#
+# Starting docker should not take long.
+# Setting timeout to 10 seconds
+#
+set timeout 10
+set prompt #
+
+spawn /usr/bin/docker run --name $docker_name --network=host -v $host_jp4agent_dir:/root/JP4Agent -v $host_vmx_loc:/root/VMX --privileged -i -t $docker_tag
+
+if {$spawn_id == 0} {
+    log "Docker run spawn_id $spawn_id returning"
+    set rez [display_usage $script_name ]
+    exit 1
+}
+
+log "docker run spawn_id $spawn_id"
+
+send "\r"
+send "\r"
+expect {
+    "#" {
+        log "got docker prompt"
+        send "ls\r"
+    }
+    eof  {
+        log "eof"
+        exit 1
+    }
+    timeout {
+        log "docker run: timeout"
+        close
+        exit 1
+    }
+}
+
+send "\r"
+#
+#change to home
+#
+expect "#" { send "cd\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect *   { send "\r" }
+unset expect_out(buffer)
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+expect "#" { send "\r" }
+puts "The (docker) output is '$expect_out(buffer)'."
+set prompt [lindex [split $expect_out(buffer) "\n"] end]
+puts "The docker prompt is '$prompt'"
+expect "$prompt" { send "ls\r" }
+expect "$prompt" { send "\r" }
+
+expect "$prompt" { send "\r" }
+unset expect_out(buffer)
+set vmx_running  0
+set vmx_setup_error 0
+
+
+log_prominent "Starting VMX..."
+#
+# Starting VMX takes time.
+# Setting timeout to 60 minutes
+#
+set timeout 3600
+expect "$prompt" { send "cd /root/VMX; ../JP4Agent/tools/docker/scripts/setup_vmx.sh; cd\r" }
+expect {
+    "setup VMX: ___error___" {
+        log " Got \"setup VMX: ___error___\""
+        send "\r"
+    }
+    "setup VMX: ___success___" {
+        log " Got \"setup VMX: ___success___\""
+        send "\r"
+    }
+    timeout {
+        log "setup_vmx.sh: timeout"
+        exit 1
+    }
+}
+
+
+set timeout 10
+log "Check if VMX is running:"
+expect "$prompt" { send "cd /root/VMX/vmx; ./vmx.sh --status | grep \"Check if vMX is running\" ; cd\r" }
+expect {
+    "Yes" {
+        log "VMX Running"
+        set vmx_running 1
+        set vmx_setup_error 0
+    }
+    "No" {
+        log "VMX Not Running"
+        set vmx_setup_error 1
+    }
+    timeout {
+        log "Check if vMX is running: timeout"
+        set vmx_setup_error 1
+    }
+}
+#send "\r"
+expect "$prompt" { send "\r" }
+
+log "vmx_running : $vmx_running"
+
+eat_extra_prompts $prompt
+
+#
+# exit
+#
+if { $vmx_setup_error } {
+    log "vmx setup: Returning FAILURE"
+    exit 1
+} else {
+    log "vmx setup: Returning SUCCESS"
+    exit 0
+}

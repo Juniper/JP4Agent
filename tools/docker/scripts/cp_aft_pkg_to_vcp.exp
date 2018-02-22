@@ -1,0 +1,72 @@
+#!/usr/bin/expect
+#
+# VMX setup scripts
+#
+# load_aft_pkg.sh: Loads aft package to VCP at /usr/share/pfe
+#
+# Created by Sandesh Kumar Sodhi, January 2017
+# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+#
+# All rights reserved.
+#
+# Notice and Disclaimer: This code is licensed to you under the Apache
+# License 2.0 (the "License"). You may not use this code except in compliance
+# with the License. This code is not an official Juniper product. You can
+# obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Third-Party Code: This code may depend on other components under separate
+# copyright notice and license terms. Your use of the source code for those
+# components is subject to the terms and conditions of the respective license
+# as noted in the Third-Party source code file.
+#
+
+source [file join [file dirname [info script]] lib.exp]
+
+log_debug "Will connect to VCP via ssh and create forwarding sandbox"
+
+set script_name [file tail $argv0]
+
+proc display_usage {} {
+    global script_name
+    puts "Usage  : $script_name"
+    return 1
+}
+
+set spawn_id [login_vcp_ssh]
+#
+# timeout 20 seconds
+#
+set timeout 20
+
+expect "$vcp_prompt" { send "ls -lrt /usr/share/pfe | grep aft.tgz\r" }
+expect "$vcp_prompt" { send "rm -f /usr/share/pfe/aft.tgz\r" }
+expect "$vcp_prompt" { send "rm -f /usr/share/pfe/aft.tgz.sha1\r" }
+expect "$vcp_prompt" { send "ls -lrt /usr/share/pfe | grep aft.tgz\r" }
+expect "$vcp_prompt" { send "\r" }
+
+close
+
+set spawn_id [host_shell]
+
+#
+# timeout 20 seconds
+#
+set timeout 20
+
+expect "$host_prompt" { send "ls -l /root/VMX/\r" }
+cp_to_vcp /root/VMX/aft.tgz /usr/share/pfe/
+expect "$host_prompt" { send "\r" }
+cp_to_vcp /root/VMX/aft.tgz.sha1 /usr/share/pfe/
+expect "$host_prompt" { send "\r" }
+log_debug "aft packages copy to vcp: SUCCESS"
+send "exit\r"
+
+close
+
+#
+# Regression scripts use this messagees to detect vmx setup status.
+# If you change this message, please make the same change in regression scripts.
+#
+puts "Copy of aft package to vcp: success!!"
+
+exit 0

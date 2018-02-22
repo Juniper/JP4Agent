@@ -1,8 +1,8 @@
 #!/usr/bin/expect
 #
-# Advanced Forwarding Interface : AFI client examples
+# VMX setup scripts
 #
-# Created by Sandesh Kumar Sodhi, December  2017
+# Created by Sandesh Kumar Sodhi, December 2017
 # Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
@@ -36,14 +36,14 @@ proc display_usage {} {
 set spawn_id [login_vcp_ssh]
 
 #
-# timeout 1 minutes
+# timeout 1 minute
 #
 set timeout 60
 
 expect "$vcp_prompt" { send "\r" }
 expect "$vcp_prompt" { send "cli restart fpc 0\r" }
 expect "$vcp_prompt" { send "cli\r" }
-puts re_cli_prompt=$re_cli_prompt
+log_debug "Expecting re_cli_prompt=$re_cli_prompt"
 expect "$re_cli_prompt" { send "show chassis fpc 0\r" }
 set total_wait 0
 while 1 {
@@ -77,5 +77,13 @@ while 1 {
 expect "$re_cli_prompt" { send "show chassis fpc 0\r" }
 expect "$re_cli_prompt" { send "exit\r" }
 expect "$vcp_prompt" { send "exit\r" }
+
 close
+
+#
+# Regression scripts use this messagees to detect vmx setup status.
+# If you change this message, please make the same change in regression scripts.
+#
+puts "restart fpc 0: success!!"
+
 exit 0

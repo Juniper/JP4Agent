@@ -1,0 +1,7 @@
+[
+   "Note" : "This is the cofiguration file for aft target",
+   "AFTConfig" : {
+       "aft-server-ip"         : "0.0.0.0",
+       "aft-server-port"       : "50051"
+   }
+]
