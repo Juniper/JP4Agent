@@ -27,6 +27,7 @@ os:
   - linux
 before_install:
   - cd tools/docker; docker build -f Dockerfile_p4 -t juniper-p4 .
+  - cd ../..
   - docker run -d --name travis-p4 -v `pwd`:/root/JP4Agent --privileged -i -t juniper-p4 /bin/bash
   - docker ps -a
 script:
