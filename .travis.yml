@@ -26,8 +26,8 @@ compiler:
 os:
   - linux
 before_install:
-  - docker pull juniper/p4:latest
-  - docker run -d --name travis-p4 -v `pwd`:/root/JP4Agent --privileged -i -t juniper/p4 /bin/bash
+  - cd tools/docker; docker build -f Dockerfile_p4 -t juniper-p4 .
+  - docker run -d --name travis-p4 -v `pwd`:/root/JP4Agent --privileged -i -t juniper-p4 /bin/bash
   - docker ps -a
 script:
   - docker exec travis-p4 /bin/bash -c "cd /root/JP4Agent/build; ./make-all-null.sh"
