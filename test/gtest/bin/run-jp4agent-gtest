@@ -3,5 +3,11 @@
 JP4AGENT_LOC=../../..
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/jp4agent/obj
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/utils/obj
+
+if [ "$1" == "nullTest" ]
+then
+    echo "Deleting file NullTest.txt\n"
+    rm -f $JP4AGENT_LOC/src/targets/null/NullTest.txt
+fi
  
-$JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest
+$JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest $1

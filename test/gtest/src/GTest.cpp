@@ -30,6 +30,9 @@
 #include <iomanip>
 #include <ctime>
 #include <future>
+#include <fstream>
+
+using namespace std;
 
 using namespace std::chrono_literals;
 
@@ -398,6 +401,25 @@ TEST_F(P4, ipv4Router)
     tVerifyPackets(capture_ifs);
 }
 
+// Test5: Null Target Test.
+TEST_F(P4, nullTest)
+{
+    // Launch controller to add route entry.
+    ControllerAddRouteEntry();
+    sleep_thread_log(15s);
+    ifstream gtestFile;
+    std::string line, log;
+    const std::string expectedString = "key_field: packet.ip4.daddr\ntree.ByteSize(): 69\nentry_name: entry1\nparent_name: ipv4_lpm\ntarget_afi_object: etherencap1\n";
+    gtestFile.open("/root/JP4Agent/src/targets/null/NullTest.txt");
+    while ( getline (gtestFile,line) )
+        {
+            log += line + "\n";
+	}
+    gtestFile.close();
+    EXPECT_TRUE(log.compare(expectedString) == 0);
+}
+
+
 //
 // gtest main
 //
@@ -408,8 +430,14 @@ int main(int argc, char **argv)
     boost::filesystem::create_directories(gtestOutputDirName);
 
     ::testing::InitGoogleTest(&argc, argv);
-    ::testing::GTEST_FLAG(filter) = "*";
-    //::testing::GTEST_FLAG(filter) = "*ipv4Router*";
-    //::testing::GTEST_FLAG(filter) = "*injectL2Pkt*:*puntL2Pkt*:*hostPing*";
+    if (argc == 1) {
+        ::testing::GTEST_FLAG(filter) = "P4.*-P4.nullTest";
+    }
+    else {
+        ::testing::GTEST_FLAG(filter) = "*nullTest*";
+    }
+   //::testing::GTEST_FLAG(filter) = "*ipv4Router*";
+   //::testing::GTEST_FLAG(filter) = "*injectL2Pkt*:*puntL2Pkt*:*hostPing*";
+
     return RUN_ALL_TESTS();
 }

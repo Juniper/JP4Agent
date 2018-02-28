@@ -25,6 +25,9 @@
 #define __NullObject__
 
 #include "Afi.h"
+#include <fstream>
+
+using namespace std;
 
 namespace NULLHALP {
 
@@ -43,7 +46,6 @@ class NullObject
 public:
     NullObject () {};
     virtual ~NullObject () {};
-
 };
 
 ///
@@ -171,6 +173,7 @@ public:
         return os;
     }
 
+    ofstream gtestFile;
 };
 
 }  // namespace NULLHALP

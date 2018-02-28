@@ -33,7 +33,10 @@ void NullTree::_bind()
     ::ywrapper::StringValue key_field = _tree.key_field();
     Log(DEBUG) << "key_field: " << key_field.value();
 
-    //TBD: FIXME: Write into file
+    // Write into file for null test
+    gtestFile.open("../NullTest.txt", std::fstream::app);
+    gtestFile << "key_field: " << key_field.value() << "\n";
+    gtestFile.close();
 }
 
 //  

@@ -59,7 +59,14 @@ void NullTreeEntry::_bind()
 
     std::cout<<"nullTree :" << nullTreePtr << "\n";
 
-    //TBD: FIXME: Write into file
+    // Write into file
+    gtestFile.open("../NullTest.txt", std::fstream::app);
+    gtestFile << "tree.ByteSize(): " << _treeEntry.ByteSize() << "\n";
+    gtestFile << "entry_name: " << entry_name.value() << "\n";
+    gtestFile << "parent_name: " << parent_name.value() << "\n";
+    gtestFile << "target_afi_object: " << target_afi_object.value() << "\n";
+    gtestFile.close();
+
 }
 
 //  
