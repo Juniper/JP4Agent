@@ -39,7 +39,8 @@ CPPFLAGS += \
 	-I../../../pi/protos/p4/config \
 	-I../../../pi/protos/p4/tmp \
 	-I../../../utils/include/ \
-	-I/usr/include/jsoncpp
+	-I/usr/include/jsoncpp \
+	-I/root/downloads/cpp-client/src
 
 LDLIBS = \
 	-ljp4agent \

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 JP4AGENT_LOC=../../../..
-export LD_LIBRARY_PATH=/root/VMX/afi/lib
+export LD_LIBRARY_PATH=/usr/local/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/VMX/afi/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/jp4agent/obj
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/utils/obj
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/pi/obj

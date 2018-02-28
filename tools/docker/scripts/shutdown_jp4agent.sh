@@ -18,7 +18,7 @@
 # as noted in the Third-Party source code file.
 #
 
-ps -ef | grep "\.\/jp4agent"  | awk '{print $2}' | xargs kill -SIGUSR1
+ps -ef | grep "jp4agent"  | awk '{print $2}' | xargs kill -SIGUSR1
 #
 # Regression script 'docker_run_ut.expect' use this message to detect compilation status.
 # If you change this message, please make the same change in 'docker_run_ut.expect'.
