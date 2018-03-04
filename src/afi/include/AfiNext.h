@@ -20,37 +20,42 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AfiNext__
-#define __AfiNext__
+#ifndef SRC_AFI_INCLUDE_AFINEXT_H_
+#define SRC_AFI_INCLUDE_AFINEXT_H_
 
-namespace AFIHAL {
+#include <memory>
+#include <vector>
+#include "AfiTypes.h"
 
+namespace AFIHAL
+{
 class AfiNext;
-using AfiEnginePtr      = std::shared_ptr<AfiEngine>;
+using AfiEnginePtr = std::shared_ptr<AfiEngine>;
 
-using AfiNextPtr = std::shared_ptr<AfiNext>;
-using AfiNextWeakPtr = std::weak_ptr<AfiNext>;
+using AfiNextPtr        = std::shared_ptr<AfiNext>;
+using AfiNextWeakPtr    = std::weak_ptr<AfiNext>;
 using AfiNextWeakVector = std::vector<AfiNextWeakPtr>;
 
 //
 // Class for connecting Afi objects.
 // It is used by AfiObject and AfiEntry
-// to point at "next" object in the forwarding topo. 
+// to point at "next" object in the forwarding topo.
 //
 
-class AfiNext {
-protected:
-    AfiObjectMap  _next;
+class AfiNext
+{
+ protected:
+    AfiObjectMap _next;
 
-public:
-    void         nextInsert(const AfiObjectPtr &nextNode);
-    void         nextRemove(const AfiObjectPtr &nextNode);
-    void         nextRemove(const AfiObjectName objectName);
-    bool         nextFind(AfiObjectName objectName, AfiObjectPtr &nextNode) const;
+ public:
+    void nextInsert(const AfiObjectPtr &nextNode);
+    void nextRemove(const AfiObjectPtr &nextNode);
+    void nextRemove(const AfiObjectName objectName);
+    bool nextFind(AfiObjectName objectName, const AfiObjectPtr &nextNode) const;
     AfiObjectPtr nextFirst() const;
     uint32_t     nextCount() const;
 };
 
 }  // namespace AFIHAL
 
-#endif // __AfiNext__
+#endif  // SRC_AFI_INCLUDE_AFINEXT_H_

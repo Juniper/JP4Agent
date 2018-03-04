@@ -20,20 +20,22 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "Afi.h"
+#include "AfiJsonResource.h"
+#include <iostream>
 
-namespace AFIHAL {
-
+namespace AFIHAL
+{
 //
 // Description
 //
-std::ostream & AfiJsonResource::description (std::ostream &os) const
+std::ostream &
+AfiJsonResource::description(std::ostream &os) const
 {
-    os << "_________ AfiJsonResource _______"      << std::endl;
-    os << "Name                :" << this->name()  << std::endl;
-    os << "Id                  :" << this->id()    << std::endl;
-    os << "Type                :" << this->type()  << std::endl;
-    os << "Object String       :" << this->objStr()  << std::endl;
+    os << "_________ AfiJsonResource _______" << std::endl;
+    os << "Name                :" << this->name() << std::endl;
+    os << "Id                  :" << this->id() << std::endl;
+    os << "Type                :" << this->type() << std::endl;
+    os << "Object String       :" << this->objStr() << std::endl;
     return os;
 }
 

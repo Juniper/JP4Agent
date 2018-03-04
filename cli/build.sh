@@ -1,4 +1,4 @@
-#~/bin/bash
+#/bin/bash
 protoc -I. --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ./jp4cli.proto
 protoc -I. --cpp_out=. ./jp4cli.proto
 python3 -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. ./jp4cli.proto

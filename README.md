@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.com/Juniper/JP4Agent.svg?token=MxjFSwkncDCE55YiaJFy&branch=master)](https://travis-ci.com/Juniper/JP4Agent)
-
 ##### Note: Use of this software is governed by an Apache 2.0 license, and can be found in the “LICENSE” file.
 
 JP4Agent (Juniper P4 Agent)
@@ -26,16 +24,27 @@ This repository provides:
  -- JP4Agent
     |-- LICENSE              License 
     |-- README.md            This README file
-    |-- docs                 Documentation
-    |-- p4                   Sample p4 programs
-    |-- src                  JP4Agent source
-    |-- test 
-    |   |-- controller       Test controller
-    |   `-- gtest            GTests for JP4agent
-    `-- tools
-        |-- config           Setup configuration
-        |-- docker           Dockerfile(s), configuration and scripts for Docker
-        `-- scripts          Setup and regression scripts
+	|-- AFI                  AFI data model
+	|-- build                Build scripts
+	|-- cli                  Command line
+	|-- config               JP4Agent Configurations
+	|-- docs                 Documentation
+	|-- src
+	|   |-- afi              AFI HAL
+	|   |-- jp4agent         JP4Agent
+	|   |-- pi               PI layer
+	|   |-- targets
+	|   |   |-- aft          AFT target HALP
+	|   |   |-- brcm         Broadcom target HALP
+	|   |   `-- null         Null target HALP
+	|   `-- utils            Utils
+	|-- test
+	|   |-- controller       Test controller
+	|   `-- gtest            GTests for JP4agent
+	`-- tools
+		|-- config           Setup configuration
+		|-- docker           Dockerfile(s), configuration and scripts for Docker
+		`-- scripts          Setup and regression scripts
 ```
 
 Requirements
@@ -177,7 +186,7 @@ if2=eth3
 ```
 <br>
 <br>
-<div style="text-align:center" align="center"> <img src="docs/resources/External-tester.png" width="600"> </div>
+<div style="text-align:center" align="center"> <img src="docs/resources/vmx_with_tester.png" width="400"> </div>
 <br>
 <br>
 

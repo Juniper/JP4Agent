@@ -23,42 +23,45 @@
 #ifndef __P4RuntimeService__
 #define __P4RuntimeService__
 
+#include "Hostpath.h"
+
 class P4RuntimeServiceImpl : public p4::P4Runtime::Service
 {
-private:
+ public:
+    explicit P4RuntimeServiceImpl(Hostpath &hpPktIO) : _hpPktHdl{hpPktIO} {}
 
-  Status tableInsert(const p4::TableEntry &tableEntry);
-  Status tableWrite(p4::Update_Type update,
-                     const p4::TableEntry &table_entry);
-  Status _write(const p4::WriteRequest &request);
+ private:
+    Hostpath &_hpPktHdl;  // Handle to the hostpath packet IO methods.
 
-  Status Write(ServerContext *context,
-               const p4::WriteRequest *request,
-               p4::WriteResponse *rep) override;
-               
-  Status Read(ServerContext *context,
-              const p4::ReadRequest *request,
-              ServerWriter<p4::ReadResponse> *writer) override;
+    // Methods
+    Status tableInsert(const p4::TableEntry &tableEntry);
+    Status tableWrite(p4::Update_Type       update,
+                      const p4::TableEntry &table_entry);
+    Status _write(const p4::WriteRequest &request);
 
-  Status SetForwardingPipelineConfig(
-      ServerContext *context,
-      const p4::SetForwardingPipelineConfigRequest *request,
-      p4::SetForwardingPipelineConfigResponse *rep) override;
+    Status Write(ServerContext *context, const p4::WriteRequest *request,
+                 p4::WriteResponse *rep) override;
 
-  Status GetForwardingPipelineConfig(
-      ServerContext *context,
-      const p4::GetForwardingPipelineConfigRequest *request,
-      p4::GetForwardingPipelineConfigResponse *rep) override;
-      
-  Status StreamChannel(ServerContext *context,
-                       StreamChannelReaderWriter *stream) override;
+    Status Read(ServerContext *context, const p4::ReadRequest *request,
+                ServerWriter<p4::ReadResponse> *writer) override;
 
-  static Uint128 convert_u128(const p4::Uint128 &from) {
-    return Uint128(from.high(), from.low());
-  }
+    Status SetForwardingPipelineConfig(
+        ServerContext *                               context,
+        const p4::SetForwardingPipelineConfigRequest *request,
+        p4::SetForwardingPipelineConfigResponse *     rep) override;
 
-  //P4Info _p4Info;
-  //AfiDevice _afiDevice;
+    Status GetForwardingPipelineConfig(
+        ServerContext *                               context,
+        const p4::GetForwardingPipelineConfigRequest *request,
+        p4::GetForwardingPipelineConfigResponse *     rep) override;
+
+    Status StreamChannel(ServerContext *            context,
+                         StreamChannelReaderWriter *stream) override;
+
+    static Uint128 convert_u128(const p4::Uint128 &from)
+    {
+        return Uint128(from.high(), from.low());
+    }
 };
 
-#endif // __P4RuntimeService__
+#endif  // __P4RuntimeService__

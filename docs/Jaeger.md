@@ -9,7 +9,7 @@ https://jaeger.readthedocs.io/en/latest/architecture/
 ```
 
 <br>
-<div style="text-align:center" align="center"><img src ="resources/Jaeger-Architecture.png" width="150"/></div>
+<div style="text-align:center" align="center"><img src ="resources/JaegerIntegration.png" width="800"/></div>
 <br>
 <br>
 

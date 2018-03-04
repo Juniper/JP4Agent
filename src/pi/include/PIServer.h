@@ -23,29 +23,49 @@
 #ifndef __PIServer__
 #define __PIServer__
 
+#include <memory>
+#include <string>
+#include "Hostpath.h"
+#include "CLIService.h"
 
 class PIServer;
 using PIServerUPtr = std::unique_ptr<PIServer>;
 
 class PIServer
 {
-public:
-    PIServer(const std::string &piServerAddr)
-        : _piServerAddr(piServerAddr) {}
-
-    ~PIServer(){};
+ public:
+    PIServer(const std::string &piServerAddr, uint16_t hpUdpPort,
+             const std::string &pktIOListenAddr, const std::string &cliServAddr)
+        : _piServerAddr{piServerAddr},
+          _hpPktIO{hpUdpPort, pktIOListenAddr},
+          _piService{_hpPktIO},
+          _cliService{cliServAddr}
+    {
+    }
 
     //
     // Start PI Server thread
     //
     void startPIServer();
 
-private:
-    const std::string        _piServerAddr;
+    //
+    // Start thread to handle incoming packets.
+    //
+    void startPktIOHandler();
 
-    P4RuntimeServiceImpl     _piService;
-    ServerBuilder            _piBuilder;
-    std::unique_ptr<Server>  _piServer;
+    //
+    // Start debug CLI service thread.
+    //
+    void startDbgCLIServer();
+
+ private:
+    const std::string _piServerAddr;
+    Hostpath          _hpPktIO;
+
+    P4RuntimeServiceImpl    _piService;
+    ServerBuilder           _piBuilder;
+    std::unique_ptr<Server> _piServer;
+    CLIService              _cliService;
 
     // Start server and bind to default address (0.0.0.0:50051)
     void PIGrpcServerRun();
@@ -66,4 +86,4 @@ private:
     void piServer(void);
 };
 
-#endif // __PIServer__
+#endif  // __PIServer__

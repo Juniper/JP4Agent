@@ -63,6 +63,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  libtool \
  libxml2-utils \
  libyaml-cpp-dev \
+ net-tools \
  nmap \
  openssh-client \
  openssl \

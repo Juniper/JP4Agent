@@ -20,56 +20,60 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __Afi__
-#define __Afi__
+#ifndef SRC_AFI_INCLUDE_AFI_H_
+#define SRC_AFI_INCLUDE_AFI_H_
 
-#include <memory>
-#include <map>
+#include <jaegertracing/Tracer.h>
 #include <jsoncpp/json/json.h>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include "Log.h"
-#include "Utils.h"
-#include "AfiTypes.h"
-#include "AfiJsonResource.h"
+#include "AfiCreator.h"
 #include "AfiDM.h"
+#include "AfiDevice.h"
+#include "AfiJsonResource.h"
 #include "AfiNext.h"
 #include "AfiObject.h"
-#include "AfiCreator.h"
-#include "AfiDevice.h"
 #include "AfiTree.h"
 #include "AfiTreeEntry.h"
+#include "AfiTypes.h"
+#include "Log.h"
 
 //
-// This function to be impleted by each target
+// This function to be implemented by each target
 //
 AFIHAL::AfiDeviceUPtr createDevice(const std::string &name);
 
-namespace AFIHAL {
-
+namespace AFIHAL
+{
 class Afi;
-using AfiUPtr = std::unique_ptr<Afi>;
+using AfiUPtr          = std::unique_ptr<Afi>;
 using AfiObjectNameMap = std::map<std::string, AfiObjectPtr>;
-//using AfiObjectIdMap = std::map<uint32_t, AfiObjectPtr>;
+// using AfiObjectIdMap = std::map<uint32_t, AfiObjectPtr>;
 
-class Afi {
-
-public:
-    static Afi& instance() {
+class Afi
+{
+ public:
+    static Afi &instance()
+    {
         static Afi afi;
         return afi;
     }
-  
-    Afi(Afi const&) = delete;
-    Afi(Afi&&) = delete;
-    Afi& operator=(Afi const&) = delete;
-    Afi& operator=(Afi &&) = delete;
 
-    //AfiDevice& getDevice() {
+    Afi(Afi const &) = delete;
+    Afi(Afi &&)      = delete;
+    Afi &operator=(Afi const &) = delete;
+    Afi &operator=(Afi &&) = delete;
+
+    // AfiDevice& getDevice() {
     //    return _afiDevice;
     //}
 
-    void init() {
-        //AfiDeviceUPtr createDevice(const std::string &name);
+    void init()
+    {
+        // AfiDeviceUPtr createDevice(const std::string &name);
 
         Log(DEBUG) << "___ Afi::init : creating device ___";
         _afiDevice = createDevice("_device_");
@@ -77,23 +81,31 @@ public:
 
     bool handleAfiJsonObject(const Json::Value &cfg_obj);
     bool handlePipelineConfig(const Json::Value &cfg_root);
+    bool addAfiTree(const std::string &aftTreeName, const std::string &keyField,
+                    const int protocol, const std::string &defaultNextObject,
+                    const unsigned int treeSize);
+
     bool addEntry(const std::string &keystr, int pLen);
 
     const AfiObjectPtr getAfiObject(const std::string &name)
     {
-        Log(DEBUG) << "getAfiObject name:"<< name;
-        return _afiDevice->getAfiObject(name); 
+        Log(DEBUG) << "getAfiObject name:" << name;
+        return _afiDevice->getAfiObject(name);
     }
 
-protected:
+    const std::vector<AfiObjectPtr> getAfiObjects() const
+    {
+        return _afiDevice->getAfiObjects();
+    }
+
+ protected:
     Afi() {}
     ~Afi() {}
- 
-private:
-    AfiDeviceUPtr    _afiDevice;
+
+ private:
+    AfiDeviceUPtr _afiDevice;
 };
 
 }  // namespace AFIHAL
 
-
-#endif // __Afi__
+#endif  // SRC_AFI_INCLUDE_AFI_H_

@@ -5,7 +5,7 @@
 # build_push_docker.sh : Build and push Docker to Docker hub repo
 #
 # Created by Sandesh Kumar Sodhi, January 2018
-# Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+# Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
 #
 # All rights reserved.
 #
@@ -30,10 +30,12 @@ echo BUILD_DOCKERS=$BUILD_DOCKERS
 echo PUSH_DOCKERS_TO_DOCKERHUB=$PUSH_DOCKERS_TO_DOCKERHUB
 
 function docker_tag_n_push_to_docker_hub {
-    docker login
+    #docker login
 
-    docker tag juniper-p4-vmx $DOCKER_HUB_TAG
-    docker push $DOCKER_HUB_TAG
+    docker tag $DOCKER_P4_TAG $DOCKER_HUB_P4_TAG
+    docker tag $DOCKER_P4_VMX_TAG $DOCKER_HUB_P4_VMX_TAG
+    docker push $DOCKER_HUB_P4_TAG
+    docker push $DOCKER_HUB_P4_VMX_TAG
 }
 
 #
@@ -51,8 +53,8 @@ $ECHO ===============================================
 
 if [ "$BUILD_DOCKERS" == "yes" ]; then
     cd $REPO_DIR/tools/docker/
-    run_command docker build -f Dockerfile_p4 -t juniper-p4 .
-    run_command docker build -f Dockerfile_p4_vmx -t juniper-p4-vmx .
+    run_command docker build -f Dockerfile_p4 -t $DOCKER_P4_TAG .
+    run_command docker build -f Dockerfile_p4_vmx -t $DOCKER_P4_VMX_TAG .
 else
     log_debug "Skipping building of dockers"
 fi

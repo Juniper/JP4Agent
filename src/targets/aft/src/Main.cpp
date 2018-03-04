@@ -22,7 +22,10 @@
 
 #include <getopt.h>
 #include <signal.h>
+#include <memory>
+#include <string>
 #include "JP4Agent.h"
+
 //
 // Defaults
 //
@@ -33,7 +36,7 @@ const std::string _debugmode = "debug-afi-objects";
 // Usage
 //
 void
-displayUsage (void)
+displayUsage(void)
 {
     std::cout << "\n\tUsage:\n";
     std::cout << "\tjp4agent OPTIONS\n";
@@ -51,7 +54,8 @@ void
 handle_signal(int signum)
 {
     if (signum == SIGINT) {
-        std::cout << "\nJP4Agent does not quit on SIGINT\n";
+        std::cout << "\nGot SIGINT. Exiting...\n";
+        exit(0);
     } else if (signum == SIGUSR1) {
         std::cout << "\nGot SIGUSR1. Exiting gracefully...\n";
         exit(0);
@@ -65,44 +69,38 @@ int
 main(int argc, char *argv[])
 {
     Log(DEBUG) << "===== Juniper P4 Agent =====";
-    //
-    // ctrl+ c should not terminate the program
-    //
     signal(SIGINT, handle_signal);
     signal(SIGUSR1, handle_signal);
 
     std::string configFile = defConfigFile;
 
-#define no_argument       0
+#define no_argument 0
 #define required_argument 1
 #define optional_argument 2
 
-    const struct option longopts[] =
-    {
-      {"config", required_argument,  0, 'c'},
-      {"help",   no_argument,        0, 'h'},
-      {0,0,0,0},
+    const struct option longopts[] = {
+        {"config", required_argument, 0, 'c'},
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0},
     };
 
     int index;
-    int iarg=0;
+    int iarg = 0;
 
-    opterr=1;
-    while(iarg != -1)
-    {
-      iarg = getopt_long(argc, argv, "c:h", longopts, &index);
+    opterr = 1;
+    while (iarg != -1) {
+        iarg = getopt_long(argc, argv, "c:h", longopts, &index);
 
-      switch (iarg)
-      {
-        case 'c':
-          configFile = optarg;
-          break;
+        switch (iarg) {
+            case 'c':
+                configFile = optarg;
+                break;
 
-        case 'h':
-          displayUsage();
-          exit(1);
-          return 0;
-      }
+            case 'h':
+                displayUsage();
+                exit(1);
+                return 0;
+        }
     }
 
     auto jP4Agent = std::make_unique<JP4Agent>(configFile);
@@ -111,6 +109,8 @@ main(int argc, char *argv[])
     //
     // Keep the main alive
     //
-    while(1) { sleep(1000); }
+    while (1) {
+        sleep(1000);
+    }
     return 0;
 }

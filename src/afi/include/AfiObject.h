@@ -20,51 +20,59 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AfiObject__
-#define __AfiObject__
+#ifndef SRC_AFI_INCLUDE_AFIOBJECT_H_
+#define SRC_AFI_INCLUDE_AFIOBJECT_H_
 
-#include "Afi.h"
+#include <map>
+#include <memory>
+#include <string>
 
-namespace AFIHAL {
+#include "AfiJsonResource.h"
+#include "AfiNext.h"
 
+namespace AFIHAL
+{
 class AfiObject;
 
-using AfiObjectPtr = std::shared_ptr<AfiObject>;
+using AfiObjectPtr     = std::shared_ptr<AfiObject>;
 using AfiObjectWeakPtr = std::weak_ptr<AfiObject>;
 
 using AfiObjectNameMap = std::map<std::string, AfiObjectPtr>;
-using AfiObjectIdMap = std::map<uint32_t, AfiObjectPtr>;
+using AfiObjectIdMap   = std::map<uint32_t, AfiObjectPtr>;
 
-class AfiObject : public AfiNext {
-    
-protected:
-    AfiJsonResource  _jsonRes; ///< Json Resource
-    
-public:
-    AfiObject (const AfiJsonResource &jsonRes) : _jsonRes(jsonRes) {}
+class AfiObject : public AfiNext
+{
+ protected:
+    AfiJsonResource _jsonRes;  ///< Json Resource
 
-    virtual ~AfiObject () {};
+ public:
+    explicit AfiObject(const AfiJsonResource &jsonRes) : _jsonRes(jsonRes) {}
 
-    virtual bool bind() = 0;
-    virtual bool unbind() = 0;
-    virtual std::ostream& description (std::ostream &os) const = 0;
+    virtual ~AfiObject() {}
 
-    //virtual bool update(void);
-    //virtual bool change(void);
-    
+    virtual bool          bind()                              = 0;
+    virtual bool          unbind()                            = 0;
+    virtual std::ostream &description(std::ostream &os) const = 0;
+
+    // virtual bool update(void);
+    // virtual bool change(void);
+
     /// @returns AfiObject id
-    AfiObjectId id() const { return _jsonRes.id(); };  /// TBD : revisit <<<<<< AfiObjectId ~~~ AfiJasonResourceId
+    AfiObjectId id() const
+    {
+        return _jsonRes.id();
+    }  /// TBD : revisit <<<<<< AfiObjectId ~~~ AfiJasonResourceId
 
     /// @returns AfiObject name
-    const std::string name()  const { return _jsonRes.name(); };
-    
+    const std::string name() const { return _jsonRes.name(); }
+
     /// @returns AfiObject type
-    const std::string type()  const { return _jsonRes.type(); };
-    
+    const std::string type() const { return _jsonRes.type(); }
+
     /// @returns AfiObject objStr
-    const std::string objStr()  const { return _jsonRes.objStr(); };
+    const std::string objStr() const { return _jsonRes.objStr(); }
 };
 
 }  // namespace AFIHAL
 
-#endif // __AfiObject__
+#endif  // SRC_AFI_INCLUDE_AFIOBJECT_H_

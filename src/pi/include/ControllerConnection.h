@@ -23,6 +23,9 @@
 #ifndef __ControllerConnection__
 #define __ControllerConnection__
 
+#include <mutex>
+#include "pvtPI.h"
+
 class ControllerConnection;
 extern ControllerConnection controller_conn;
 
@@ -31,7 +34,7 @@ extern ControllerConnection controller_conn;
 // controller connected at a time.
 class ControllerConnection
 {
-  public:
+ public:
     void set_stream(StreamChannelReaderWriter *stream)
     {
         std::lock_guard<std::mutex> lock{scm};
@@ -46,7 +49,7 @@ class ControllerConnection
     // Send pkt on the stream channel to the controller.
     bool send_pkt_in(p4::PacketIn *pkt) const
     {
-        bool pkt_sent = false;
+        bool                        pkt_sent = false;
         std::lock_guard<std::mutex> lock{scm};
         if (stream_) {
             p4::StreamMessageResponse response;
@@ -58,9 +61,9 @@ class ControllerConnection
         return pkt_sent;
     }
 
-  private:
-    mutable std::mutex scm;  // Guards access to stream channel ptr.
+ private:
+    mutable std::mutex         scm;  // Guards access to stream channel ptr.
     StreamChannelReaderWriter *stream_{nullptr};
 };
 
-#endif // __ControllerConnection__
+#endif  // __ControllerConnection__

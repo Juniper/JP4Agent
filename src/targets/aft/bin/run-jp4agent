@@ -14,7 +14,8 @@ if [ "$#" -eq 1 ]; then
     #
     # If provided first arguments is the log file
     #
-    $JP4AGENT_LOC/src/targets/aft/bin/jp4agent | tee $1
+    LOG_FILE=$1
+    $JP4AGENT_LOC/src/targets/aft/bin/jp4agent | tee $LOG_FILE
 else
     #ldd $JP4AGENT_LOC/src/targets/aft/obj/jp4agent
     #LD_DEBUG=all $JP4AGENT_LOC/src/targets/aft/obj/jp4agent

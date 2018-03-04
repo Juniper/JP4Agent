@@ -41,17 +41,27 @@ then
         echo "===== Running make clean under ${component} ====="
         make clean -C ${component} 
     done
+    echo "===== Deleting all obj directories ====="
+    cd $REPO_DIR; find . -name obj | xargs rm -rf
 else
     make srcs -C $REPO_DIR/AFI
     for component in "${components[@]}"
     do
         echo "===== Running make under ${component} ====="
-        make -C ${component} 
+        make -j4 -C ${component} DEBUG_BUILD=1 CODE_COVERAGE=1
         if [ $? -ne 0 ]
         then
-          echo "$me: ERROR!" 
+          echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 
+          echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 
+          echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 
           exit 1
         fi
     done
     echo "$me: SUCCESS!!!"
+    #
+    # Regression script 'docker_run_ut.expect' use this message to detect compilation status.
+    # If you change this message, please make the same change in 'docker_run_ut.expect'.
+    #
+    echo "JP4Agent binaries compilation success!!"
 fi
+exit 0

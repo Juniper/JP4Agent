@@ -206,7 +206,7 @@ if {$vmx_running && $compile_jp4agent} {
     if {$generate_coverage} {
         expect "$prompt" { send "export COVERAGE=yes\r" }
     }
-    expect "$prompt" { send "cd /root/JP4Agent; ./tools/docker/scripts/build-jp4.sh ; cd\r" }
+    expect "$prompt" { send "cd /root/JP4Agent/build; ./make-all-aft.sh clean; ./make-all-aft.sh ; cd\r" }
     
     expect {
         "JP4Agent binaries compilation success!!" {
@@ -220,6 +220,9 @@ if {$vmx_running && $compile_jp4agent} {
     }
     expect "$prompt" { send "\r" }
 }
+
+# TBD: Wait for FPC to come up. Adding sleep for now
+sleep 60
 
 if {$vmx_running && $cp_aft_pkg} {
     log_prominent "Copying AFT package to VCP..."
@@ -288,17 +291,21 @@ if {$vmx_running && $reconfig_fwd_sandbox} {
 }
 
 if {$vmx_running && $start_jp4agent} {
-    log_prominent "Starting JP4Agent..."
+    log_prominent "Killing already running JP4Agent, if any, ..."
     set timeout 600
     expect "$prompt" { send "ps auwx | grep jp4agent\r" }
     expect "$prompt" { send "ps -ef | grep jp4agent | grep -v grep | awk '{print \$2}' | xargs kill -9\r" }
     expect "$prompt" { send "ps auwx | grep jp4agent\r" }
     sleep 3
-    expect "$prompt" { send "cd /root/JP4Agent/src ; tmux new-session -d -s jp4agent ./run-jp4agent $report_dir/$regress_report_dir_name/jp4agent.log.txt ; cd \r" }
+    log_prominent "Starting JP4Agent..."
+    expect "$prompt" { send "ls -l /root/JP4Agent/src/targets/aft/bin\r" }
+    expect "$prompt" { send "cd /root/JP4Agent/src/targets/aft/bin; tmux new-session -d -s jp4agent ./run-jp4agent $report_dir/$regress_report_dir_name/jp4agent.log.txt ; cd \r" }
     expect "$prompt" { send "\r" }
     expect "$prompt" { send "\r" }
     expect "$prompt" { send "\r" }
     sleep 5
+    log_prominent "Check if JP4Agent is running ..."
+    expect "$prompt" { send "ps auwx | grep jp4agent\r" }
     expect "$prompt" { send "\r" }
 }
 
@@ -307,11 +314,11 @@ if {$vmx_running && $run_gtests} {
 
     log_prominent "Running GTEST..."
 
-    expect "$prompt" { send "rm -rf $gtest_dir/GTEST_RESULT_*\r" }
-    expect "$prompt" { send "rm -rf $gtest_dir/jp4agent-gtest*.xml\r" }
-    expect "$prompt" { send "cd $gtest_dir ; ./run-gtests | tee $report_dir/$regress_report_dir_name/gtest.log.txt; cd \r" }
-    expect "$prompt" { send "mv -f $gtest_dir/jp4agent-gtest.xml $report_dir/$regress_report_dir_name/gtest.xml\r" }
-    expect "$prompt" { send "mv -f $gtest_dir/GTEST_RESULT_* $report_dir/$regress_report_dir_name/\r" }
+    expect "$prompt" { send "rm -rf $gtest_dir/bin/GTEST_RESULT_*\r" }
+    expect "$prompt" { send "rm -rf $gtest_dir/bin/jp4agent-gtest*.xml\r" }
+    expect "$prompt" { send "cd $gtest_dir/bin ; ./run-jp4agent-gtest | tee $report_dir/$regress_report_dir_name/gtest.log.txt; cd \r" }
+    expect "$prompt" { send "mv -f $gtest_dir/bin/jp4agent-gtest.xml $report_dir/$regress_report_dir_name/gtest.xml\r" }
+    expect "$prompt" { send "mv -f $gtest_dir/bin/GTEST_RESULT_* $report_dir/$regress_report_dir_name/\r" }
 
     expect "$prompt" { send "\r" }
     expect "$prompt" { send "\r" }
@@ -331,7 +338,7 @@ if {$vmx_running && $generate_coverage } {
     log_prominent "Generating code coverage report..."
     set timeout 30
 
-    expect "$prompt" { send "cd /root/JP4Agent/tools/docker/scripts; ./generate_coverage_report.sh $report_dir/$regress_report_dir_name/coverage.html; cd \r" }
+    expect "$prompt" { send "cd /root/JP4Agent/tools/docker/scripts; ./generate_coverage_report.sh $report_dir/$regress_report_dir_name/gcov; cd \r" }
     expect "$prompt" { send "\r" }
 }
 

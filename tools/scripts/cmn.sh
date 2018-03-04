@@ -35,7 +35,10 @@ validate_jp4agent_repo
 
 REPO_DIR=$JP4AGENT_REPO
 
-DOCKER_HUB_TAG=juniper/p4-vmx:latest
+DOCKER_P4_TAG=juniper-p4
+DOCKER_P4_VMX_TAG=juniper-p4-vmx
+DOCKER_HUB_P4_TAG=juniper/p4:latest
+DOCKER_HUB_P4_VMX_TAG=juniper/p4-vmx:latest
 CONFIG_DIR_NAME=config
 SCRIPTS_DIR_NAME=scripts
 REPORT_DIR_NAME=report

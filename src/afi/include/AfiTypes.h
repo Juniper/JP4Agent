@@ -20,15 +20,17 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AfiTypes__
-#define __AfiTypes__
+#ifndef SRC_AFI_INCLUDE_AFITYPES_H_
+#define SRC_AFI_INCLUDE_AFITYPES_H_
 
-#include <iostream>
 #include <cstdint>
-#include <set>
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-namespace AFIHAL {
+namespace AFIHAL
+{
 //
 // Core classes
 //
@@ -36,28 +38,28 @@ class AfiEngine;
 class AfiObject;
 class AfiEntry;
 
-using AfiJsonResourceId = uint64_t;        ///< AFI json resource Id
-using AfiObjectId       = uint64_t;        ///< AFI object Id
+using AfiJsonResourceId = uint64_t;  ///< AFI json resource Id
+using AfiObjectId       = uint64_t;  ///< AFI object Id
 
-using AfiObjectName     = std::string;
+using AfiObjectName = std::string;
 
 //
 // Smart pointer type aliases
 //
-//using AfiEnginePtr      = std::shared_ptr<AfiEngine>;
-//using AfiEngineWeakPtr  = std::weak_ptr<AfiEngine>;
-using AfiObjectPtr      = std::shared_ptr<AfiObject>;
-using AfiObjectWeakPtr  = std::weak_ptr<AfiObject>;
-using AfiEntryPtr       = std::shared_ptr<AfiEntry>;
-using AfiEntryWeakPtr   = std::weak_ptr<AfiEntry>;
+// using AfiEnginePtr      = std::shared_ptr<AfiEngine>;
+// using AfiEngineWeakPtr  = std::weak_ptr<AfiEngine>;
+using AfiObjectPtr     = std::shared_ptr<AfiObject>;
+using AfiObjectWeakPtr = std::weak_ptr<AfiObject>;
+using AfiEntryPtr      = std::shared_ptr<AfiEntry>;
+using AfiEntryWeakPtr  = std::weak_ptr<AfiEntry>;
 
 //
 // Aliases for maps and vectors
 //
-using AfiObjectVector   = std::vector<AfiObjectPtr>;
-using AfiObjectMap      = std::map<AfiObjectName, AfiObjectPtr>;
-using AfiObjectWeakMap  = std::map<AfiObjectName, AfiObjectWeakPtr>;
+using AfiObjectVector  = std::vector<AfiObjectPtr>;
+using AfiObjectMap     = std::map<AfiObjectName, AfiObjectPtr>;
+using AfiObjectWeakMap = std::map<AfiObjectName, AfiObjectWeakPtr>;
 
 }  // namespace AFIHAL
 
-#endif // __AfiTypes__
+#endif  // SRC_AFI_INCLUDE_AFITYPES_H_

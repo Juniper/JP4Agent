@@ -24,7 +24,15 @@ TARGET_LIB = libpi.so
 RM = rm -rf
 OBJDIR  = ../obj
 
-CXXFLAGS += -fPIC -g -O0 -std=c++14 -Wall -Werror
+CXXFLAGS += -fPIC -std=c++14 -Wall -Werror
+
+ifdef DEBUG_BUILD
+	CXXFLAGS += -g -O0
+endif
+
+ifdef CODE_COVERAGE
+	CXXFLAGS += -fprofile-arcs -ftest-coverage
+endif
 
 CPPFLAGS += \
 	-I. \
@@ -32,13 +40,15 @@ CPPFLAGS += \
 	-I../../afi/include \
 	-I../../utils/include \
 	-I../protos \
-	-I../protos/p4/tmp \
-	-I../protos/p4/config \
 	-I../../../AFI/protos \
 	-I../../../AFI/protos/juniper \
 	-I/usr/include/jsoncpp
 
-LDFLAGS = -shared
+ifdef CODE_COVERAGE
+	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov
+endif
+
+LDFLAGS = -shared $(LDLIBS)
 
 all: $(OBJDIR)/$(TARGET_LIB)
 	@echo $(TARGET_LIB) compilation success!
@@ -50,7 +60,8 @@ SRCS = \
 	P4Info.cpp \
 	P4RuntimeService.cpp \
 	PI.cpp \
-	PIServer.cpp
+	PIServer.cpp \
+	CLIService.cpp
 
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 OBJS := $(addprefix $(OBJDIR)/,$(OBJS))

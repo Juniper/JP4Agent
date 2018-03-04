@@ -20,15 +20,20 @@ from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.contrib.completers import WordCompleter
 
+import sys
 import grpc
 import jp4cli_pb2
 import jp4cli_pb2_grpc
 
-p4_cmds_full = ['inject-l2-pkt <sandbox-index> <port-index>: Inject layer 2 packet',
-                'add-ether-encap <src-mac> <dst-mac> <0 or inner-vlan-id> <0 or outer-vlan-id> <output-port-token>',
-                'set-input-port-next-node <port-index> <next-node-token>',
-                'add-route <rtt-token> <prefix> <next-node-token>',
-                'add-receive <receive-code> <context>']
+p4_cmds_full = ['add-table <table-name> <key-field> <protocol-num> <default-next-obj> <table-size>',
+                'add-table-entry <table-name> <prefix> <prefix-length>',
+                'show-afi-objects']
+
+cli_cmds = ['help', 'quit']
+
+def display_usage():
+    for cmd in p4_cmds_full:
+        print(cmd)
 
 def send_cmd(stub, usr_cmd):
     try:
@@ -40,27 +45,44 @@ def send_cmd(stub, usr_cmd):
         else:
             print(e.details())
     else:
-        print("Cmd output: " + response.cmdout)
+        print(response.cmdout)
 
 def run_cli():
     """
-    Main fn: Loop and get input from user.
+    Present a prompt and get input from the user.
     """
-    channel = grpc.insecure_channel('localhost:53421')
+
+    # Connect to command handler grpc server
+    cli_serv_addr = 'localhost:53421'
+    channel = grpc.insecure_channel(cli_serv_addr)
     stub = jp4cli_pb2_grpc.CmdHandlerStub(channel)
-    p4_cmds = ['cross-connect', 'inject-l2-pkt', 'add-ether-encap',
-               'set-input-port-next-node']
+
+    # Setup prompt
+    p4_cmds = [cmd.split()[0] for cmd in p4_cmds_full] + cli_cmds
     p4_cmds_completer = WordCompleter(p4_cmds, sentence=True)
     p4_cmd_history = InMemoryHistory()
 
-    try:
-        while True:
-            usr_cmd = prompt('JP4Agent> ', completer=p4_cmds_completer,
-                             history=p4_cmd_history)
-            send_cmd(stub, usr_cmd)
-    except (KeyboardInterrupt, EOFError) as e:
-        print('Exiting JP4Agent CLI.')
+    while True:
+        # Get user command
+        try:
+            usr_cmd = prompt('JP4Agent> ', completer=p4_cmds_completer, history=p4_cmd_history)
+        except (KeyboardInterrupt, EOFError) as e:
+            continue
 
+        if not usr_cmd:
+            continue
+        elif usr_cmd in ['help', 'h', '?']:
+            display_usage()
+            continue
+        elif usr_cmd in ['quit', 'exit']:
+            print('Exiting JP4Agent CLI.')
+            sys.exit()
+        elif usr_cmd.strip().split()[0] not in p4_cmds:
+            print('Invalid command. Supported commands are:')
+            display_usage()
+            continue
+        # Valid cmd. Send to cmd server.
+        send_cmd(stub, usr_cmd)
 
 if __name__ == '__main__':
     run_cli()

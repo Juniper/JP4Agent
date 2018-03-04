@@ -21,53 +21,17 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AftClient__
-#define __AftClient__
+#ifndef SRC_TARGETS_AFT_AFT_INCLUDE_AFTCLIENT_H_
+#define SRC_TARGETS_AFT_AFT_INCLUDE_AFTCLIENT_H_
 
-#include <memory>
-#include <cstring>
-#include <iostream>
-#include <signal.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <string>
-#include <unistd.h>
-#include <thread>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-#include <string.h>
-#include <net/if.h>
-#include <linux/if_tun.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <arpa/inet.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <errno.h>
-#include <stdarg.h>
-
-#define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
-#include <boost/array.hpp>
-#include <boost/bind.hpp>
-#include <boost/asio.hpp>
-#include <boost/atomic.hpp>
-#include <boost/algorithm/string.hpp>
-
-//#include "Base.h"
-//#include "JP4Agent.h"
-#include "Log.h"
-#include "jnx/Aft.h"
-#include "jnx/AfiTransport.h"
-#include "Utils.h"
 #include "Aft.h"
+#include "Log.h"
+#include "Utils.h"
+#include "jnx/AfiTransport.h"
+#include "jnx/Aft.h"
 
-//namespace AFTHALP {
+// namespace AFTHALP {
 
 //
 // @class   AftClient
@@ -75,16 +39,17 @@
 //
 class AftClient
 {
-public:
-    static AftClient& instance() {
+ public:
+    static AftClient &instance()
+    {
         static AftClient aftclient;
         return aftclient;
-    }   
-  
-    AftClient(AftClient const&) = delete;
-    AftClient(AftClient&&) = delete;
-    AftClient& operator=(AftClient const&) = delete;
-    AftClient& operator=(AftClient &&) = delete;
+    }
+
+    AftClient(AftClient const &) = delete;
+    AftClient(AftClient &&)      = delete;
+    AftClient &operator=(AftClient const &) = delete;
+    AftClient &operator=(AftClient &&) = delete;
 
     void init(const std::string &configFile);
 
@@ -93,27 +58,23 @@ public:
     //
     AftNodeToken addTable(const std::string &tableName,
                           const std::string &fieldName,
-                          AftNodeToken defaultTragetToken);
+                          AftNodeToken       defaultTargetToken);
 
     //
     // Add a routing table to the sandbox
     //
     AftNodeToken addRouteTable(const std::string &rttName,
-                               AftNodeToken defaultTragetToken);
+                               AftNodeToken       defaultTargetToken);
 
-
-    int addRoute(AftNodeToken  rttNodeToken,
-                 const char *prefix_bytes,
-                 int num_prefix_bytes,
-                 int prefix_len,
-                 AftNodeToken  routeTragetToken);
+    int addRoute(AftNodeToken rttNodeToken, const char *prefix_bytes,
+                 int num_prefix_bytes, int prefix_len,
+                 AftNodeToken routeTargetToken);
 
     //
     // Add route to a routing table
     //
-    int addRoute(AftNodeToken      rttNodeToken,
-                 const std::string &prefix,
-                 AftNodeToken       routeTragetToken);
+    int addRoute(AftNodeToken rttNodeToken, const std::string &prefix,
+                 AftNodeToken routeTargetToken);
 
     //
     // Create list
@@ -123,9 +84,7 @@ public:
     //
     // Set next node for an input port
     //
-    int setInputPortNextNode(AftIndex inputPortIndex,
-                             AftNodeToken nextToken);
-
+    int setInputPortNextNode(AftIndex inputPortIndex, AftNodeToken nextToken);
 
     int setIngressStart(AftNodeToken ingressStartToken);
 
@@ -133,7 +92,6 @@ public:
     // Get token for an output port
     //
     AftNodeToken getOuputPortToken(AftIndex outputPortIndex);
-
 
     AftNodeToken addReceiveNode(uint32_t receiveCode, uint64_t context);
 
@@ -144,26 +102,25 @@ public:
                                    const std::string &src_mac,
                                    AftNodeToken       nextToken);
 
-
     AftNodeToken outputPortToken(AftIndex portIndex);
     AftNodeToken puntPortToken(void);
 
-protected:
+ protected:
     AftClient() {}
     //
     // Destructor
     //
-    ~AftClient() {};
+    ~AftClient() {}
 
-private:
-    std::string                 _afiServerAddr;   //< AFI server address
-    std::string                 _afiHostpathAddr; //< AFI hostpath address
+ private:
+    std::string _afiServerAddr;    //< AFI server address
+    std::string _afiHostpathAddr;  //< AFI hostpath address
 
-    const std::string           _sandbox_name = "jp4agent"; //< Sandbox name
-    AftSandboxPtr               _sandbox;
-    AftTransportPtr             _transport;
+    const std::string _sandbox_name = "jp4agent";  //< Sandbox name
+    AftSandboxPtr     _sandbox;
+    AftTransportPtr   _transport;
 
-    bool                        _tracing;  //< True if debug tracing is enabled
+    bool _tracing;  //< True if debug tracing is enabled
 
     //
     // read configuration
@@ -173,14 +130,15 @@ private:
     //
     // Constructor
     //
-    //AftClient(const std::string &afiServerAddr)
-    //          : _afiServerAddr(afiServerAddr) 
+    // AftClient(const std::string &afiServerAddr)
+    //          : _afiServerAddr(afiServerAddr)
     // TBD: move to AftClient.cpp
-    void createTransportToAftServer() {
+    void createTransportToAftServer()
+    {
         //
         // Initialize transport connection to AFI server
         //
-        //_transport = AfiTransport::create(_afiServerAddr);
+        // _transport = AfiTransport::create(_afiServerAddr);
         _transport = AfiTransport::create();
         assert(_transport != nullptr);
     }
@@ -190,16 +148,17 @@ private:
     //
     int openSandbox();
 
-    void sendboxSend(AftInsertPtr insert) {
+    void sendboxSend(AftInsertPtr insert)
+    {
         if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
-            Log(DEBUG) << "_aft_debugmode: "<< _aft_debugmode << " Not calling _sandbox->send()";
+            Log(DEBUG) << "_aft_debugmode: " << _aft_debugmode
+                       << " Not calling _sandbox->send()";
             return;
-        } 
+        }
         _sandbox->send(insert);
     }
-
 };
 
 //}  // namespace AFTHALP
 
-#endif // __AftClient__
+#endif  // SRC_TARGETS_AFT_AFT_INCLUDE_AFTCLIENT_H_

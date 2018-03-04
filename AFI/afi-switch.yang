@@ -1,0 +1,70 @@
+//
+// Juniper AFI : Switch
+//
+// Created by Sandesh Kumar Sodhi, January 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-switch {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-switch/junos/17.3";
+    prefix "afi-switch";
+
+    import afi-types  { prefix "afi-types"; }
+    import afi-common { prefix "afi-cmn"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sandesh Kumar Sodhi
+        sksodhi@juniper.net";
+
+    description
+      "Static multi-part conditional";
+
+    revision 2018-01-31 {
+        description "Initial revision.";
+    }
+
+    container switch-case {
+        description "AFI switch case";
+
+        leaf name {
+            type string;
+            description "Name of switch case";
+        }   
+
+        leaf value {
+            type string;
+            description "Field to use for switch";
+        }
+
+        leaf node {
+            type string;
+            description "Node to go to, on match";
+        }
+    }
+
+    container afi-switch {
+        description "AFI switch";
+
+        leaf name {
+            type string;
+            description "Name of switch node";
+        }   
+
+        leaf switch-field {
+            type afi-types:afi-field;
+            description "Field to use for switch";
+        }
+
+        leaf-list key-fields {
+            type afi-types:afi-field;
+            description "List of fields";
+        }
+    }
+}

@@ -20,52 +20,59 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AfiCreator__
-#define __AfiCreator__
+#ifndef SRC_AFI_INCLUDE_AFICREATOR_H_
+#define SRC_AFI_INCLUDE_AFICREATOR_H_
 
-namespace AFIHAL {
+#include <functional>
+#include <map>
+#include <string>
+#include "Log.h"
 
+namespace AFIHAL
+{
 template <class AfiRes, class AfiPtr>
-class AfiCreator {
-public:
-    using AfiObjectCreator = std::function<AfiPtr(const AfiRes &res)>;
+class AfiCreator
+{
+ public:
+    using AfiObjectCreator    = std::function<AfiPtr(const AfiRes &res)>;
     using AfiObjectCreatorMap = std::map<std::string, AfiObjectCreator>;
 
-protected:
-    AfiObjectCreatorMap  _creatorMap;
+ protected:
+    AfiObjectCreatorMap _creatorMap;
 
-public:
+ public:
     //
     // Constructor and destructor
     //
-    AfiCreator() {};
-    ~AfiCreator() {};
+    AfiCreator() {}
+    ~AfiCreator() {}
 
     //
     // Set creator
     //
-    void setCreator(const std::string type, AfiObjectCreator objectCreator) {
+    void setCreator(const std::string type, AfiObjectCreator objectCreator)
+    {
         _creatorMap[type] = objectCreator;
-    };
+    }
 
-    bool find(const std::string type, AfiObjectCreator &objectCreator)
+    bool find(const std::string type, AfiObjectCreator *objectCreator)
     {
         typename AfiObjectCreatorMap::iterator it;
 
         it = _creatorMap.find(type);
         if (it != _creatorMap.end()) {
-            objectCreator = it->second;
+            *objectCreator = it->second;
             return true;
         }
 
         return false;
-    };
+    }
 
-    AfiPtr create(const std::string type,
-                  const AfiRes &res) {
+    AfiPtr create(const std::string type, const AfiRes &res)
+    {
         AfiObjectCreator objectCreator;
 
-        if (find(type, objectCreator)) {
+        if (find(type, &objectCreator)) {
             return objectCreator(res);
         } else {
             Log(ERROR) << " objectCreator not found for " << type;
@@ -76,4 +83,4 @@ public:
 
 }  // namespace AFIHAL
 
-#endif // __AfiCreator__
+#endif  // SRC_AFI_INCLUDE_AFICREATOR_H_

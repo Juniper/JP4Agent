@@ -21,15 +21,17 @@
 //
 
 #include "AftClient.h"
+#include <string>
+#include <utility>
+#include <vector>
 
-//namespace AFTHALP {
-
+// namespace AFTHALP {
 
 //
 // init
 //
 void
-AftClient::init (const std::string &configFile)
+AftClient::init(const std::string &configFile)
 {
     readConfig(configFile);
     createTransportToAftServer();
@@ -43,7 +45,7 @@ AftClient::init (const std::string &configFile)
 int
 AftClient::readConfig(const std::string &configFile)
 {
-    Log(DEBUG) << "Reading config file: "<< configFile;
+    Log(DEBUG) << "Reading config file: " << configFile;
     return 0;
 }
 
@@ -59,57 +61,61 @@ AftClient::readConfig(const std::string &configFile)
 //
 
 int
-AftClient::openSandbox ()
+AftClient::openSandbox()
 {
     std::string proxy_sandbox_name = _sandbox_name + "-JUNOS";
 
-
     if (_aft_debugmode.find("debug-aft-client") != std::string::npos) {
-        Log(DEBUG) << "sandbox_name: "<< _sandbox_name;
-        Log(DEBUG) << "proxy_sandbox_name: "<< proxy_sandbox_name;
+        Log(DEBUG) << "sandbox_name: " << _sandbox_name;
+        Log(DEBUG) << "proxy_sandbox_name: " << proxy_sandbox_name;
     }
 
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
-        Log(DEBUG) << "_aft_debugmode: "<< _aft_debugmode << " No alloc/open sandbox";
+        Log(DEBUG) << "_aft_debugmode: " << _aft_debugmode
+                   << " No alloc/open sandbox";
         return 0;
     }
 
-    bool status = _transport->alloc("proxy", proxy_sandbox_name, 1, 1); 
+    bool status = _transport->alloc("proxy", proxy_sandbox_name, 1, 1);
     if (status == 0) {
-        Log(ERROR) << "_transport->alloc ("<< proxy_sandbox_name <<") failed!";
+        Log(ERROR) << "_transport->alloc (" << proxy_sandbox_name
+                   << ") failed!";
         return -1;
     } else {
         if (_aft_debugmode.find("debug-aft-client") != std::string::npos) {
-            Log(DEBUG) << "_transport->alloc("<< proxy_sandbox_name <<") SUCCESS!";
+            Log(DEBUG) << "_transport->alloc(" << proxy_sandbox_name
+                       << ") SUCCESS!";
         }
     }
 
     if (_transport->open(proxy_sandbox_name, _sandbox)) {
-        Log(DEBUG) << "Got Sandbox ("<< proxy_sandbox_name <<") handle!";
+        Log(DEBUG) << "Got Sandbox (" << proxy_sandbox_name << ") handle!";
     } else {
-        Log(ERROR) << "Open Sandbox ("<< proxy_sandbox_name <<") failed!";
+        Log(ERROR) << "Open Sandbox (" << proxy_sandbox_name << ") failed!";
         return -1;
     }
 
     if (_aft_debugmode.find("debug-aft-client") != std::string::npos) {
-        Log(DEBUG) << "_sandbox->inputPortCount(): "<< _sandbox->inputPortCount();
-        Log(DEBUG) << "_sandbox->inputPortMax(): "<< _sandbox->inputPortMax();
-        Log(DEBUG) << "_sandbox->outputPortCount(): "<< _sandbox->outputPortCount();
-        Log(DEBUG) << "_sandbox->outputPortMax(): "<< _sandbox->outputPortMax();
+        Log(DEBUG) << "_sandbox->inputPortCount(): "
+                   << _sandbox->inputPortCount();
+        Log(DEBUG) << "_sandbox->inputPortMax(): " << _sandbox->inputPortMax();
+        Log(DEBUG) << "_sandbox->outputPortCount(): "
+                   << _sandbox->outputPortCount();
+        Log(DEBUG) << "_sandbox->outputPortMax(): "
+                   << _sandbox->outputPortMax();
     }
 
     AftPortTablePtr inputPorts = _sandbox->inputPortTable();
 
     Log(DEBUG) << "InputPorts: ";
     if (_aft_debugmode.find("debug-aft-client") != std::string::npos) {
-        Log(DEBUG) << "inputPorts->maxIndex(): "<< inputPorts->maxIndex();
+        Log(DEBUG) << "inputPorts->maxIndex(): " << inputPorts->maxIndex();
     }
 
     AftPortPtr port;
-    for (AftIndex  i = 0 ; i < inputPorts->maxIndex();  i++) {
+    for (AftIndex i = 0; i < inputPorts->maxIndex(); i++) {
         if (inputPorts->portForIndex(i, port)) {
-            Log(DEBUG) << "index: " << i
-                       << " port name: " << port->portName()
+            Log(DEBUG) << "index: " << i << " port name: " << port->portName()
                        << " port If name: " << port->portIfName()
                        << " token: " << port->nodeToken();
         } else {
@@ -121,13 +127,12 @@ AftClient::openSandbox ()
 
     Log(DEBUG) << "OutputPorts: ";
     if (_aft_debugmode.find("debug-aft-client") != std::string::npos) {
-        Log(DEBUG) << "outputPorts->maxIndex(): "<< outputPorts->maxIndex();
+        Log(DEBUG) << "outputPorts->maxIndex(): " << outputPorts->maxIndex();
     }
 
-    for (AftIndex  i = 0 ; ((i < outputPorts->maxIndex()) && (i < 20));  i++) {
+    for (AftIndex i = 0; ((i < outputPorts->maxIndex()) && (i < 20)); i++) {
         if (outputPorts->portForIndex(i, port)) {
-            Log(DEBUG) << "index: " << i
-                       << " port name: " << port->portName()
+            Log(DEBUG) << "index: " << i << " port name: " << port->portName()
                        << " port If name: " << port->portIfName()
                        << " token: " << port->nodeToken();
         } else {
@@ -138,21 +143,22 @@ AftClient::openSandbox ()
     return 0;
 }
 
-AftNodeToken 
-AftClient::outputPortToken (AftIndex portIndex)
+AftNodeToken
+AftClient::outputPortToken(AftIndex portIndex)
 {
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
-        Log(DEBUG) << "_aft_debugmode: "<< _aft_debugmode << " Returning 20000";
+        Log(DEBUG) << "_aft_debugmode: " << _aft_debugmode
+                   << " Returning 20000";
         return 20000;
     }
 
     AftPortTablePtr outputPorts = _sandbox->outputPortTable();
 
     AftPortPtr port;
-    for (AftIndex  i = 0 ; i < outputPorts->maxIndex();  i++) {
+    for (AftIndex i = 0; i < outputPorts->maxIndex(); i++) {
         if ((i == portIndex) && (outputPorts->portForIndex(i, port))) {
-            Log(DEBUG) << "Found output port " << portIndex
-                       << "Returning " << port->nodeToken();
+            Log(DEBUG) << "Found output port " << portIndex << "Returning "
+                       << port->nodeToken();
             return port->nodeToken();
         }
     }
@@ -165,18 +171,19 @@ AftNodeToken
 AftClient::puntPortToken(void)
 {
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
-        Log(DEBUG) << "_aft_debugmode: "<< _aft_debugmode << " Returning 30000";
+        Log(DEBUG) << "_aft_debugmode: " << _aft_debugmode
+                   << " Returning 30000";
         return 30000;
     }
 
     AftPortTablePtr outputPorts = _sandbox->outputPortTable();
 
     AftPortPtr port;
-    for (AftIndex  i = 0 ; i < outputPorts->maxIndex();  i++) {
+    for (AftIndex i = 0; i < outputPorts->maxIndex(); i++) {
         if ((outputPorts->portForIndex(i, port)) &&
             (port->portName().compare("punt") == 0)) {
-            Log(DEBUG)  << "Found punt port "
-                        << "Returning " << port->nodeToken();
+            Log(DEBUG) << "Found punt port "
+                       << "Returning " << port->nodeToken();
             return port->nodeToken();
         }
     }
@@ -201,12 +208,12 @@ AftClient::puntPortToken(void)
 //
 
 int
-AftClient::setInputPortNextNode (AftIndex     inputPortIndex,
-                                 AftNodeToken nextToken)
+AftClient::setInputPortNextNode(AftIndex inputPortIndex, AftNodeToken nextToken)
 {
     AftInsertPtr insert = AftInsert::create(_sandbox);
 
-    AftNodePtr  inputPort = _sandbox->setInputPortByIndex(inputPortIndex, nextToken);
+    AftNodePtr inputPort =
+        _sandbox->setInputPortByIndex(inputPortIndex, nextToken);
 
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
         return 0;
@@ -217,12 +224,10 @@ AftClient::setInputPortNextNode (AftIndex     inputPortIndex,
     //
     // Send the new input port to the user sandbox
     //
-    //_sandbox->send(insert);
+    // _sandbox->send(insert);
     sendboxSend(insert);
     return 0;
 }
-
-
 
 //
 // @fn
@@ -230,28 +235,28 @@ AftClient::setInputPortNextNode (AftIndex     inputPortIndex,
 //
 // @brief
 // Set ingress start: Make all input ports point to ingress start node.
-// 
+//
 // @param[in]
 //     ingressStartToken Ingress start token
 // @return routing table node token
 //
 
 int
-AftClient::setIngressStart (AftNodeToken ingressStartToken)
+AftClient::setIngressStart(AftNodeToken ingressStartToken)
 {
-
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
         return 0;
     }
 
     AftPortTablePtr inputPorts = _sandbox->inputPortTable();
 
-    for (AftIndex  i = 0 ; i < inputPorts->maxIndex();  i++) {
-         setInputPortNextNode(i, ingressStartToken);
+    for (AftIndex i = 0; i < inputPorts->maxIndex(); i++) {
+        setInputPortNextNode(i, ingressStartToken);
+        std::cout << "AftClient:: setting ingress port " << i << " --> token"
+                  << ingressStartToken << "\n";
     }
     return 0;
 }
- 
 
 //
 // @fn
@@ -263,19 +268,17 @@ AftClient::setIngressStart (AftNodeToken ingressStartToken)
 // @param[in]
 //     tableName Routing table name
 // @param[in]
-//     defaultTragetToken  Default route target token
+//     defaultTargetToken  Default route target token
 // @return routing table node token
 //
 
 AftNodeToken
-AftClient::addTable (const std::string &tableName,
-                     const std::string &fieldName,
-                     AftNodeToken defaultTragetToken)
+AftClient::addTable(const std::string &tableName, const std::string &fieldName,
+                    AftNodeToken defaultTargetToken)
 {
-    AftNodeToken        tableNodeToken;
-    //AftNodeToken        discardNodeToken;
-    AftInsertPtr        insert;
-
+    AftNodeToken tableNodeToken;
+    // AftNodeToken        discardNodeToken;
+    AftInsertPtr insert;
 
     std::cout << "AftClient::addTable Adding table ... \n";
 
@@ -291,8 +294,7 @@ AftClient::addTable (const std::string &tableName,
     //
     // Create a route lookup tree
     //
-    auto treePtr = AftTree::create(AftField(fieldName),
-                                   defaultTragetToken);
+    auto treePtr = AftTree::create(AftField(fieldName), defaultTargetToken);
 
     //
     // Stitch the optional params
@@ -302,15 +304,15 @@ AftClient::addTable (const std::string &tableName,
     treePtr->setNodeParameter<std::string>("rt.nhType", "route");
     treePtr->setNodeParameter<uint32_t>("rt.skipBits", skipBits);
 
-
     tableNodeToken = insert->push(treePtr);
-    std::cout << "AftClient::addTable tableNodeToken:" << tableNodeToken << "\n";
+    std::cout << "AftClient::addTable tableNodeToken:" << tableNodeToken
+              << "\n";
     insert->push(tableName, tableNodeToken);
 
     //
     // Send all the nodes to the sandbox
     //
-    //_sandbox->send(insert);
+    // _sandbox->send(insert);
     sendboxSend(insert);
 
     return tableNodeToken;
@@ -326,17 +328,17 @@ AftClient::addTable (const std::string &tableName,
 // @param[in]
 //     rttName Routing table name
 // @param[in]
-//     defaultTragetToken  Default route target token
+//     defaultTargetToken  Default route target token
 // @return routing table node token
 //
 
 AftNodeToken
-AftClient::addRouteTable (const std::string &rttName,
-                          AftNodeToken defaultTragetToken)
+AftClient::addRouteTable(const std::string &rttName,
+                         AftNodeToken       defaultTargetToken)
 {
-    AftNodeToken        rttNodeToken;
-    //AftNodeToken        discardNodeToken;
-    AftInsertPtr        insert;
+    AftNodeToken rttNodeToken;
+    // AftNodeToken        discardNodeToken;
+    AftInsertPtr insert;
 
     //
     // Allocate an insert context
@@ -346,8 +348,8 @@ AftClient::addRouteTable (const std::string &rttName,
     //
     // Create a route lookup tree
     //
-    auto treePtr = AftTree::create(AftField("packet.lookupkey"),
-                                   defaultTragetToken);
+    auto treePtr =
+        AftTree::create(AftField("packet.lookupkey"), defaultTargetToken);
 
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
         return 0;
@@ -359,25 +361,22 @@ AftClient::addRouteTable (const std::string &rttName,
     //
     // Send all the nodes to the sandbox
     //
-    //_sandbox->send(insert);
+    // _sandbox->send(insert);
     sendboxSend(insert);
 
     return rttNodeToken;
 }
 
-
 int
-AftClient::addRoute (AftNodeToken  rttNodeToken,
-                     const char *prefix_bytes,
-                     int num_prefix_bytes,
-                     int prefix_len,
-                     AftNodeToken  routeTragetToken)
+AftClient::addRoute(AftNodeToken rttNodeToken, const char *prefix_bytes,
+                    int num_prefix_bytes, int prefix_len,
+                    AftNodeToken routeTargetToken)
 {
-    AftInsertPtr        insert;
-    //AftNodeToken        outputPortToken;
+    AftInsertPtr insert;
+    // AftNodeToken        outputPortToken;
 
     AftDataBytes aftdatabytes_prefix;
-    for(int t = 0; t < num_prefix_bytes; ++t){
+    for (int t = 0; t < num_prefix_bytes; ++t) {
         uint8_t byte = prefix_bytes[t];
         aftdatabytes_prefix.push_back(byte);
     }
@@ -391,26 +390,28 @@ AftClient::addRoute (AftNodeToken  rttNodeToken,
     //
     insert = AftInsert::create(_sandbox);
 
-    std::cout <<"Adding route ---> Node token " << routeTragetToken << std::endl;
+    std::cout << "Adding route ---> Node token " << routeTargetToken
+              << std::endl;
 
     //
     // Create a route
     //
     // Ref: aftman/rt/rt-trio/src/RtEntryTrio.cpp
-    AftDataPtr  daddr    = AftDataPrefix::create(aftdatabytes_prefix, prefix_len); // TBD: Check if 32 is fine
-    AftEntryPtr entryPtr = AftEntryRoute::create(rttNodeToken, std::move(daddr), routeTragetToken, true);
+    AftDataPtr daddr = AftDataPrefix::create(
+        aftdatabytes_prefix, prefix_len);  // TBD: Check if 32 is fine
+    AftEntryPtr entryPtr = AftEntryRoute::create(rttNodeToken, std::move(daddr),
+                                                 routeTargetToken, true);
 
     insert->push(entryPtr);
 
     //
     // Send all the nodes to the sandbox
     //
-    //_sandbox->send(insert);
+    // _sandbox->send(insert);
     sendboxSend(insert);
 
     return 0;
 }
-
 
 //
 // @fn
@@ -424,17 +425,16 @@ AftClient::addRoute (AftNodeToken  rttNodeToken,
 // @param[in]
 //     prefix Route prefix
 // @param[in]
-//     routeTragetToken Route target token
+//     routeTargetToken Route target token
 // @return 0 - Success, -1 - Error
 //
 
 int
-AftClient::addRoute (AftNodeToken       rttNodeToken,
-                     const std::string &prefix,
-                     AftNodeToken       routeTragetToken)
+AftClient::addRoute(AftNodeToken rttNodeToken, const std::string &prefix,
+                    AftNodeToken routeTargetToken)
 {
-    AftInsertPtr        insert;
-    //AftNodeToken        outputPortToken;
+    AftInsertPtr insert;
+    // AftNodeToken        outputPortToken;
 
     std::vector<std::string> prefix_sub_strings;
     boost::split(prefix_sub_strings, prefix, boost::is_any_of("./"));
@@ -445,7 +445,7 @@ AftClient::addRoute (AftNodeToken       rttNodeToken,
     }
 
     AftDataBytes aftdatabytes_prefix;
-    for(unsigned int t = 0; t < (prefix_sub_strings.size() - 1); ++t){
+    for (unsigned int t = 0; t < (prefix_sub_strings.size() - 1); ++t) {
         uint8_t byte = std::strtoul(prefix_sub_strings.at(t).c_str(), NULL, 0);
         aftdatabytes_prefix.push_back(byte);
     }
@@ -455,15 +455,17 @@ AftClient::addRoute (AftNodeToken       rttNodeToken,
     //
     insert = AftInsert::create(_sandbox);
 
-    std::cout <<"Adding route ";
-    std::cout << prefix << " ---> Node token " << routeTragetToken << std::endl;
+    std::cout << "Adding route ";
+    std::cout << prefix << " ---> Node token " << routeTargetToken << std::endl;
 
     //
     // Create a route
     //
     // Ref: aftman/rt/rt-trio/src/RtEntryTrio.cpp
-    AftDataPtr  daddr    = AftDataPrefix::create(aftdatabytes_prefix, 32); // TBD: Check if 32 is fine
-    AftEntryPtr entryPtr = AftEntryRoute::create(rttNodeToken, std::move(daddr), routeTragetToken, true);
+    AftDataPtr  daddr    = AftDataPrefix::create(aftdatabytes_prefix,
+                                             32);  // TBD: Check if 32 is fine
+    AftEntryPtr entryPtr = AftEntryRoute::create(rttNodeToken, std::move(daddr),
+                                                 routeTargetToken, true);
 
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
         return 0;
@@ -474,7 +476,7 @@ AftClient::addRoute (AftNodeToken       rttNodeToken,
     //
     // Send all the nodes to the sandbox
     //
-    //_sandbox->send(insert);
+    // _sandbox->send(insert);
     sendboxSend(insert);
 
     return 0;
@@ -493,9 +495,9 @@ AftClient::addRoute (AftNodeToken       rttNodeToken,
 //
 
 AftNodeToken
-AftClient::createList (AftTokenVector tokVec)
+AftClient::createList(AftTokenVector tokVec)
 {
-    AftInsertPtr        insert;
+    AftInsertPtr insert;
 
     //
     // Allocate an insert context
@@ -505,7 +507,7 @@ AftClient::createList (AftTokenVector tokVec)
     //
     // Build a list of provided tokens
     //
-    //AftNodePtr list = AftList::create(token1, token2);
+    // AftNodePtr list = AftList::create(token1, token2);
     AftNodePtr list = AftList::create(tokVec);
 
     insert->push(list);
@@ -533,7 +535,7 @@ AftClient::createList (AftTokenVector tokVec)
 AftNodeToken
 AftClient::getOuputPortToken(AftIndex outputPortIndex)
 {
-    AftNodeToken        outputPortToken;
+    AftNodeToken outputPortToken;
 
     _sandbox->outputPortByIndex(outputPortIndex, outputPortToken);
 
@@ -567,12 +569,11 @@ AftClient::addReceiveNode(uint32_t receiveCode, uint64_t context)
     //
     auto aftReceivePtr = AftReceive::create(receiveCode, context);
 
-
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
         return 0;
     }
 
-    AftNodeToken  nhReceiveToken = insert->push(aftReceivePtr);
+    AftNodeToken nhReceiveToken = insert->push(aftReceivePtr);
 
     //
     // Send all the nodes to the sandbox
@@ -581,7 +582,6 @@ AftClient::addReceiveNode(uint32_t receiveCode, uint64_t context)
 
     return nhReceiveToken;
 }
-
 
 //
 // @fn
@@ -601,11 +601,8 @@ AftClient::addReceiveNode(uint32_t receiveCode, uint64_t context)
 
 AftNodeToken
 AftClient::addEtherEncapNode(const std::string &dst_mac,
-                             const std::string &src_mac,
-                             AftNodeToken       nextToken)
+                             const std::string &src_mac, AftNodeToken nextToken)
 {
-
-
     if (_aft_debugmode.find("no-aft-server") != std::string::npos) {
         return 0;
     }
@@ -618,10 +615,10 @@ AftClient::addEtherEncapNode(const std::string &dst_mac,
     // Create a key vector of ethernet data
     //
 
-    AftKeyVector encapKeys = { AftKey(AftField("packet.ether.saddr"),
-                                      AftDataEtherAddr::create(src_mac)),
-                               AftKey(AftField("packet.ether.daddr"),
-                                      AftDataEtherAddr::create(dst_mac)) };
+    AftKeyVector encapKeys = {AftKey(AftField("packet.ether.saddr"),
+                                     AftDataEtherAddr::create(src_mac)),
+                              AftKey(AftField("packet.ether.daddr"),
+                                     AftDataEtherAddr::create(dst_mac))};
     //
     // Create aft encap node
     //
@@ -632,8 +629,7 @@ AftClient::addEtherEncapNode(const std::string &dst_mac,
     //
     aftEncapPtr->setNodeNext(nextToken);
 
-
-    AftNodeToken  nhEncapToken = insert->push(aftEncapPtr);
+    AftNodeToken nhEncapToken = insert->push(aftEncapPtr);
 
     //
     // Send all the nodes to the sandbox

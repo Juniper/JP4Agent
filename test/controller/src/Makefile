@@ -26,17 +26,16 @@ LIB  = libcontroller.a
 PROTOS = ../../../src/pi/protos
 OBJDIR  = ../obj
 
-CXXFLAGS += -g -O0 -std=c++14 -Wall -Werror -Wl,--no-undefined
+CXXFLAGS += -std=c++14 -Wall -Werror -Wl,--no-undefined
+
+ifdef DEBUG_BUILD
+	CXXFLAGS += -g -O0
+endif
 
 SRCS = \
 	Controller.cpp \
 	Main.cpp \
-	P4InfoUtils.cpp \
-	$(PROTOS)/p4runtime.pb.cc \
-	$(PROTOS)/p4runtime.grpc.pb.cc \
-	$(PROTOS)/p4/config/p4info.pb.cc \
-	$(PROTOS)/p4/tmp/p4config.pb.cc \
-	$(PROTOS)/google/rpc/status.pb.cc
+	P4InfoUtils.cpp
 
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 OBJS := $(addprefix $(OBJDIR)/,$(OBJS))
@@ -48,6 +47,7 @@ CPPFLAGS += \
 	-I$(PROTOS)
 
 LDLIBS = \
+	-lpi_proto \
 	-lprotobuf \
 	-lgrpc++ \
 	-lprotoc \
@@ -59,9 +59,12 @@ LDLIBS = \
 	-lpthread \
 	-lboost_thread
 
-ifdef COVERAGE
-    LDLIBS   += -lgcov
+ifdef CODE_COVERAGE
+	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov
 endif
+
+LDFLAGS += \
+	-L$(PROTOS)
 
 all: $(OBJDIR)/$(LIB) $(OBJDIR)/$(PROG)
 	@echo $(PROG) has been compiled

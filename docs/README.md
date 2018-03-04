@@ -5,21 +5,28 @@ JP4Agent documentation
 
 ### Login to VCP
 ```
-telnet localhost 8601     <<< Console
-or
-ssh root@<vcp ip>
+Console:
+telnet localhost 8601
 Username: root
+Password: JunAFI
+
+Ssh:
+ssh root@<vcp ip>
 Password: JunAFI
 ```
 
 ### Login to VFP
 ```
+Console:
 telnet localhost 8602     <<< Console
-or
-ssh root@<vfp ip>
-Username: pfe
+Username: root
+Password: root
+
+Ssh:
+ssh pfe@<vfp ip>
 Password: pfe
-Root password: root
+
+After logging as user 'pfe', to become root do 'su' (root password: root)
 ```
 
 

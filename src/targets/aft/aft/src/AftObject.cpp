@@ -20,6 +20,6 @@
 // as noted in the Third-Party source code file.
 //
 
-
-namespace AFTHALP {
+namespace AFTHALP
+{
 }  // namespace AFTHALP

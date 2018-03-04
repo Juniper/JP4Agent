@@ -22,25 +22,29 @@
 
 #include "pvtPI.h"
 
-//  
+//
 // Description
-//  
-std::ostream & P4InfoTable::description (std::ostream &os) const
+//
+std::ostream &
+P4InfoTable::description(std::ostream &os) const
 {
     const auto &pre = _table.preamble();
     os << "_________ P4InfoTable _______" << std::endl;
     os << "pre.id():" << pre.id() << std::endl;
     os << "pre.name().c_str():" << pre.name().c_str() << std::endl;
-    os << "table.match_fields().size():" << _table.match_fields().size() << std::endl;
-    os << "table.action_refs().size():" << _table.action_refs().size() << std::endl;
+    os << "table.match_fields().size():" << _table.match_fields().size()
+       << std::endl;
+    os << "table.action_refs().size():" << _table.action_refs().size()
+       << std::endl;
     os << "table.size():" << _table.size() << std::endl;
     return os;
 }
 
-//  
+//
 // Description
-//  
-std::ostream & P4InfoAction::description (std::ostream &os) const
+//
+std::ostream &
+P4InfoAction::description(std::ostream &os) const
 {
     const auto &pre = _action.preamble();
     os << "_________ Action _______" << std::endl;

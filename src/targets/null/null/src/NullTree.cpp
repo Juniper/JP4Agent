@@ -22,6 +22,8 @@
 
 #include "Null.h"
 
+extern std::unique_ptr<opentracing::v1::Span> span;
+
 namespace NULLHALP {
 
 void NullTree::_bind()
@@ -32,6 +34,12 @@ void NullTree::_bind()
 
     ::ywrapper::StringValue key_field = _tree.key_field();
     Log(DEBUG) << "key_field: " << key_field.value();
+
+    std::stringstream ks;
+    ks  << key_field.value();
+    opentracing::string_view key("Null:NullTree:Key Field");
+    opentracing::string_view key_val(ks.str());
+    span->SetBaggageItem(key, key_val);
 
     // Write into file for null test
     gtestFile.open("../NullTest.txt", std::fstream::app);
@@ -47,7 +55,7 @@ std::ostream & NullTree::description (std::ostream &os) const
     os << "_________ NullTree _______"   << std::endl;
     os << "Name                :" << this->name()  << std::endl;
     os << "Id                  :" << this->id()    << std::endl;
-    //os << "_defaultTragetToken :" << this->_defaultTragetToken << std::endl;
+    //os << "_defaultTargetToken :" << this->_defaultTargetToken << std::endl;
     //os << "_token              :" << this->_token << std::endl;
     
 #if 0

@@ -20,10 +20,12 @@
 // as noted in the Third-Party source code file.
 //
 
+#include <memory>
+#include <string>
 #include "Aft.h"
 
-namespace AFTHALP {
-
+namespace AFTHALP
+{
 void
 AftDevice::setObjectCreators()
 {
@@ -36,7 +38,7 @@ AftDevice::setObjectCreators()
 // Factory creation method, constructors and destructors
 //
 AftDeviceUPtr
-AftDevice::create (const std::string &name)
+AftDevice::create(const std::string &name)
 {
     Log(DEBUG) << "___ AftDevice::create ___";
     auto device = std::make_unique<AftDevice>(name);
@@ -47,25 +49,28 @@ AftDevice::create (const std::string &name)
     device->setObjectCreators();
 
     if (_aft_debugmode.find("no-aft-server") == std::string::npos) {
-        AftClient::instance().init("/root/JP4Agent/config/aft-target-halp-cfg.json");
+        AftClient::instance().init(
+            "/root/JP4Agent/config/aft-target-halp-cfg.json");
     }
 
     return device;
 }
 
 void
-AftDevice::destroy() {}
+AftDevice::destroy()
+{
+}
 
-AftDevice::AftDevice (const std::string &name): AfiDevice(name)
+AftDevice::AftDevice(const std::string &name) : AfiDevice(name)
 {
     //
     // create() function does all the work
     //
-};
+}
 
-AftDevice::~AftDevice ()
+AftDevice::~AftDevice()
 {
     destroy();
-};
+}
 
 }  // namespace AFTHALP

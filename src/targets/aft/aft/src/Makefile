@@ -26,7 +26,15 @@ TARGET_LIB = libaft_target_halp.so
 RM = rm -rf
 OBJDIR  = ../obj
 
-CXXFLAGS += -fPIC -g -O0 -std=c++14 -Wall -Werror
+CXXFLAGS += -fPIC -std=c++14 -Wall -Werror
+
+ifdef DEBUG_BUILD
+	CXXFLAGS += -g -O0
+endif
+
+ifdef CODE_COVERAGE
+	CXXFLAGS += -fprofile-arcs -ftest-coverage
+endif
 
 CPPFLAGS += \
 	-I. \
@@ -40,7 +48,11 @@ CPPFLAGS += \
 	-I$(AFI_INCLUDE)/afi-transport \
 	-I$(AFI_INCLUDE)/aft-client
 
-LDFLAGS = -shared
+ifdef CODE_COVERAGE
+	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov
+endif
+
+LDFLAGS = -shared $(LDLIBS)
 
 all: $(OBJDIR)/$(TARGET_LIB)
 	@echo $(TARGET_LIB) compilation success!

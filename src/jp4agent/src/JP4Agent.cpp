@@ -20,6 +20,8 @@
 // as noted in the Third-Party source code file.
 //
 
+#include <fstream>
+
 #include "JP4Agent.h"
 #include "PI.h"
 
@@ -37,18 +39,26 @@
 bool
 JP4Agent::Config::readConfig()
 {
-    Json::Value cfg_root;
+    Json::Value   cfg_root;
     std::ifstream cfgfile(_configFile);
     cfgfile >> cfg_root;
 
-	_debugMode       = cfg_root["JP4AgentConfig"]["DebugConfig"]["debug-mode"].asString();
-	_piServerAddr    = cfg_root["JP4AgentConfig"]["PIConfig"]["pi-server-address"].asString();
-	_pktIOServerAddr = cfg_root["JP4AgentConfig"]["DevicePktIOConfig"]["pktio-server-address"].asString();
-	_hostpathPort    = cfg_root["JP4AgentConfig"]["hostpath-listen-port"].asUInt();
+    _debugMode =
+        cfg_root["JP4AgentConfig"]["DebugConfig"]["debug-mode"].asString();
+    _piServerAddr =
+        cfg_root["JP4AgentConfig"]["PIConfig"]["pi-server-address"].asString();
+    _pktIOServerAddr =
+        cfg_root["JP4AgentConfig"]["DevicePktIOConfig"]["pktio-server-address"]
+            .asString();
+    _cliServerAddr =
+        cfg_root["JP4AgentConfig"]["DebugCLIConfig"]["cli-server-address"]
+            .asString();
+    _hostpathPort =
+        cfg_root["JP4AgentConfig"]["HostpathConfig"]["hostpath-server-port"]
+            .asUInt();
 
     return true;
 }
-
 
 //
 // @fn
@@ -82,15 +92,16 @@ JP4Agent::Config::validateConfig()
 void
 JP4Agent::Config::displayConfig()
 {
-    std::cout << "___ Configuration ___"    << std::endl;
+    std::cout << "___ Configuration ___" << std::endl;
 
     Log(DEBUG) << "configFile      : " << _configFile;
     Log(DEBUG) << "debugmode       : " << _debugmode;
     Log(DEBUG) << "piServerAddr    : " << _piServerAddr;
     Log(DEBUG) << "pktIOServerAddr : " << _pktIOServerAddr;
+    Log(DEBUG) << "dbgCLIServAddr  : " << _cliServerAddr;
     Log(DEBUG) << "hostpathPort    : " << _hostpathPort;
 }
- 
+
 //
 // @fn
 // init
@@ -102,16 +113,21 @@ JP4Agent::Config::displayConfig()
 // @return void
 //
 
+std::unique_ptr<opentracing::v1::Span> span;
+
 void
 JP4Agent::init()
 {
+    initTracing();
 
     _config.readConfig();
     _config.validateConfig();
     _config.displayConfig();
 
-
-    _pi = std::make_unique<PI>();
+    _pi = std::make_unique<PI>(_config._piServerAddr,
+                               _config._hostpathPort,
+                               _config._pktIOServerAddr,
+                               _config._cliServerAddr);
     //
     // Initialize PI
     //

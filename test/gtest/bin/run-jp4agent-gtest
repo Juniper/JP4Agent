@@ -1,6 +1,7 @@
 #!/bin/bash
 
 JP4AGENT_LOC=../../..
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/pi/protos
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/jp4agent/obj
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/utils/obj
 
@@ -8,6 +9,8 @@ if [ "$1" == "nullTest" ]
 then
     echo "Deleting file NullTest.txt\n"
     rm -f $JP4AGENT_LOC/src/targets/null/NullTest.txt
+    $JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest $1
+else
+$JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest --gtest_output=xml:./
 fi
  
-$JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest $1

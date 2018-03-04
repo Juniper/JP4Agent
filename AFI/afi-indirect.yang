@@ -1,0 +1,37 @@
+//
+// Juniper AFI : Indirect
+//
+// Created by Sandesh Kumar Sodhi, January 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-indirect {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-indirect/junos/17.3";
+    prefix "afi-indirect";
+
+    import afi-types  { prefix "afi-types"; }
+    import afi-common { prefix "afi-cmn"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sandesh Kumar Sodhi
+        sksodhi@juniper.net";
+
+    description
+      "Indirect";
+
+    revision 2017-12-02 {
+        description "Initial revision.";
+    }
+
+    container afi-indirect {
+        description "TBD";
+
+    }
+}

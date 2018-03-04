@@ -1,0 +1,37 @@
+//
+// Juniper AFI : Sample
+//
+// Created by Sandesh Kumar Sodhi, January 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-sample {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-sample/junos/17.3";
+    prefix "afi-sample";
+
+    import afi-types  { prefix "afi-types"; }
+    import afi-common { prefix "afi-cmn"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sandesh Kumar Sodhi
+        sksodhi@juniper.net";
+
+    description
+      "AFI Sample";
+
+    revision 2017-12-02 {
+        description "Initial revision.";
+    }
+
+    container afi-sample {
+        description "TBD";
+
+    }
+}

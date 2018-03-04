@@ -22,6 +22,8 @@
 
 #include "Null.h"
 
+extern std::unique_ptr<opentracing::v1::Span> span;
+
 namespace NULLHALP {
 
 //NullNodeToken NullTreeEntry::bind(void)
@@ -59,6 +61,26 @@ void NullTreeEntry::_bind()
 
     std::cout<<"nullTree :" << nullTreePtr << "\n";
 
+    std::stringstream es;
+    es  << entry_name.value();
+    opentracing::string_view name("Null:NullTreeEntry:Name");
+    opentracing::string_view name_val(es.str());
+    span->SetBaggageItem(name, name_val);
+
+    std::stringstream ps;
+    ps  << parent_name.value();
+    opentracing::string_view parent("Null:NullTreeEntry:Parent Name");
+    opentracing::string_view parent_val(ps.str());
+    span->SetBaggageItem(parent, parent_val);
+
+    std::stringstream as;
+    as << target_afi_object.value();
+    opentracing::string_view afi("Null:NullTreeEntry:Target AFI Object");
+    opentracing::string_view afi_val(as.str());
+    span->SetBaggageItem(afi, afi_val);
+
+    span->Finish();
+
     // Write into file
     gtestFile.open("../NullTest.txt", std::fstream::app);
     gtestFile << "tree.ByteSize(): " << _treeEntry.ByteSize() << "\n";
@@ -77,7 +99,7 @@ std::ostream & NullTreeEntry::description (std::ostream &os) const
     os << "_________ NullTreeEntry _______"   << std::endl;
     os << "Name                :" << this->name()  << std::endl;
     os << "Id                  :" << this->id()    << std::endl;
-    //os << "_defaultTragetToken :" << this->_defaultTragetToken << std::endl;
+    //os << "_defaultTargetToken :" << this->_defaultTargetToken << std::endl;
     //os << "_token              :" << this->_token << std::endl;
     
 #if 0

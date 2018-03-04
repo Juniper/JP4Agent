@@ -20,64 +20,83 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AfiDevice__
-#define __AfiDevice__
+#ifndef SRC_AFI_INCLUDE_AFIDEVICE_H_
+#define SRC_AFI_INCLUDE_AFIDEVICE_H_
 
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-namespace AFIHAL {
+#include "AfiCreator.h"
+#include "AfiJsonResource.h"
+#include "AfiObject.h"
 
+namespace AFIHAL
+{
 class AfiDevice;
 using AfiDeviceUPtr = std::unique_ptr<AfiDevice>;
-//using AfiDevicePtr = std::shared_ptr<AfiDevice>;
-//using AfiDeviceWeakPtr = std::weak_ptr<AfiDevice>;
+// using AfiDevicePtr = std::shared_ptr<AfiDevice>;
+// using AfiDeviceWeakPtr = std::weak_ptr<AfiDevice>;
 
 using AfiObjectNameMap = std::map<std::string, AfiObjectPtr>;
 
-class AfiDevice {
-protected:
+class AfiDevice
+{
+ protected:
     //
     // Device mount
     //
-    AfiCreator<AfiJsonResource, AfiObjectPtr>  _objCreator;
+    AfiCreator<AfiJsonResource, AfiObjectPtr> _objCreator;
 
-public:
+ public:
     //
     // Constructor and destructor
     //
-    AfiDevice(const std::string &name) : _name(name) {};
-    ~AfiDevice() {};
-    //virtual ~AfiDevice() {};
+    explicit AfiDevice(const std::string &name) : _name(name) {}
+    ~AfiDevice() {}
+    // virtual ~AfiDevice() {};
 
     //
     // Mount interface
     //
-    void setObjectCreator (const std::string objType,  //<<<<<<< TBD: string ref 
-                           AfiCreator<AfiJsonResource, AfiObjectPtr>::AfiObjectCreator objCreator) {
+    void setObjectCreator(
+        const std::string objType,  //<<<<<<< TBD: string ref
+        AfiCreator<AfiJsonResource, AfiObjectPtr>::AfiObjectCreator objCreator)
+    {
         _objCreator.setCreator(objType, objCreator);
     }
 
     virtual void setObjectCreators() = 0;
 
-    AfiObjectPtr handleDMObject(const AfiJsonResource& res);
+    AfiObjectPtr handleDMObject(const AfiJsonResource &res);
 
     void insertToObjectMap(const AfiObjectPtr &obj)
     {
-        Log(DEBUG) << "insertToObjectMap... obj->name():"<< obj->name();
+        Log(DEBUG) << "insertToObjectMap... obj->name():" << obj->name();
         _objectsMap[obj->name()] = obj;
     }
 
     const AfiObjectPtr getAfiObject(const std::string &name)
     {
-        Log(DEBUG) << "getAfiObject name:"<< name;
+        Log(DEBUG) << "getAfiObject name:" << name;
         return _objectsMap[name];
     }
 
-private:
-    AfiObjectNameMap _objectsMap;
-    std::string _name;
-};
+    const std::vector<AfiObjectPtr> getAfiObjects() const
+    {
+        std::vector<AfiObjectPtr> objs;
+        for (const auto &objpair : _objectsMap) {
+            objs.push_back(objpair.second);
+        }
+        return objs;
+    }
 
+ private:
+    AfiObjectNameMap _objectsMap;
+    std::string      _name;
+};
 
 }  // namespace AFIHAL
 
-#endif // __AfiDevice__
+#endif  // SRC_AFI_INCLUDE_AFIDEVICE_H_

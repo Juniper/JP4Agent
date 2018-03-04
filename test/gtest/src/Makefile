@@ -31,9 +31,12 @@ CONTROLLER_DIR = ../../controller
 CXXFLAGS += \
 	-L$(GTEST_DIR)/make \
 	-L$(CONTROLLER_DIR)/obj \
-	-g -O0 \
 	-std=c++14 \
 	-Wall \
+
+ifdef DEBUG_BUILD
+	CXXFLAGS += -g -O0
+endif
 
 SRCS = \
 	GTest.cpp \
@@ -65,10 +68,12 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 LDFLAGS += \
+	-L../../../src/pi/protos \
 	-L../../../src/utils/obj
 
 LDLIBS = \
 	-lcontroller \
+	-lpi_proto \
 	-lgrpc++ \
 	-lprotoc \
 	-lprotobuf \
@@ -82,8 +87,8 @@ LDLIBS = \
 	-lnet \
 	-lutils
 
-ifdef COVERAGE
-    LDLIBS   += -lgcov
+ifdef CODE_COVERAGE
+	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov
 endif
 
 LIBS = gtest.a 

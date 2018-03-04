@@ -20,56 +20,61 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AFTHALP_AftTreeEntry__
-#define __AFTHALP_AftTreeEntry__
+#ifndef SRC_TARGETS_AFT_AFT_INCLUDE_AFTTREEENTRY_H_
+#define SRC_TARGETS_AFT_AFT_INCLUDE_AFTTREEENTRY_H_
 
-namespace AFTHALP {
+#include <memory>
 
+namespace AFTHALP
+{
 class AftTreeEntry;
-using AftTreeEntryPtr = std::shared_ptr<AftTreeEntry>;
+using AftTreeEntryPtr     = std::shared_ptr<AftTreeEntry>;
 using AftTreeEntryWeakPtr = std::weak_ptr<AftTreeEntry>;
 
-class AftTreeEntry: public AftObjectTemplate<AFIHAL::AfiTreeEntry, AftTreeEntry>
+class AftTreeEntry
+    : public AftObjectTemplate<AFIHAL::AfiTreeEntry, AftTreeEntry>
 {
     using AftObjectTemplate::AftObjectTemplate;
-public:
-    //AftTreeEntry (const AfiJsonResource &jsonRes) : AfiTree(jsonRes) {}
-    //~AftTreeEntry () {}
 
-    /// 
+ public:
+    // AftTreeEntry (const AfiJsonResource &jsonRes) : AfiTree(jsonRes) {}
+    // ~AftTreeEntry () {}
+
+    ///
     /// @brief  Create the JNH handler
-    /// 
-    /// @param [in] sandbox Em sandbox pointer which holds the JnhSandbox pointer
-    /// 
+    ///
+    /// @param [in] sandbox Em sandbox pointer which holds the JnhSandbox
+    /// pointer
+    ///
     /// @return Jnh handle shared pointer
-    /// 
+    ///
     void _bind() override;
-    
+
     //
     // Debug
     //
-    std::ostream &description (std::ostream &os) const;
-    
-    friend std::ostream &operator<< (std::ostream &os,
-                                     const AftTreeEntryPtr &AftTreeEntry) {
+    std::ostream &description(std::ostream &os) const;
+
+    friend std::ostream &operator<<(std::ostream &         os,
+                                    const AftTreeEntryPtr &AftTreeEntry)
+    {
         return AftTreeEntry->description(os);
     }
-    
+
 #if 0
-    const AftNodeToken token() {
-        return _token;
+    const AftNodeToken token() { return _token; }
+
+    void setDefaultTargetToken(AftNodeToken token)
+    {
+        _defaultTargetToken = token;
     }
-    
-    void setDefaultTragetToken(AftNodeToken token) {
-        _defaultTragetToken = token;
-    }
-    
-private:
-    AftNodeToken               _defaultTragetToken{AFT_NODE_TOKEN_DISCARD};
-    AftNodeToken               _token{AFT_NODE_TOKEN_NONE};
+
+ private:
+    AftNodeToken _defaultTargetToken{AFT_NODE_TOKEN_DISCARD};
+    AftNodeToken _token{AFT_NODE_TOKEN_NONE};
 #endif
 };
 
 }  // namespace AFTHALP
 
-#endif // __AFTHALP_AftTreeEntry__
+#endif  // SRC_TARGETS_AFT_AFT_INCLUDE_AFTTREEENTRY_H_

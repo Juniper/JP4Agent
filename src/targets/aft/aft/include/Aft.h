@@ -20,29 +20,26 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __Aft__
-#define __Aft__
+#ifndef SRC_TARGETS_AFT_AFT_INCLUDE_AFT_H_
+#define SRC_TARGETS_AFT_AFT_INCLUDE_AFT_H_
 
-#include <memory>
-#include <map>
-#include <cstdint>
-#include <jsoncpp/json/json.h>
+#include <string>
 
 extern const std::string _aft_debugmode;
 
-#include "Log.h"
-#include "Utils.h"
 #include "Afi.h"
 #include "AftClient.h"
 #include "AftDevice.h"
 #include "AftObject.h"
 #include "AftTree.h"
 #include "AftTreeEntry.h"
-
+#include "Log.h"
+#include "Utils.h"
 
 AFIHAL::AfiDeviceUPtr createDevice(const std::string &name);
 
-namespace AFTHALP {
+namespace AFTHALP
+{
 }  // namespace AFTHALP
 
-#endif // __Aft__
+#endif  // SRC_TARGETS_AFT_AFT_INCLUDE_AFT_H_

@@ -21,14 +21,17 @@
 //
 
 #include "Aft.h"
+#include <string>
 
 AFIHAL::AfiDeviceUPtr
-createDevice (const std::string &name)
+createDevice(const std::string &name)
 {
-    Log(DEBUG) << "___ createDevice_______";
+    Log(DEBUG) << "___ createDevice___";
     return AFTHALP::AftDevice::create(name);
 }
 
-const std::string _aft_debugmode = "no-aft-server";
-namespace AFTHALP {
+// const std::string _aft_debugmode = "no-aft-server";
+const std::string _aft_debugmode = "";
+namespace AFTHALP
+{
 }  // namespace AFTHALP

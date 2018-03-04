@@ -20,36 +20,36 @@
 // as noted in the Third-Party source code file.
 //
 
+#ifndef SRC_TARGETS_AFT_AFT_INCLUDE_AFTOBJECT_H_
+#define SRC_TARGETS_AFT_AFT_INCLUDE_AFTOBJECT_H_
 
-#ifndef __AftObject__
-#define __AftObject__
-
+#include <map>
+#include <memory>
+#include <string>
 #include "Afi.h"
 
-namespace AFTHALP {
-
+namespace AFTHALP
+{
 class AftObject;
-class AfiTree;       /// TBD: remove me
+class AfiTree;  /// TBD: remove me
 
-using AftObjectPtr = std::shared_ptr<AftObject>;
+using AftObjectPtr     = std::shared_ptr<AftObject>;
 using AftObjectWeakPtr = std::weak_ptr<AftObject>;
 
 using AftObjectNameMap = std::map<std::string, AftObjectPtr>;
-using AftObjectIdMap = std::map<uint32_t, AftObjectPtr>;
+using AftObjectIdMap   = std::map<uint32_t, AftObjectPtr>;
 
 class AftObject
 {
-    
-public:
-    AftObject () {};
-    virtual ~AftObject () {};
-
+ public:
+    AftObject() {}
+    virtual ~AftObject() {}
 };
 
 ///
 /// Forward decalaration
 ///
-template<typename AfiObjType, typename AftObjType>
+template <typename AfiObjType, typename AftObjType>
 class AftObjectTemplate;
 
 ///
@@ -57,8 +57,9 @@ class AftObjectTemplate;
 /// @brief Template base class for all Aft Objects
 ///
 template <typename AfiObjType, typename AftObjType>
-class AftObjectTemplate: public AftObject, public AfiObjType {
-public:
+class AftObjectTemplate : public AftObject, public AfiObjType
+{
+ public:
     ///
     /// Template share pointer alias
     ///
@@ -67,21 +68,27 @@ public:
     ///
     /// Construction and destruction
     ///
-    AftObjectTemplate<AfiObjType, AftObjType>(const AFIHAL::AfiJsonResource &res): AfiObjType(res) {}
+    AftObjectTemplate<AfiObjType, AftObjType>(
+        const AFIHAL::AfiJsonResource &res)
+        : AfiObjType(res)
+    {
+    }
     virtual ~AftObjectTemplate<AfiObjType, AftObjType>() {}
 
     ///
-    /// @brief Utility creation function. This can be overriden by subclasses if required
+    /// @brief Utility creation function. This can be overriden by subclasses if
+    /// required
     ///        to implement any node specific features
     ///
     /// @param [in] newAftObj   Aft Object pointer
     ///
     /// @return Shared pointer to EmTrio object
     ///
-    std::shared_ptr<AftObjType> _create(const std::shared_ptr<AftObjType> &newAftObj)
+    std::shared_ptr<AftObjType> _create(
+        const std::shared_ptr<AftObjType> &newAftObj)
     {
         return newAftObj;
-    };
+    }
 
     ///
     /// @breif  Factory builder Aft objects
@@ -91,19 +98,20 @@ public:
     /// @return Shared pointer to Aft object
     ///
     ///
-    static std::shared_ptr<AftObjType> create(const AFIHAL::AfiJsonResource &res)
+    static std::shared_ptr<AftObjType> create(
+        const AFIHAL::AfiJsonResource &res)
     {
         //
         // Create our object and return a shared pointer to it
         //
-        std::shared_ptr<AftObjType> _newAftObj = std::make_shared<AftObjType>(res);
+        std::shared_ptr<AftObjType> _newAftObj =
+            std::make_shared<AftObjType>(res);
 
         //
         // See if there's any subclass specific noodling
         //
         return _newAftObj->_create(_newAftObj);
     }
-
 
     ///
     /// @brief  Default bind function for EmTrio class.i
@@ -116,9 +124,8 @@ public:
     ///
     virtual void _bind()
     {
-         //return nullptr;
+        // return nullptr;
     }
-
 
     ///
     /// @brief  Bind function which creates JNH handle
@@ -129,7 +136,6 @@ public:
     ///
     virtual bool bind() override
     {
-
         //
         // Let the caller know whether it worked or not
         //
@@ -141,7 +147,7 @@ public:
     ///
     /// Destroy routine to uninstall JNH handle
     ///
-    void destroy ()
+    void destroy()
     {
         //
         // Release any hardware memory
@@ -165,14 +171,13 @@ public:
     ///
     /// Debugging
     ///
-    virtual std::ostream& description (std::ostream &os) const override
+    virtual std::ostream &description(std::ostream &os) const override
     {
         os << "AftObjectTemplate: description \n";
         return os;
     }
-
 };
 
 }  // namespace AFTHALP
 
-#endif // __AftObject__
+#endif  // SRC_TARGETS_AFT_AFT_INCLUDE_AFTOBJECT_H_

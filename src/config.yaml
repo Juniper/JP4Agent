@@ -32,7 +32,7 @@ reporter:
     queueSize: 100
     bufferFlushInterval: 10
     logSpans: true
-    localAgentHostPort: 172.24.82.22:6831
+    localAgentHostPort: 10.102.144.109:6831
 
 headers:
     jaegerDebugHeader: debug-id
@@ -42,5 +42,5 @@ headers:
 
 baggage_restrictions:
     denyBaggageOnInitializationFailure: false
-    hostPort: 172.24.82.22:5778
+    hostPort: 10.102.144.109:5778
     refreshInterval: 10

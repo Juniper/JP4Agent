@@ -20,28 +20,33 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "pvtPI.h"
+#include "DeviceHPPacket.h"
+#include <arpa/inet.h>
+#include <iomanip>
+#include <iostream>
+#include <boost/io/ios_state.hpp>
 
-// 
+//
 // @brief  Create Transmit Packet
 //
-DeviceHPPacketPtr DeviceHPPacket::createTransmit (uint16_t dataSize,
-                                        SandboxId sandboxId, 
-                                        PortIndex portIndex, 
-                                        DeviceHPPacket::PacketType packetType)
+DeviceHPPacketPtr
+DeviceHPPacket::createTransmit(uint16_t dataSize, SandboxId sandboxId,
+                               PortIndex                  portIndex,
+                               DeviceHPPacket::PacketType packetType)
 {
     DeviceHPPacketPtr pkt = std::make_shared<DeviceHPPacket>();
-        
+
     pkt->_selfPtr = pkt;
 
     pkt->_sandboxId    = sandboxId;
-    pkt->_portIndex    = portIndex; 
-    pkt->_pktDir       = PacketDirTransmit;  
+    pkt->_portIndex    = portIndex;
+    pkt->_pktDir       = PacketDirTransmit;
     pkt->_innerPktType = packetType;
 
     pkt->_totalLength = pkt->_headerSize + dataSize;
     // TBD: Revisit
-    //pkt->_pktDataBuffer = new (std::nothrow) uint8_t [pkt->_baseHdr.totalLength()];
+    // pkt->_pktDataBuffer = new (std::nothrow) uint8_t
+    // [pkt->_baseHdr.totalLength()];
     pkt->_pktDataBuffer = new (std::nothrow) uint8_t[pkt->_totalLength]{};
 
     if (pkt->_pktDataBuffer == nullptr) {
@@ -55,22 +60,24 @@ DeviceHPPacketPtr DeviceHPPacket::createTransmit (uint16_t dataSize,
     return pkt;
 }
 
-// 
+//
 // @brief Create Receive Packet
 //
-DeviceHPPacketPtr DeviceHPPacket::createReceive (uint16_t dataSize)
+DeviceHPPacketPtr
+DeviceHPPacket::createReceive(uint16_t dataSize)
 {
     DeviceHPPacketPtr pkt = std::make_shared<DeviceHPPacket>();
-        
+
     pkt->_selfPtr = pkt;
 
-    pkt->_pktDir       = PacketDirReceive;  // TBD: Revisit
+    pkt->_pktDir      = PacketDirReceive;  // TBD: Revisit
     pkt->_totalLength = pkt->_headerSize + dataSize;
 
-    // TBD: Revisit 
+    // TBD: Revisit
     // First allocate for header and then increase/decrease
-    //pkt->_pktDataBuffer = new (std::nothrow) uint8_t [BaseHeader::size + 5000];
-    pkt->_pktDataBuffer = new (std::nothrow) uint8_t [pkt->_totalLength]{};
+    // pkt->_pktDataBuffer = new (std::nothrow) uint8_t [BaseHeader::size +
+    // 5000];
+    pkt->_pktDataBuffer = new (std::nothrow) uint8_t[pkt->_totalLength]{};
     if (pkt->_pktDataBuffer == nullptr) {
         // error assigning memory. Take measures.
         return nullptr;
@@ -82,12 +89,13 @@ DeviceHPPacketPtr DeviceHPPacket::createReceive (uint16_t dataSize)
 //
 // @brief Serializes header
 //
-void DeviceHPPacket::headerSerialize(void)
+void
+DeviceHPPacket::headerSerialize(void)
 {
-    uint8_t   version = 0;
-    uint8_t   direction = DeviceHPPacket::PacketDirTransmit;
+    uint8_t version   = 0;
+    uint8_t direction = DeviceHPPacket::PacketDirTransmit;
 
-    uint8_t  *hdr = _pktDataBuffer;
+    uint8_t *hdr = _pktDataBuffer;
 
     ((*(uint8_t *)hdr) &= 0x0F);
     ((*(uint8_t *)hdr) |= (((uint8_t)version) << 4) & 0xF0);
@@ -95,7 +103,7 @@ void DeviceHPPacket::headerSerialize(void)
     ((*(uint8_t *)hdr) &= 0xF7);
     ((*(uint8_t *)hdr) |= (((uint8_t)direction) << 3) & 0x08);
 
-    *(uint8_t  *)(hdr + 1) = 0;
+    *(uint8_t *)(hdr + 1)  = 0;
     *(uint16_t *)(hdr + 2) = htons(_totalLength);
     *(uint16_t *)(hdr + 4) = htons(_sandboxId);
     *(uint16_t *)(hdr + 6) = htons(_portIndex);
@@ -104,7 +112,8 @@ void DeviceHPPacket::headerSerialize(void)
 //
 // @brief Parses header of Aft packet
 //
-void DeviceHPPacket::headerParse(void)
+void
+DeviceHPPacket::headerParse(void)
 {
     {
         boost::io::ios_all_saver ias(std::cout);
@@ -116,7 +125,7 @@ void DeviceHPPacket::headerParse(void)
         std::cout << "\n";
     }
 
-    uint8_t  *hdr         = _pktDataBuffer;
+    uint8_t *hdr = _pktDataBuffer;
     //    uint8_t  version      = (((*(uint8_t *)hdr) & 0xF0) >> 4);
     uint8_t  direction    = (((*(uint8_t *)hdr) & 0x08) >> 3);
     uint16_t total_length = *(uint16_t *)(hdr + 2);
@@ -127,12 +136,12 @@ void DeviceHPPacket::headerParse(void)
     sb_index     = ntohs(sb_index);
     port_index   = ntohs(port_index);
 
-    _sandboxId    = static_cast<uint16_t>(sb_index);
-    _portIndex    = port_index; 
+    _sandboxId = static_cast<uint16_t>(sb_index);
+    _portIndex = port_index;
     if (direction == 0) {
-        _pktDir       = PacketDirReceive;  
+        _pktDir = PacketDirReceive;
     } else {
-        _pktDir       = PacketDirTransmit;  
+        _pktDir = PacketDirTransmit;
     }
     _innerPktType = PacketTypeL2;
 }

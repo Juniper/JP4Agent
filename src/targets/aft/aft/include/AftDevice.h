@@ -20,37 +20,39 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AftDevice__
-#define __AftDevice__
+#ifndef SRC_TARGETS_AFT_AFT_INCLUDE_AFTDEVICE_H_
+#define SRC_TARGETS_AFT_AFT_INCLUDE_AFTDEVICE_H_
 
+#include <memory>
+#include <string>
 #include "Aft.h"
 
-namespace AFTHALP {
-
+namespace AFTHALP
+{
 //
 // AftDevice
 //
 
 class AftDevice;
-using AftDeviceUPtr = std::unique_ptr<AftDevice>;
-using AftDevicePtr = std::shared_ptr<AftDevice>;
+using AftDeviceUPtr    = std::unique_ptr<AftDevice>;
+using AftDevicePtr     = std::shared_ptr<AftDevice>;
 using AftDeviceWeakPtr = std::weak_ptr<AftDevice>;
 
 class AftDevice final : public AFIHAL::AfiDevice
 {
-public:
+ public:
     //
     // Constructor and destructor
     //
-    AftDevice(const std::string &name);
+    explicit AftDevice(const std::string &name);
     ~AftDevice();
-    
+
     static AftDeviceUPtr create(const std::string &newName);
-    void destroy();
+    void                 destroy();
 
     void setObjectCreators();
 };
 
 }  // namespace AFTHALP
 
-#endif
+#endif  // SRC_TARGETS_AFT_AFT_INCLUDE_AFTDEVICE_H_

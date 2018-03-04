@@ -20,61 +20,59 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AfiJsonResource__
-#define __AfiJsonResource__
+#ifndef SRC_AFI_INCLUDE_AFIJSONRESOURCE_H_
+#define SRC_AFI_INCLUDE_AFIJSONRESOURCE_H_
 
-namespace AFIHAL {
+#include <memory>
+#include <string>
+#include "AfiTypes.h"
 
+namespace AFIHAL
+{
 class AfiJsonResource;
 
-using AfiJsonResourcePtr = std::shared_ptr<AfiJsonResource>;
+using AfiJsonResourcePtr     = std::shared_ptr<AfiJsonResource>;
 using AfiJsonResourceWeakPtr = std::weak_ptr<AfiJsonResource>;
 
-class AfiJsonResource {
-    
-protected:
-    std::string      _type;   ///< Name
-    AfiJsonResourceId  _id;   ///< Object Id
-    std::string      _name;   ///< Name
-    std::string      _objStr; ///< Name
-    
-public:
-    AfiJsonResource (const std::string &type,
-                     const AfiJsonResourceId id,
-                     const std::string &name,
-                     const std::string &objStr)
-                     : _type(type),
-                       _id(id),
-                       _name(name),
-                      _objStr(objStr) {}
+class AfiJsonResource
+{
+ protected:
+    std::string       _type;    ///< Name
+    AfiJsonResourceId _id;      ///< Object Id
+    std::string       _name;    ///< Name
+    std::string       _objStr;  ///< Name
 
-    
-    AfiJsonResource() {} ///////// TBD: why we need this
-    ~AfiJsonResource () {};
+ public:
+    AfiJsonResource(const std::string &type, const AfiJsonResourceId id,
+                    const std::string &name, const std::string &objStr)
+        : _type(type), _id(id), _name(name), _objStr(objStr)
+    {
+    }
 
     //
     // Debug
     //
-    std::ostream &description (std::ostream &os) const;
-    
-    friend std::ostream &operator<< (std::ostream &os,
-                                     const AfiJsonResourcePtr &resource) {
+    std::ostream &description(std::ostream &os) const;
+
+    friend std::ostream &operator<<(std::ostream &            os,
+                                    const AfiJsonResourcePtr &resource)
+    {
         return resource->description(os);
     }
 
     /// @returns resource type
-    const std::string type()  const { return _type; };
-    
+    const std::string type() const { return _type; }
+
     /// @returns resource id
-    AfiJsonResourceId id() const { return _id; };
+    AfiJsonResourceId id() const { return _id; }
 
     /// @returns resource name
-    const std::string name()  const { return _name; };
-    
+    const std::string name() const { return _name; }
+
     /// @returns resource object string
-    const std::string objStr()  const { return _objStr; };
+    const std::string objStr() const { return _objStr; }
 };
 
 }  // namespace AFIHAL
 
-#endif // __AfiJsonResource__
+#endif  // SRC_AFI_INCLUDE_AFIJSONRESOURCE_H_

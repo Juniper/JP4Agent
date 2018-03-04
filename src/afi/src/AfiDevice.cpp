@@ -20,10 +20,10 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "Afi.h"
+#include "AfiDevice.h"
 
-namespace AFIHAL {
-
+namespace AFIHAL
+{
 AfiObjectPtr
 AfiDevice::handleDMObject(const AfiJsonResource& res)
 {
@@ -39,7 +39,7 @@ AfiDevice::handleDMObject(const AfiJsonResource& res)
     }
 
     insertToObjectMap(afiObj);
-   
+
     //
     // Now bind the afi object.
     //

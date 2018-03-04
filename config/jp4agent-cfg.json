@@ -5,10 +5,10 @@
             "Note"                 : "JP4Agent's PI server listen address", 
             "pi-server-address"    : "0.0.0.0:50051"
         },
-        "HostpatConfig" : {
+        "HostpathConfig" : {
             "Note"                 : "Address where JP4Agent listens for hostpath packets from PacketIO", 
             "hostpath-server-ip"   : "0.0.0.0",
-            "hostpath-server-port" : 50051
+            "hostpath-server-port" : 64015
         },
         "DevicePktIOConfig" : {
             "Note"                 : "Address where PacketIO listens for hostpath packets from JP4Agent", 
@@ -20,7 +20,7 @@
         },
         "DebugCLIConfig" : {
             "Note"                 : "Debug CLI config", 
-            "cli-server-address"   : "128.0.0.16:64014"
+            "cli-server-address"   : "0.0.0.0:53421"
         },
         "TargetConfig" : {
             "Note"                 : "Target config", 

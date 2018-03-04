@@ -23,28 +23,28 @@
 #ifndef __DeviceHPPacket__
 #define __DeviceHPPacket__
 
+#include <memory>
+
 // TBD : Change them to enum/const?
 #define DEVICE_HOSTPATH_PACKET_HDR_VERSION 0
-#define AFT_CLIENT_HOSTPATH_PORT           8001
-#define AFT_PACKETIO_HOSTPATH_PORT_STR    "8002"
-
+#define AFT_CLIENT_HOSTPATH_PORT 8001
+#define AFT_PACKETIO_HOSTPATH_PORT_STR "8002"
 
 class DeviceHPPacket;
 
-using SandboxId = uint16_t; ///< 16 bit sandbox id
-using PortIndex = uint16_t; ///< 16 bit port index
+using SandboxId = uint16_t;  ///< 16 bit sandbox id
+using PortIndex = uint16_t;  ///< 16 bit port index
 
 ///
 /// @addtogroup DeviceHPPacket
 /// @{
 ///
-using DeviceHPPacketPtr = std::shared_ptr<DeviceHPPacket>; 
+using DeviceHPPacketPtr     = std::shared_ptr<DeviceHPPacket>;
 using DeviceHPPacketWeakPtr = std::weak_ptr<DeviceHPPacket>;
 
 ///
 /// @}
 ///
-
 
 ///
 /// @addtogroup DeviceHPPacket pkt
@@ -56,37 +56,38 @@ using DeviceHPPacketWeakPtr = std::weak_ptr<DeviceHPPacket>;
 /// @class   DeviceHPPacket
 /// @brief   Primary class for device hostpath packets
 ///
-class DeviceHPPacket {
-public:
-    ///  
+class DeviceHPPacket
+{
+ public:
+    ///
     /// @enum  PacketDir
     /// @brief DeviceHPPacket packet direction
-    ///  
+    ///
     enum PacketDir {
-        PacketDirReceive = 0, ///< Packet from Device
-        PacketDirTransmit,    ///< Packet to Device
+        PacketDirReceive = 0,  ///< Packet from Device
+        PacketDirTransmit,     ///< Packet to Device
     };
 
-    ///  
+    ///
     /// @enum  PacketType
     /// @brief DeviceHPPacket inner packet type
-    ///  
+    ///
     enum PacketType {
-        PacketTypeL2 = 0, ///< Layer 2 packet
-        PacketTypeL3,     ///< Layer 3 packet
+        PacketTypeL2 = 0,  ///< Layer 2 packet
+        PacketTypeL3,      ///< Layer 3 packet
     };
 
     static const int _headerSize = 8;  // 8 Bytes
 
-private:
-    DeviceHPPacketWeakPtr  _selfPtr;     ///< Weak pointer to itself
+ private:
+    DeviceHPPacketWeakPtr _selfPtr;  ///< Weak pointer to itself
 
     // TBD: For now, initialize length to 1500
-    uint16_t                      _totalLength{1500};
-    SandboxId                      _sandboxId;      ///< Sandbox ID
-    PortIndex                       _portIndex;      ///< Port Index
-    DeviceHPPacket::PacketDir      _pktDir;         ///< Packet Direction
-    DeviceHPPacket::PacketType     _innerPktType;   ///< Inner Packet Type
+    uint16_t                   _totalLength{1500};
+    SandboxId                  _sandboxId;     ///< Sandbox ID
+    PortIndex                  _portIndex;     ///< Port Index
+    DeviceHPPacket::PacketDir  _pktDir;        ///< Packet Direction
+    DeviceHPPacket::PacketType _innerPktType;  ///< Inner Packet Type
 
     //
     // Format of packet data buffer
@@ -115,10 +116,9 @@ private:
     // Port Index    : 16 bits < Port Index
     //
 
-    uint8_t                  *_pktDataBuffer{nullptr};  ///< Packet Data Buffer
+    uint8_t *_pktDataBuffer{nullptr};  ///< Packet Data Buffer
 
-public:
-
+ public:
     //
     // Constructor and destructor
     //
@@ -139,65 +139,66 @@ public:
     /// @param [in] sandboxId  Sandbox Id
     /// @param [in] portIndex  Port index
     /// @param [in] packetType Packet Type
-    /// @returns               Return Aft packet shared pointer 
+    /// @returns               Return Aft packet shared pointer
     ///
-    static DeviceHPPacketPtr createTransmit (uint16_t dataSize,
-                                        SandboxId sandboxId,
-                                        PortIndex portIndex,
-                                        DeviceHPPacket::PacketType packetType);
+    static DeviceHPPacketPtr createTransmit(
+        uint16_t dataSize, SandboxId sandboxId, PortIndex portIndex,
+        DeviceHPPacket::PacketType packetType);
 
     ///
     /// @brief                 Factory method to create packet for receive
     /// @param [in] dataSize   Packet data length excluding header
-    /// @returns               Return Aft packet shared pointer 
+    /// @returns               Return Aft packet shared pointer
     ///
-    static DeviceHPPacketPtr createReceive (uint16_t dataSize);
+    static DeviceHPPacketPtr createReceive(uint16_t dataSize);
 
     //
     // Accessors
     //
 
     /// @brief Packet data size
-    //void     setTotalLength(uint16_t len) { _totalLength = len; }
-    //uint16_t totalLength() const { return _totalLength; }
+    // void     setTotalLength(uint16_t len) { _totalLength = len; }
+    // uint16_t totalLength() const { return _totalLength; }
 
     /// @returns Sandbox Id
-    SandboxId sandboxId() const { return _sandboxId; };
+    SandboxId sandboxId() const { return _sandboxId; }
 
     /// @returns Port index
-    PortIndex portIndex() const { return _portIndex; };
+    PortIndex portIndex() const { return _portIndex; }
 
     /// @returns Packet direction
-    DeviceHPPacket::PacketDir packetDir() const { return _pktDir; };
+    DeviceHPPacket::PacketDir packetDir() const { return _pktDir; }
 
     /// @returns Inner packet type
-    DeviceHPPacket::PacketType innerPacketType() const { return  _innerPktType; };
+    DeviceHPPacket::PacketType innerPacketType() const
+    {
+        return _innerPktType;
+    };
 
     /// @returns Start of packet data buffer
-    uint8_t *header()  const { return &_pktDataBuffer[0]; }
+    uint8_t *header() const { return &_pktDataBuffer[0]; }
 
     /// @returns Header size
-    int      headerSize() const { return (_headerSize); }
+    int headerSize() const { return (_headerSize); }
 
     /// @returns Start of packer data
-    uint8_t *data () const { return &_pktDataBuffer[headerSize()]; }
+    uint8_t *data() const { return &_pktDataBuffer[headerSize()]; }
 
     /// @returns Packet data size
-    int      dataSize() const { return (_totalLength - headerSize()); }
+    int dataSize() const { return (_totalLength - headerSize()); }
 
     /// @returns Packet size
-    int      size() const { return(_totalLength); }  //TBD: Revisit
+    int size() const { return (_totalLength); }  // TBD: Revisit
 
     /// @brief Serializes header
-    void     headerSerialize();
+    void headerSerialize();
 
     /// @brief Parses header
-    void     headerParse();
+    void headerParse();
 };
 
 ///
 /// @}
 ///
- 
-#endif // __DeviceHPPacket__
 
+#endif  // __DeviceHPPacket__

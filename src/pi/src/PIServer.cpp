@@ -20,6 +20,7 @@
 // as noted in the Third-Party source code file.
 //
 
+#include <thread>
 #include "pvtPI.h"
 
 //
@@ -52,13 +53,25 @@ PIServer::piServer(void)
 //
 
 void
-PIServer::startPIServer(void)
+PIServer::startPIServer()
 {
-    std::thread piSrvr( [this] { this->piServer(); } );
+    std::thread piSrvr([this] { this->piServer(); });
     piSrvr.detach();
 }
 
-void 
+void
+PIServer::startPktIOHandler()
+{
+    _hpPktIO.startDevicePacketHandler();
+}
+
+void
+PIServer::startDbgCLIServer()
+{
+    _cliService.startCLIService();
+}
+
+void
 PIServer::PIGrpcServerRun()
 {
     _piBuilder.AddListeningPort(_piServerAddr,
@@ -66,15 +79,15 @@ PIServer::PIGrpcServerRun()
 
     _piBuilder.RegisterService(&_piService);
 
-    //builder.RegisterService(&server_data->gnmi_service);
+    // builder.RegisterService(&server_data->gnmi_service);
 
-    _piBuilder.SetMaxReceiveMessageSize(256*1024*1024);  // 256MB
-    
+    _piBuilder.SetMaxReceiveMessageSize(256 * 1024 * 1024);  // 256MB
+
     _piServer = _piBuilder.BuildAndStart();
     Log(DEBUG) << "PI Server listening on " << _piServerAddr << "\n";
 }
 
-void 
+void
 PIServer::PIGrpcServerWait()
 {
     _piServer->Wait();
@@ -86,11 +99,10 @@ PIServer::PIGrpcServerShutdown()
     _piServer->Shutdown();
 }
 
-void PIServer::PIGrpcServerForceShutdown(int deadline_seconds)
+void
+PIServer::PIGrpcServerForceShutdown(int deadline_seconds)
 {
-    using clock = std::chrono::system_clock;
+    using clock   = std::chrono::system_clock;
     auto deadline = clock::now() + std::chrono::seconds(deadline_seconds);
     _piServer->Shutdown(deadline);
 }
-
-

@@ -23,59 +23,34 @@
 #ifndef __pvtPI__
 #define __pvtPI__
 
-#include <iostream>
-#include <iomanip>
-#include <memory>
-#include <thread>
-#include <map>
-#include <cassert>
-#include <arpa/inet.h>
-#include <algorithm>
-#include <cstddef>
-#include <mutex>
-#include <jsoncpp/json/json.h>
-
-#define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
-#include <boost/array.hpp>
-#include <boost/bind.hpp>
-#include <boost/asio.hpp>
-#include <boost/atomic.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/io/ios_state.hpp>
-
-// TBD: Remove grpc:: in code inline
 #include <grpc++/grpc++.h>
-// #include <grpc++/support/error_details.h>
 
+#include "Afi.h"
 #include "Log.h"
+#include "Utils.h"
 #include "google/rpc/code.pb.h"
+#include "p4/tmp/p4config.pb.h"
 #include "p4runtime.grpc.pb.h"
 #include "p4runtime.pb.h"
-#include "p4config.pb.h"
 #include "uint128.h"
-#include "Utils.h"
-#include "Afi.h"
 
-using SandboxId         = uint16_t;        ///< Sandbox Id
-using DevicePortIndex   = uint16_t;        ///< Device port index 
+using SandboxId       = uint16_t;  ///< Sandbox Id
+using DevicePortIndex = uint16_t;  ///< Device port index
 
-using StreamChannelReaderWriter = grpc::ServerReaderWriter<
-  p4::StreamMessageResponse, p4::StreamMessageRequest>;
+using StreamChannelReaderWriter =
+    grpc::ServerReaderWriter<p4::StreamMessageResponse,
+                             p4::StreamMessageRequest>;
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
-using grpc::ServerWriter;
 using grpc::ServerReaderWriter;
+using grpc::ServerWriter;
 using grpc::Status;
 using grpc::StatusCode;
 
-#include "ControllerConnection.h"
-#include "DeviceHPPacket.h"
-#include "Hostpath.h"
 #include "P4Info.h"
 #include "P4RuntimeService.h"
 #include "PIServer.h"
 
-
-#endif // __pvtPI__
+#endif  // __pvtPI__

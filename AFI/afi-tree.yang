@@ -31,17 +31,16 @@ module afi-tree {
         description "Initial revision.";
     }
 
-
     container afi-tree {
         description "AFT Tree";
 
         leaf name {
-            description "Name";
+            description "Name of tree";
             type string;
         }   
 
         leaf-list key-fields {
-            type afi-types:aft-field;
+            type afi-types:afi-field;
             description "List of fields";
         }
 
@@ -52,12 +51,12 @@ module afi-tree {
 
         leaf proto {
             description "Protocol";
-            type afi-types:aft-protocol-index;
+            type afi-types:afi-protocol-index;
         }   
 
         leaf default-next-node {
             description "Default node to execute if no match made";
-            type afi-types:aft-token;
+            type string;
         }   
 
         leaf size {

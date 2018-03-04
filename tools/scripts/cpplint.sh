@@ -48,7 +48,7 @@ touch $LINT_REPORT_FILE
 $DATE > $LINT_REPORT_FILE
 echo "========== cpplint report ==========" >> $LINT_REPORT_FILE
 
-for f in `find $JP4AGENT_REPO \( -name \*.h -o -name \*.cpp \) -print`; do
+for f in `find $JP4AGENT_REPO -type f \( -name \*.h -o -name \*.cpp \) ! -name "*.pb.*" -print`; do
     echo $CPPLINT --filter=\'$CPPLINT_FILTER\' $f 
     #$CPPLINT --filter='$CPPLINT_FILTER' $f >> $LINT_REPORT_FILE 2>&1
     $CPPLINT --filter='-whitespace/braces,-build/c++11' $f >> $LINT_REPORT_FILE 2>&1

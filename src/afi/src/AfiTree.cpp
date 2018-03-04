@@ -20,37 +20,51 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "Afi.h"
+#include "AfiTree.h"
+#include <jaegertracing/Tracer.h>
+#include <cstring>
+#include <memory>
 
-namespace AFIHAL {
+#include "Log.h"
+#include "Utils.h"
 
-//  
-// Description
-//  
-std::ostream &
-AfiTree::description (std::ostream &os) const
+extern std::unique_ptr<opentracing::v1::Span> span;
+
+namespace AFIHAL
 {
-    os << "_________ AfiTree _______"   << std::endl;
+//
+// Description
+//
+std::ostream &
+AfiTree::description(std::ostream &os) const
+{
+    os << "_________ AfiTree _______" << std::endl;
     return os;
 }
 
-
-AfiTree::AfiTree (const AfiJsonResource &jsonRes) : AfiObject(jsonRes)
+AfiTree::AfiTree(const AfiJsonResource &jsonRes) : AfiObject(jsonRes)
 {
     // TBD: FIXME magic number 5000
 
     char bytes_decoded[5000];
     memset(bytes_decoded, 0, sizeof(bytes_decoded));
-    int num_decoded_bytes = base64_decode(jsonRes.objStr(), bytes_decoded, 5000);
-    
+    int num_decoded_bytes =
+        base64_decode(jsonRes.objStr(), bytes_decoded, 5000);
+
     Log(DEBUG) << "bytes_decoded: " << bytes_decoded;
-    Log(DEBUG)  << "num_decoded_bytes: " << num_decoded_bytes;
-    
+    Log(DEBUG) << "num_decoded_bytes: " << num_decoded_bytes;
+
     _tree.ParseFromArray(bytes_decoded, num_decoded_bytes);
-    
-    Log(DEBUG)  << "tree.ByteSize(): " << _tree.ByteSize();
+
+    Log(DEBUG) << "tree.ByteSize(): " << _tree.ByteSize();
     ::ywrapper::StringValue key_field = _tree.key_field();
     Log(DEBUG) << "key_field: " << key_field.value();
+
+    std::stringstream ks;
+    ks << key_field.value();
+    opentracing::string_view key("AFI:AFITree:Key Field");
+    opentracing::string_view key_val(ks.str());
+    span->SetBaggageItem(key, key_val);
 }
 
 }  // namespace AFIHAL

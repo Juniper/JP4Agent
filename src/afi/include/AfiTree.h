@@ -20,38 +20,40 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AfiTree__
-#define __AfiTree__
+#ifndef SRC_AFI_INCLUDE_AFITREE_H_
+#define SRC_AFI_INCLUDE_AFITREE_H_
 
-#include "Afi.h"
+#include <memory>
+#include "AfiDM.h"
+#include "AfiObject.h"
 
-namespace AFIHAL {
-
+namespace AFIHAL
+{
 class AfiTree;
-using AfiTreePtr = std::shared_ptr<AfiTree>;
+using AfiTreePtr     = std::shared_ptr<AfiTree>;
 using AfiTreeWeakPtr = std::weak_ptr<AfiTree>;
 
-class AfiTree: public AfiObject
+class AfiTree : public AfiObject
 {
-public:
-    AfiTree (const AfiJsonResource &jsonRes);
+ public:
+    explicit AfiTree(const AfiJsonResource &jsonRes);
 
-    ~AfiTree () {}
+    ~AfiTree() {}
 
-    //  
+    //
     // Debug
-    //  
-    std::ostream &description (std::ostream &os) const;
+    //
+    std::ostream &description(std::ostream &os) const;
 
-    friend std::ostream &operator<< (std::ostream &os,
-                                     const AfiTreePtr &afitree) {
+    friend std::ostream &operator<<(std::ostream &os, const AfiTreePtr &afitree)
+    {
         return afitree->description(os);
-    }   
+    }
 
-protected:
+ protected:
     juniper::afi_tree::AfiTree _tree;
 };
 
 }  // namespace AFIHAL
 
-#endif // __AfiTree__
+#endif  // SRC_AFI_INCLUDE_AFITREE_H_

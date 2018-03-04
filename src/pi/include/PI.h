@@ -23,6 +23,8 @@
 #ifndef __PI__
 #define __PI__
 
+#include <memory>
+#include <string>
 #include "pvtPI.h"
 
 class PI;
@@ -30,17 +32,23 @@ using PIUPtr = std::unique_ptr<PI>;
 
 class PI
 {
-public:
-    PI() {}
-    ~PI() {}
-  
-    void init() {
-        _piServer = std::make_unique<PIServer>("0.0.0.0:50051");
-        _piServer->startPIServer();
+ public:
+    PI(const std::string &piServAddr, uint16_t hpUdpPort,
+       const std::string &pktIOListenAddr, const std::string &cliServAddr)
+    {
+        _piServer = std::make_unique<PIServer>(piServAddr, hpUdpPort,
+                                               pktIOListenAddr, cliServAddr);
     }
 
-private:
-    PIServerUPtr  _piServer;
+    void init()
+    {
+        _piServer->startPIServer();
+        _piServer->startPktIOHandler();
+        _piServer->startDbgCLIServer();
+    }
+
+ private:
+    PIServerUPtr _piServer;
 };
 
-#endif // __PI__
+#endif  // __PI__

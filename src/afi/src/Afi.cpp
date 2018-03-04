@@ -21,43 +21,47 @@
 //
 
 #include "Afi.h"
+#include <string>
 
-namespace AFIHAL {
+#include "AfiDM.h"
+#include "Utils.h"
 
-bool 
+namespace AFIHAL
+{
+bool
 Afi::handleAfiJsonObject(const Json::Value &cfg_obj)
 {
     Log(DEBUG) << "___ AFI::handleAfiJsonObject ___\n";
 
-	// TBD: Revisit: on stack
-	AfiJsonResource res(cfg_obj["afi-object-type"].asString(),
-						cfg_obj["afi-object-id"].asUInt64(),
-						cfg_obj["afi-object-name"].asString(),
-						cfg_obj["afi-object"].asString());
-	
-	//   
-	// Create Afi Object
-	//   
-	AfiObjectPtr afiObj = _afiDevice->handleDMObject(res);
+    // TBD: Revisit: on stack
+    AfiJsonResource res(cfg_obj["afi-object-type"].asString(),
+                        cfg_obj["afi-object-id"].asUInt64(),
+                        cfg_obj["afi-object-name"].asString(),
+                        cfg_obj["afi-object"].asString());
 
-	//   
-	// If we didn't create a object, we fail the operation
-	//   
-	if (afiObj == nullptr) {
+    //
+    // Create Afi Object
+    //
+    AfiObjectPtr afiObj = _afiDevice->handleDMObject(res);
+
+    //
+    // If we didn't create a object, we fail the operation
+    //
+    if (afiObj == nullptr) {
         Log(ERROR) << "Error creating afi object";
-		return false;
-	}
+        return false;
+    }
 
     return true;
 }
 
-bool 
+bool
 Afi::handlePipelineConfig(const Json::Value &cfg_root)
 {
     Log(DEBUG) << "____ AFI:: handlePipelineConfig ____\n";
     for (Json::Value::ArrayIndex i = 0; i != cfg_root.size(); i++) {
         const Json::Value &cfg_obj = cfg_root[i];
-        auto status = handleAfiJsonObject(cfg_obj);
+        auto               status  = handleAfiJsonObject(cfg_obj);
         if (true != status) {
             Log(ERROR) << "Error handling afi json object";
             return status;
@@ -67,7 +71,64 @@ Afi::handlePipelineConfig(const Json::Value &cfg_root)
     return true;
 }
 
-bool 
+bool
+Afi::addAfiTree(const std::string &aftTreeName, const std::string &keyField,
+                const int protocol, const std::string &defaultNextObject,
+                const unsigned int treeSize)
+{
+    Log(DEBUG) << "____ AFI::addAfiTree ____\n";
+    Log(DEBUG) << "aftTreeName: " << aftTreeName;
+    Log(DEBUG) << "keyField   : " << keyField;
+
+    Json::Value afiTreeJsonObject;
+
+    afiTreeJsonObject["afi-object-type"] = "afi-tree";
+
+    afiTreeJsonObject["afi-object-name"] = aftTreeName;
+    afiTreeJsonObject["afi-object-id"]   = 1000001;
+
+    juniper::afi_tree::AfiTree afiTree;
+
+    ::ywrapper::StringValue *tree_name = new ::ywrapper::StringValue();
+    tree_name->set_value(aftTreeName);
+    afiTree.set_allocated_name(tree_name);
+
+    ::ywrapper::StringValue *key_field = new ::ywrapper::StringValue();
+    key_field->set_value(keyField);
+    afiTree.set_allocated_key_field(key_field);
+
+    ::ywrapper::UintValue *proto = new ::ywrapper::UintValue();
+    proto->set_value(protocol);
+    afiTree.set_allocated_proto(proto);
+
+    ::ywrapper::StringValue *default_next_node = new ::ywrapper::StringValue();
+    default_next_node->set_value(defaultNextObject);
+    afiTree.set_allocated_default_next_node(default_next_node);
+
+    ::ywrapper::UintValue *size = new ::ywrapper::UintValue();
+    size->set_value(treeSize);
+    afiTree.set_allocated_size(size);
+
+    int   tree_size = afiTree.ByteSize();
+    char *array     = new char[tree_size];
+    std::cout << "tree_size: " << tree_size << std::endl;
+    afiTree.SerializeToArray(array, tree_size);
+
+    std::string encoded = base64_encode(array, (unsigned int)tree_size);
+    std::cout << "encoded: " << encoded << std::endl << std::endl;
+
+    afiTreeJsonObject["afi-object"] = encoded;
+
+    auto status = handleAfiJsonObject(afiTreeJsonObject);
+    if (true != status) {
+        Log(ERROR) << "Error handling afi tree entry json object";
+        return status;
+    }
+
+    return true;
+}
+
+bool
 Afi::addEntry(const std::string &keystr, int pLen)
 {
     Log(DEBUG) << "____ AFI::addEntry ____\n";
@@ -78,9 +139,9 @@ Afi::addEntry(const std::string &keystr, int pLen)
 
     afiTreeEntryJsonObject["afi-object-type"] = "afi-tree-entry";
 
-    std::string afi_object_name = "entry1";
+    std::string afi_object_name               = "entry1";
     afiTreeEntryJsonObject["afi-object-name"] = afi_object_name;
-    afiTreeEntryJsonObject["afi-object-id"] = 1233456;
+    afiTreeEntryJsonObject["afi-object-id"]   = 1233456;
 
     juniper::afi_tree_entry::AfiTreeEntry afiTreeEntry;
 
@@ -97,7 +158,7 @@ Afi::addEntry(const std::string &keystr, int pLen)
     afiTreeEntry.set_allocated_target_afi_object(target_afi_object);
 
     ::ywrapper::StringValue *prefix_bytes = new ::ywrapper::StringValue();
-    //prefix_bytes->set_value("10.10.10.10/16");
+    // prefix_bytes->set_value("10.10.10.10/16");
     prefix_bytes->set_value(keystr);
     afiTreeEntry.set_allocated_prefix_bytes(prefix_bytes);
 
@@ -105,23 +166,23 @@ Afi::addEntry(const std::string &keystr, int pLen)
     prefix_length->set_value(pLen);
     afiTreeEntry.set_allocated_prefix_length(prefix_length);
 
-    int tree_size = afiTreeEntry.ByteSize();
-    char* array = new char[tree_size];
-    std::cout << "tree_size: " << tree_size << std::endl;
-    afiTreeEntry.SerializeToArray(array, tree_size);
+    int   entry_size = afiTreeEntry.ByteSize();
+    char *array      = new char[entry_size];
+    std::cout << "entry_size: " << entry_size << std::endl;
+    afiTreeEntry.SerializeToArray(array, entry_size);
 
-    std::string encoded = base64_encode(array, (unsigned int)tree_size);
+    std::string encoded = base64_encode(array, (unsigned int)entry_size);
     std::cout << "encoded: " << encoded << std::endl << std::endl;
 
     afiTreeEntryJsonObject["afi-object"] = encoded;
 
-	auto status = handleAfiJsonObject(afiTreeEntryJsonObject);
-	if (true != status) {
-		Log(ERROR) << "Error handling afi tree entry json object";
-		return status;
-	}
+    auto status = handleAfiJsonObject(afiTreeEntryJsonObject);
+    if (true != status) {
+        Log(ERROR) << "Error handling afi tree entry json object";
+        return status;
+    }
 
     return true;
 }
- 
+
 }  // namespace AFIHAL

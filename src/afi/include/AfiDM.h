@@ -20,13 +20,14 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AfiDM__
-#define __AfiDM__
+#ifndef SRC_AFI_INCLUDE_AFIDM_H_
+#define SRC_AFI_INCLUDE_AFIDM_H_
 
 #include "afi_tree/afi_tree.pb.h"
 #include "afi_tree_entry/afi_tree_entry.pb.h"
 
-namespace AFIHAL {
+namespace AFIHAL
+{
 }  // namespace AFIHAL
 
-#endif // __AfiDM__
+#endif  // SRC_AFI_INCLUDE_AFIDM_H_

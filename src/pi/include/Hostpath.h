@@ -23,73 +23,73 @@
 #ifndef __Hostpath__
 #define __Hostpath__
 
-#define BOOST_UDP boost::asio::ip::udp::udp
+#include <string>
+#include <vector>
+#include <boost/algorithm/string.hpp>
+#include <boost/asio.hpp>
+#include "pvtPI.h"
+
+using boost::asio::io_service;
+using boost::asio::ip::udp;
 
 struct __attribute__((packed)) cpu_header_t {
-    char zeros[8];
+    char     zeros[8];
     uint16_t reason;
     uint16_t port;
 };
 
 class Hostpath
 {
-public:
-    Hostpath(boost::asio::io_service &ioService,
-             short hpUdpPort,
-             const std::string &pktIOListenAddr)
+ public:
+    Hostpath(uint16_t hpUdpPort, const std::string &pktIOListenAddr)
         : _pktIOListenAddr(pktIOListenAddr),
-          _ioService(ioService),
           _hpUdpPort(hpUdpPort),
-          _hpUdpSock(ioService, BOOST_UDP::endpoint(BOOST_UDP::v4(), hpUdpPort))
+          _hpUdpSock(_ioService, udp::endpoint(udp::v4(), _hpUdpPort))
     {
+        // Connect to the pktIO UDP server on the devide to send packets
         std::vector<std::string> hostpathAddr_substrings;
         boost::split(hostpathAddr_substrings, _pktIOListenAddr,
                      boost::is_any_of(":"));
-        std::string &hpIpStr = hostpathAddr_substrings[0];
+        std::string &hpIpStr      = hostpathAddr_substrings[0];
         std::string &hpUDPPortStr = hostpathAddr_substrings[1];
 
-        BOOST_UDP::resolver resolver(_ioService);
-        _pktIOEndpoint = *resolver.resolve({BOOST_UDP::v4(), hpIpStr, hpUDPPortStr});
+        udp::resolver resolver(_ioService);
+        _pktIOEndpoint = *resolver.resolve({udp::v4(), hpIpStr, hpUDPPortStr});
     }
 
-    ~Hostpath(){};
+    // Send pkt out via the UDP socket to device
+    void sendPacketOut(const std::string &pkt);
 
     //
-    // Handler hostpath packet from device
-    //
-    int handlePacketFromDevice();
-
-    // Send pkt out via the UDP to device
-    void sendPacketOut(const std::string& pkt);
-
-    //
-    // Start packet listner thread
+    // Start packet listener thread
     // It handles packets received from PktIO
     //
-    void startDevicePacketHandler(void);
+    void startDevicePacketHandler();
 
-private:
-    const std::string        _pktIOListenAddr;
+ private:
+    io_service        _ioService;
+    const std::string _pktIOListenAddr;
 
-    boost::asio::io_service& _ioService;
-    unsigned short           _hpUdpPort;     //< Hospath UDP port
-    BOOST_UDP::socket        _hpUdpSock;     //< Hospath UDP socket
+    const uint16_t _hpUdpPort;  //< Hospath UDP port
+    udp::socket    _hpUdpSock;  //< Hospath UDP socket
 
-    BOOST_UDP::endpoint      _pktIOEndpoint;
+    udp::endpoint _pktIOEndpoint;
 
+    //
+    // Handler for hostpath packet from device
+    //
+    int handlePacketFromDevice();
 
     //
     // Hostpath UDP server
     //
-    void hostPathUDPServer(void);
+    void hostPathUDPServer();
 
     //
     // Inject layer 2 packet to a port
     //
-    int injectL2Packet(SandboxId  sandboxId,
-                       DevicePortIndex      portIndex,
-                       const uint8_t *l2Packet,
-                       int           l2PacketLen);
+    int injectL2Packet(SandboxId sandboxId, DevicePortIndex portIndex,
+                       const uint8_t *l2Packet, int l2PacketLen);
 };
 
-#endif // __Hostpath__
+#endif  // __Hostpath__

@@ -20,39 +20,54 @@
 // as noted in the Third-Party source code file.
 //
 
+#include <memory>
 #include "Aft.h"
 
-namespace AFTHALP {
+extern std::unique_ptr<opentracing::v1::Span> span;
 
-void AftTree::_bind()
+namespace AFTHALP
+{
+void
+AftTree::_bind()
 {
     std::cout << "AftTree: _bind" << std::endl;
-    Log(DEBUG)<< "Pushing AftTree to ASIC";
-
+    Log(DEBUG) << "Pushing AftTree to ASIC";
 
     ::ywrapper::StringValue key_field = _tree.key_field();
     Log(DEBUG) << "key_field: " << key_field.value();
 
-    AftNodeToken puntToken  = AftClient::instance().puntPortToken();
-    setDefaultTragetToken(puntToken);
+    std::stringstream ks;
+    ks << key_field.value();
+    opentracing::string_view key("Aft:AftTree:Key Field");
+    opentracing::string_view key_val(ks.str());
+    span->SetBaggageItem(key, key_val);
 
-    // TBD: rtt name from _tree 
-    _token = AftClient::instance().addTable("rtt0", key_field.value(), _defaultTragetToken);
+    AftNodeToken puntToken = AftClient::instance().puntPortToken();
+    setDefaultTargetToken(puntToken);
 
-    //return _token;
+    Log(DEBUG) << "_defaultTargetToken: " << _defaultTargetToken;
+    // TBD: rtt name from _tree
+    _token = AftClient::instance().addTable("rtt0", key_field.value(),
+                                            _defaultTargetToken);
+
+    Log(DEBUG) << "RTT _token: " << _token;
+
+    AftClient::instance().setIngressStart(_token);
+    // return _token;
 }
 
-//  
+//
 // Description
-//  
-std::ostream & AftTree::description (std::ostream &os) const
+//
+std::ostream &
+AftTree::description(std::ostream &os) const
 {
-    os << "_________ AftTree _______"   << std::endl;
-    os << "Name                :" << this->name()  << std::endl;
-    os << "Id                  :" << this->id()    << std::endl;
-    //os << "_defaultTragetToken :" << this->_defaultTragetToken << std::endl;
-    //os << "_token              :" << this->_token << std::endl;
-    
+    os << "_________ AftTree _______" << std::endl;
+    os << "Name                :" << this->name() << std::endl;
+    os << "Id                  :" << this->id() << std::endl;
+    // os << "_defaultTargetToken :" << this->_defaultTargetToken << std::endl;
+    // os << "_token              :" << this->_token << std::endl;
+
 #if 0
     os << "match_type     :" << _match_type   << std::endl;
     os << "table_type     :" << _table_type   << std::endl;

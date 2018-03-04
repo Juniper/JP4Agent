@@ -30,6 +30,7 @@ CPPFLAGS += \
 	-Ip4/config \
 	-Ip4/tmp \
 	-Igoogle/rpc \
+	-Icli
 
 LDFLAGS = -shared
 
@@ -52,7 +53,9 @@ SRCS = \
 	google/rpc/status.pb.cc \
 	google/rpc/code.pb.cc \
 	p4runtime.pb.cc \
-	p4runtime.grpc.pb.cc
+	p4runtime.grpc.pb.cc \
+	cli/jp4cli.pb.cc \
+	cli/jp4cli.grpc.pb.cc
 
 PROTO_GENERATED_HEADERS=$(subst .cc,.h, $(SRCS))
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
@@ -87,6 +90,12 @@ google/rpc/code.pb.cc: google/rpc/code.proto
 
 google/rpc/status.pb.cc: google/rpc/status.proto
 	$(PROTOC) --proto_path=google/rpc --cpp_out=google/rpc/ $<
+
+cli/jp4cli.pb.cc: cli/jp4cli.proto
+	$(PROTOC) --cpp_out=. $<
+
+cli/jp4cli.grpc.pb.cc: cli/jp4cli.proto
+	$(PROTOC) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
 
 clean:
 	$(RM) $(OBJS) $(TARGET_LIB) $(SRCS) $(PROTO_GENERATED_HEADERS) ./.depend

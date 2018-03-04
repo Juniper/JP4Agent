@@ -1,6 +1,9 @@
 //
-// Copyright (c) 2017 Juniper Networks, Inc.
-// All rights reserved. 
+//
+// AFI : Types
+//
+// Created by Sandesh Kumar Sodhi, January 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
 //
 
 module afi-types {
@@ -24,31 +27,147 @@ module afi-types {
         description "Initial revision.";
     }
  
-    typedef aft-token {
-        description "Aft token";
-        type uint64;
-    }
-
-    typedef aft-type-index {
+    typedef afi-type-index {
         description "Aft type index";
         type uint32;
     }
 
-    typedef aft-protocol-index {
+    typedef afi-protocol-index {
         description "Protocol index";
         type uint32;
     }
 
-    typedef aft-field {
-        description "Aft field";
+    typedef afi-proto-family {
+        description "AFI protocol family";
         type enumeration {
+            enum inet {
+             description
+              "Inet/IPv4";
+            }
+            enum inet6 {
+             description
+              "Inet6/IPv6";
+            }
+            enum mpls {
+             description
+              "MPLS";
+            }
+        }
+    }
+
+    typedef afi-field {
+        description "AFI field";
+        type enumeration {
+            enum ingress-port {
+             description
+              "Ingress port";
+            }
+
+            enum packet-ether-daddr {
+             description
+              "Packet Ethernet destination MAC address";
+            }
+
+            enum packet-ether-saddr {
+             description
+              "Packet Ethernet source MAC address";
+            }
+
+            enum packet-ether-type {
+             description
+              "Packet Ethernet header ether_type";
+            }
+
+            enum packet-ether-vlan1-tag-vid {
+             description
+              "Packet Ethernet vlan1 tag vlan id";
+            }
+
+
+            enum packet-arp-target-proto-addr {
+             description
+              "ARP packet target proto address";
+            }
+
+
+            enum packet-ether-vlan1-tag-pcp {
+             description
+              "Packet Ethernet vlan1 tag pcp";
+            }
+
+            enum packet-vrf-id {
+             description
+              "VRF id";
+            }
+
             enum packet-ip4-daddr {
              description
               "Packet IPv4 destination address";
             }
+
             enum packet-ip4-saddr {
              description
               "Packet IPv4 source address";
+            }
+
+            enum packet-ip4-protocol {
+             description
+              "Packet IPv4 protocol";
+            }
+
+            enum packet-ip4-diffserv {
+             description
+              "Packet IPv4 diffserv";
+            }
+
+            enum packet-ip4-ttl {
+             description
+              "Packet IPv4 ttl";
+            }
+
+            enum packet-ip6-daddr {
+             description
+              "Packet IPv6 destination address";
+            }
+
+            enum packet-ip6-saddr {
+             description
+              "Packet IPv6 source address";
+            }
+
+            enum packet-ip6-traffic-class {
+             description
+              "Packet IPv6 traffic-class";
+            }
+
+            enum packet-ip6-flow-label {
+             description
+              "Packet IPv6 flow-label";
+            }
+
+            enum packet-ip6-next-header {
+             description
+              "Packet IPv6 next header";
+            }
+
+            enum packet-ip6-hop-limit {
+             description
+              "Packet IPv6 hop limit";
+            }
+
+            enum packet-icmp-type {
+             description
+              "Packet ICMP type";
+            }
+
+            enum packet-l4-sport {
+             description
+              "Packet layer 4 source port";
+            }
+
+            enum packet-l4-dport {
+             description
+              "Packet layer 4 destination port";
             }
         }
     }

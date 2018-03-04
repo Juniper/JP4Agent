@@ -20,7 +20,13 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "pvtPI.h"
+#include <array>
+#include <iostream>
+#include <thread>
+
+#include "ControllerConnection.h"
+#include "DeviceHPPacket.h"
+#include "Hostpath.h"
 
 //
 // @fn
@@ -34,18 +40,20 @@
 // @return 0 - Success, -1 - Error
 //
 
-int 
-Hostpath::handlePacketFromDevice()
+int Hostpath::handlePacketFromDevice()
 {
-    enum { max_length = 2000 };
-    char _data[max_length];
-    BOOST_UDP::endpoint sender_endpoint;
+    std::array<char, 2000> _buf;
+    udp::endpoint sender_endpoint;
 
     // Block until data has been received successfully or an error occurs.
-    const size_t recvlen = _hpUdpSock.receive_from(
-        boost::asio::buffer(_data, max_length), sender_endpoint);
+    const size_t recvlen =
+        _hpUdpSock.receive_from(boost::asio::buffer(_buf), sender_endpoint);
     if (recvlen == 0) {
         std::cout << "Read empty packet!!\n";
+        return 0;
+    } else if (recvlen <= DeviceHPPacket::_headerSize) {
+        std::cout << "Received malformed pkt(len: " << recvlen
+                  << "). Dropping it.\n";
         return 0;
     }
 
@@ -53,16 +61,15 @@ Hostpath::handlePacketFromDevice()
     DeviceHPPacketPtr pkt =
         DeviceHPPacket::createReceive(recvlen - DeviceHPPacket::_headerSize);
 
-    pktTrace("Received (hostpath) pkt ", _data, recvlen);
+    pktTrace("Received (hostpath) pkt ", _buf.data(), recvlen);
 
-    std::copy_n(_data, recvlen, pkt->header());
+    std::copy_n(_buf.data(), recvlen, pkt->header());
 
     pktTrace("packet header", (char *)(pkt->header()), pkt->headerSize());
 
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << "pkt->headerSize(): " << pkt->headerSize() << " bytes" << std::endl;
-    std::cout << "Header: Received " << recvlen << " bytes" << std::endl;
+    std::cout << "\n\n";
+    std::cout << "pkt->headerSize(): " << pkt->headerSize() << " bytes\n";
+    std::cout << "Header: Received " << recvlen << " bytes\n";
 
     pkt->headerParse();
 
@@ -70,9 +77,10 @@ Hostpath::handlePacketFromDevice()
     std::cout << "----------------" << std::endl;
     std::cout << "Sandbox Id : " << pkt->sandboxId() << std::endl;
     std::cout << "Port Index : " << pkt->portIndex() << std::endl;
-    std::cout << "Data Size  : " << pkt->dataSize()  << std::endl;
+    std::cout << "Data Size  : " << pkt->dataSize() << std::endl;
 
-    std::cout << "pkt->dataSize(): " << pkt->dataSize() << " bytes" << std::endl;
+    std::cout << "pkt->dataSize(): " << pkt->dataSize() << " bytes"
+              << std::endl;
 
     std::cout << "Data: Received " << recvlen << " bytes" << std::endl;
 
@@ -86,9 +94,11 @@ Hostpath::handlePacketFromDevice()
 
     // XXX: HACK ALERT: Possible bug in VMXZT leads to 5 extra bytes being
     // appended to the punted packet. Work around this for now.
-    std::string payload(cpu_hdr_sz + pkt->dataSize() - 5, '\0');
+    size_t payload_len =
+        (pkt->dataSize() > 5) ? pkt->dataSize() - 5 : pkt->dataSize();
+    std::string payload(cpu_hdr_sz + payload_len, '\0');
     memcpy(&payload[0], &cpu_hdr, cpu_hdr_sz);
-    memcpy(&payload[cpu_hdr_sz], pkt->data(), pkt->dataSize() - 5);
+    memcpy(&payload[cpu_hdr_sz], pkt->data(), payload_len);
 
     // Punt it to the controller on the stream channel
     p4::PacketIn packet_in;
@@ -112,11 +122,11 @@ Hostpath::handlePacketFromDevice()
 // @return void
 //
 
-void
-Hostpath::hostPathUDPServer(void)
+void Hostpath::hostPathUDPServer()
 {
     // TBD:: move this log to appropriate place
-    //Log(DEBUG) << "Listening for hostpath packets from device on (UDP) 0.0.0.0:" << _hpUdpPort;
+    Log(DEBUG) << "Listening for hostpath packets from device on (UDP) 0.0.0.0:"
+               << _hpUdpPort;
     while (true) {
         handlePacketFromDevice();
     }
@@ -133,15 +143,13 @@ Hostpath::hostPathUDPServer(void)
 // @return void
 //
 
-void
-Hostpath::startDevicePacketHandler(void)
+void Hostpath::startDevicePacketHandler()
 {
-    std::thread udpSrvr( [this] { this->hostPathUDPServer(); } );
+    std::thread udpSrvr([this] { this->hostPathUDPServer(); });
     udpSrvr.detach();
 }
 
-void
-Hostpath::sendPacketOut(const std::string &pkt)
+void Hostpath::sendPacketOut(const std::string &pkt)
 {
     constexpr auto cpu_hdr_sz = sizeof(cpu_header_t);
     const auto in_pkt_sz = pkt.size();
@@ -153,7 +161,6 @@ Hostpath::sendPacketOut(const std::string &pkt)
         return;
     }
 
-    // XXX: Should we convert to host order?
     uint16_t egress_port = ntohs(((struct cpu_header_t *)pkt.data())->port);
 
     // XXX: For now, use sandbox ID 0
@@ -166,37 +173,33 @@ Hostpath::sendPacketOut(const std::string &pkt)
 // injectL2Packet
 //
 // @brief
-// Inject layer 2 packet on specified (output) 
+// Inject layer 2 packet on specified (output)
 // port of specified sandbox
 //
-// @param[in] 
+// @param[in]
 //     sandboxId Sandbox index
-// @param[in] 
+// @param[in]
 //     portIndex Port index
-// @param[in] 
+// @param[in]
 //     l2Packet Pointer to layer 2 packet to be injected
-// @param[in] 
+// @param[in]
 //     l2PacketLen Length of layer 2 packet
 // @return void
 //
 
-int
-Hostpath::injectL2Packet(SandboxId        sandboxId,
-                         DevicePortIndex  portIndex,
-                         const uint8_t   *l2Packet,
-                         int              l2PacketLen)
+int Hostpath::injectL2Packet(SandboxId sandboxId, DevicePortIndex portIndex,
+                             const uint8_t *l2Packet, int l2PacketLen)
 {
-    std::cout << "Injecting layer2 packet - " ;
-    std::cout << "Sandbox index:" << sandboxId  <<" ";
-    std::cout << "Port index: "<< portIndex << std::endl;
+    std::cout << "Injecting layer2 packet - ";
+    std::cout << "Sandbox index:" << sandboxId << " ";
+    std::cout << "Port index: " << portIndex << std::endl;
 
     if (!l2Packet) {
         std::cout << "l2Packet NULL" << std::endl;
     }
 
     DeviceHPPacketPtr pkt = DeviceHPPacket::createTransmit(
-                                       l2PacketLen, sandboxId,
-                                       portIndex, DeviceHPPacket::PacketTypeL2);
+        l2PacketLen, sandboxId, portIndex, DeviceHPPacket::PacketTypeL2);
 
     //
     // Get base of packet data.

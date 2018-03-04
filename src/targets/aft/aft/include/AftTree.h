@@ -20,54 +20,59 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __AftTree__
-#define __AftTree__
+#ifndef SRC_TARGETS_AFT_AFT_INCLUDE_AFTTREE_H_
+#define SRC_TARGETS_AFT_AFT_INCLUDE_AFTTREE_H_
 
-namespace AFTHALP {
+#include <jnx/Aft.h>
+#include <boost/algorithm/string.hpp>
+#include <memory>
 
+namespace AFTHALP
+{
 class AftTree;
-using AftTreePtr = std::shared_ptr<AftTree>;
+using AftTreePtr     = std::shared_ptr<AftTree>;
 using AftTreeWeakPtr = std::weak_ptr<AftTree>;
 
-class AftTree: public AftObjectTemplate<AFIHAL::AfiTree, AftTree>
+class AftTree : public AftObjectTemplate<AFIHAL::AfiTree, AftTree>
 {
     using AftObjectTemplate::AftObjectTemplate;
-public:
-    //AftTree (const AfiJsonResource &jsonRes) : AfiTree(jsonRes) {}
-    //~AftTree () {}
 
-    /// 
+ public:
+    // AftTree (const AfiJsonResource &jsonRes) : AfiTree(jsonRes) {}
+    // ~AftTree () {}
+
+    ///
     /// @brief  Create the JNH handler
-    /// 
-    /// @param [in] sandbox Em sandbox pointer which holds the JnhSandbox pointer
-    /// 
+    ///
+    /// @param [in] sandbox Em sandbox pointer which holds the JnhSandbox
+    /// pointer
+    ///
     /// @return Jnh handle shared pointer
-    /// 
+    ///
     void _bind() override;
-    
+
     //
     // Debug
     //
-    std::ostream &description (std::ostream &os) const;
-    
-    friend std::ostream &operator<< (std::ostream &os,
-                                     const AftTreePtr &AftTree) {
+    std::ostream &description(std::ostream &os) const;
+
+    friend std::ostream &operator<<(std::ostream &os, const AftTreePtr &AftTree)
+    {
         return AftTree->description(os);
     }
-    
-    const AftNodeToken token() {
-        return _token;
+
+    const AftNodeToken token() { return _token; }
+
+    void setDefaultTargetToken(AftNodeToken token)
+    {
+        _defaultTargetToken = token;
     }
-    
-    void setDefaultTragetToken(AftNodeToken token) {
-        _defaultTragetToken = token;
-    }
-    
-private:
-    AftNodeToken               _defaultTragetToken{AFT_NODE_TOKEN_DISCARD};
-    AftNodeToken               _token{AFT_NODE_TOKEN_NONE};
+
+ private:
+    AftNodeToken _defaultTargetToken{AFT_NODE_TOKEN_DISCARD};
+    AftNodeToken _token{AFT_NODE_TOKEN_NONE};
 };
 
 }  // namespace AFTHALP
 
-#endif // __AftTree__
+#endif  // SRC_TARGETS_AFT_AFT_INCLUDE_AFTTREE_H_

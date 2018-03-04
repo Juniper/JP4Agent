@@ -25,7 +25,15 @@ RM = rm -rf
 OBJDIR  = ../obj
 BINDIR  = ../bin
 
-CXXFLAGS += -g -O0 -std=c++14 -Wall -Werror -Wl,--no-undefined
+CXXFLAGS += -std=c++14 -Wall -Werror -Wl,--no-undefined
+
+ifdef DEBUG_BUILD
+	CXXFLAGS += -g -O0
+endif
+
+ifdef CODE_COVERAGE
+	CXXFLAGS += -fprofile-arcs -ftest-coverage
+endif
 
 CPPFLAGS += \
 	-I. \
@@ -59,7 +67,12 @@ LDLIBS = \
 	-lboost_system \
 	-lpthread \
 	-ljsoncpp \
-	-ljaegertracing
+	-ljaegertracing \
+	-lyaml-cpp
+
+ifdef CODE_COVERAGE
+	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov
+endif
 
 LDFLAGS += \
 	-L/usr/local/lib \

@@ -20,94 +20,108 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "pvtPI.h"
-#include "Afi.h"
 #include <jaegertracing/Tracer.h>
+#include "Afi.h"
+#include "ControllerConnection.h"
+#include "pvtPI.h"
 
 const std::string _debugmode = "debug-afi-objects:debug-pi";
 
-Status 
+extern std::unique_ptr<opentracing::v1::Span> span;
+
+Status
 P4RuntimeServiceImpl::SetForwardingPipelineConfig(
-      ServerContext *context,
-      const p4::SetForwardingPipelineConfigRequest *request,
-      p4::SetForwardingPipelineConfigResponse *rep)
+    ServerContext *                               context,
+    const p4::SetForwardingPipelineConfigRequest *request,
+    p4::SetForwardingPipelineConfigResponse *     rep)
 {
     if (_debugmode.find("debug-pi") != std::string::npos) {
-		Log(DEBUG) << "P4Runtime SetForwardingPipelineConfig\n";
-		Log(DEBUG) << request->DebugString();
+        Log(DEBUG) << "P4Runtime SetForwardingPipelineConfig\n";
+        Log(DEBUG) << request->DebugString();
     }
-    (void) rep;
+    (void)rep;
+    // Create a span for route table
+    auto tracer = opentracing::Tracer::Global();
+    span   = tracer->StartSpan("Route Table");
+    std::this_thread::sleep_for(std::chrono::milliseconds{10});
 
-    p4::SetForwardingPipelineConfigRequest_Action a  = request->action();
-    p4::ForwardingPipelineConfig config = request->config();
+    p4::SetForwardingPipelineConfigRequest_Action a      = request->action();
+    p4::ForwardingPipelineConfig                  config = request->config();
 
     p4::config::P4Info p4info_proto = config.p4info();
 
     if (_debugmode.find("debug-pi") != std::string::npos) {
-
-		Log(DEBUG) << "action:" << a;
-		Log(DEBUG) << "request->configs_size():" << request->configs_size();
+        Log(DEBUG) << "action:" << a;
+        Log(DEBUG) << "request->configs_size():" << request->configs_size();
         Log(DEBUG) << p4info_proto.DebugString();
-		Log(DEBUG) << "________ P4 INFO __________";
+        Log(DEBUG) << "________ P4 INFO __________";
 
-		Log(DEBUG) << "p4info_proto.tables_size():" << p4info_proto.tables_size();
-		Log(DEBUG) << "p4info_proto.actions_size():" << p4info_proto.actions_size();
+        Log(DEBUG) << "p4info_proto.tables_size():"
+                   << p4info_proto.tables_size();
+        Log(DEBUG) << "p4info_proto.actions_size():"
+                   << p4info_proto.actions_size();
     }
     Log(DEBUG) << p4info_proto.DebugString();
 
     const auto &actions = p4info_proto.actions();
     for (const auto &action : actions) {
-		const auto &pre = action.preamble();
-		if (_debugmode.find("debug-pi") != std::string::npos) {
-			Log(DEBUG) << "_________ Action _______";
-			Log(DEBUG) << "Id:" << pre.id();
-			Log(DEBUG) << "Name:" << pre.name();
+        const auto &pre = action.preamble();
+        if (_debugmode.find("debug-pi") != std::string::npos) {
+            Log(DEBUG) << "_________ Action _______";
+            Log(DEBUG) << "Id:" << pre.id();
+            Log(DEBUG) << "Name:" << pre.name();
         }
 
+
         P4InfoResourcePtr res(new P4InfoAction(action));
-        //P4Info::instance().insert2IdMap(res);
-        //P4Info::instance().insert2NameMap(res);
+        // P4Info::instance().insert2IdMap(res);
+        // P4Info::instance().insert2NameMap(res);
     }
 
     const auto &tables = p4info_proto.tables();
-	Log(DEBUG) << "tables.size():" << tables.size();
+    Log(DEBUG) << "tables.size():" << tables.size();
     for (const auto &table : tables) {
         const auto &pre = table.preamble();
-		if (_debugmode.find("debug-pi") != std::string::npos) {
-			Log(DEBUG) << "_________ Table _______";
-			Log(DEBUG) << "Id:" << pre.id();
-			Log(DEBUG) << "Name:" << pre.name();
+        if (_debugmode.find("debug-pi") != std::string::npos) {
+            Log(DEBUG) << "_________ Table _______";
+            Log(DEBUG) << "Id:" << pre.id();
+            Log(DEBUG) << "Name:" << pre.name();
         }
 
         P4InfoResourcePtr res(new P4InfoTable(table));
-        //P4Info::instance().insert2IdMap(res);
-        //P4Info::instance().insert2NameMap(res);
+        // P4Info::instance().insert2IdMap(res);
+        // P4Info::instance().insert2NameMap(res);
     }
 
     p4::tmp::P4DeviceConfig p4_device_config;
     if (!p4_device_config.ParseFromString(config.p4_device_config())) {
-        Log(ERROR) << "Invalid 'p4_device_config', not an instance of " <<
-                     "p4::tmp::P4DeviceConfig";
-    }    
+        Log(ERROR) << "Invalid 'p4_device_config', not an instance of "
+                   << "p4::tmp::P4DeviceConfig";
+    }
 
     const auto &device_data = p4_device_config.device_data();
 
-    std::string dd_str = std::string((char *)device_data.data(), device_data.size());
+    std::string dd_str =
+        std::string((char *)device_data.data(), device_data.size());
+
+    opentracing::string_view id("PI:SetFwdPpln:Device Data");
+    opentracing::string_view id_val(dd_str);
+    span->SetBaggageItem(id, id_val);
 
     if (_debugmode.find("debug-pi") != std::string::npos) {
-		Log(DEBUG) << "device_data.data():" << device_data.data();
-		Log(DEBUG) << "device_data.size():" << device_data.size();
-		Log(DEBUG) << "_____ JASON ________\n";
-		Log(DEBUG) << dd_str;
+        Log(DEBUG) << "device_data.data():" << device_data.data();
+        Log(DEBUG) << "device_data.size():" << device_data.size();
+        Log(DEBUG) << "_____ JASON ________\n";
+        Log(DEBUG) << dd_str;
     }
 
     std::istringstream ss(dd_str);
-    std::istream *is = &ss;
+    std::istream *     is = &ss;
 
     Json::Value cfg_root;
     (*is) >> cfg_root;
 
-	Log(DEBUG) << "_____ Calling AFI handlePipelineConfig ________\n";
+    Log(DEBUG) << "_____ Calling AFI handlePipelineConfig ________\n";
     AFIHAL::Afi::instance().handlePipelineConfig(cfg_root);
     return Status::OK;
 }
@@ -115,313 +129,298 @@ P4RuntimeServiceImpl::SetForwardingPipelineConfig(
 Status
 P4RuntimeServiceImpl::tableInsert(const p4::TableEntry &tableEntry)
 {
+    // P4InfoResourceId actionId;
 
-    //P4InfoResourceId actionId;
+    const auto tableId  = tableEntry.table_id();
+    const auto priority = tableEntry.priority();
+    Log(DEBUG) << "tableInsert: tableId: " << tableId;
+    Log(DEBUG) << "tableInsert: priority: " << priority;
 
-    const auto tableId = tableEntry.table_id();
-    const auto priority= tableEntry.priority();
-    Log(DEBUG) << "tableInsert: tableId: "<< tableId;
-    Log(DEBUG) << "tableInsert: priority: "<< priority;
+    std::stringstream ts, ps;
+    ts << tableId;
+    ps << priority;
 
+    opentracing::string_view id("PI:Tbl Insert:Table ID");
+    opentracing::string_view id_val(ts.str());
+    span->SetBaggageItem(id, id_val);
+
+    opentracing::string_view prio("PI:Tbl Insert:Priority");
+    opentracing::string_view prio_val(ps.str());
+    span->SetBaggageItem(prio, prio_val);
 
     Status status = Status::OK;
 
     if (tableEntry.is_default_action()) {
-      if (!tableEntry.match().empty()) {
-          Log(ERROR) << "Default tableEntry has non-empty key";
-          //TBD: Return error status and translate it to
-          // grpc status
-      }
-      if (tableEntry.priority() != 0) {
-          Log(ERROR) << "Default tableEntry has non-zero priority";
-      }
-      return status;
+        if (!tableEntry.match().empty()) {
+            Log(ERROR) << "Default tableEntry has non-empty key";
+            // TBD: Return error status and translate it to
+            // grpc status
+        }
+        if (tableEntry.priority() != 0) {
+            Log(ERROR) << "Default tableEntry has non-zero priority";
+        }
+        return status;
     }
 
-    Log(DEBUG) << "tableInsert: match size: "<< static_cast<size_t>(tableEntry.match().size());
-
-
-
+    Log(DEBUG) << "tableInsert: match size: "
+               << static_cast<size_t>(tableEntry.match().size());
 
     for (const auto &mf : tableEntry.match()) {
-        Log(DEBUG) << "match field id: "<< mf.field_id();
+        Log(DEBUG) << "match field id: " << mf.field_id();
 
-            if (mf.has_valid()) {
-      		    Log(DEBUG) << "match field has valid: ";
+        if (mf.has_valid()) {
+            Log(DEBUG) << "match field has valid: ";
+        }
+        if (mf.has_exact()) {
+            Log(DEBUG) << "match field has exact: ";
+        }
+        if (mf.has_lpm()) {
+            Log(DEBUG) << "match field has lpm: ";
+
+            auto               lpm       = mf.lpm();
+            const std::string &keystr    = lpm.value();
+            int                prefixLen = lpm.prefix_len();
+            Log(DEBUG) << "keystr.size(): " << keystr.size();
+            Log(DEBUG) << "bytes: ";
+            if (keystr.size() == 4) {
+                // Print IPv4 prefix
+                const char *c = keystr.c_str();
+                std::cout << +c[0] << "." << +c[1] << "." << +c[2] << "."
+                          << +c[3] << "\n";
             }
-            if (mf.has_exact()) {
-      		    Log(DEBUG) << "match field has exact: ";
-            }
-            if (mf.has_lpm()) {
-      		    Log(DEBUG) << "match field has lpm: ";
 
-                char prefix_bytes[4];
-                //int num_prefix_bytes = 0;
-
-                auto lpm = mf.lpm();
-
-                const std::string &keystr = lpm.value();
-      		    Log(DEBUG) << "keystr.size(): " << keystr.size();
-      		    Log(DEBUG) << "keystr: " << keystr;
-      		    Log(DEBUG) << "bytes: ";
-                char const *c = keystr.c_str();
-                std::cout << int(c[0]) << "." << int(c[1]) << "." << int(c[2]) << "." << int(c[3]) << "\n"; 
-                memcpy(prefix_bytes, c, keystr.size());
-                //num_prefix_bytes = keystr.size();
-
-                std::cout << static_cast<uint8_t>(keystr[0]);
-                std::cout << static_cast<uint8_t>(keystr[1]);
-                std::cout << static_cast<uint8_t>(keystr[2]);
-                std::cout << static_cast<uint8_t>(keystr[3]);
-
-
-                int prefixLen = lpm.prefix_len();
-                //lpm->set_prefix_len(prefixLen);
-      		    Log(DEBUG) << "prefixLen: " << prefixLen; 
-                AFIHAL::Afi::instance().addEntry(keystr, prefixLen);
-
-            }
-            if (mf.has_ternary()) {
-      		    Log(DEBUG) << "match field has ternary: ";
-            }
-            if (mf.has_range()) {
-      		    Log(DEBUG) << "match field has range: ";
-            }
+            Log(DEBUG) << "prefixLen: " << prefixLen;
+            AFIHAL::Afi::instance().addEntry(keystr, prefixLen);
+        }
+        if (mf.has_ternary()) {
+            Log(DEBUG) << "match field has ternary: ";
+        }
+        if (mf.has_range()) {
+            Log(DEBUG) << "match field has range: ";
+        }
     }
 
 #if 0
-    uint16_t portId = 0;
+    uint16_t               portId      = 0;
     const p4::TableAction &tableAction = tableEntry.action();
 
     switch (tableAction.type_case()) {
-        case p4::TableAction::kAction:
-              {
-				  Log(DEBUG) << "tableAction : Action ";
-				  const p4::Action &action = tableAction.action();
-                  actionId = tableAction.action().action_id();
-				  Log(DEBUG) << "actionId: "<< actionId;
+        case p4::TableAction::kAction: {
+            Log(DEBUG) << "tableAction : Action ";
+            const p4::Action &action = tableAction.action();
+            actionId                 = tableAction.action().action_id();
+            Log(DEBUG) << "actionId: " << actionId;
 
-                  P4InfoResourcePtr resAction = P4Info::instance().p4InfoResource(actionId);
-                  P4InfoActionPtr p4InfoAction = std::dynamic_pointer_cast<P4InfoAction>(resAction);
+            P4InfoResourcePtr resAction =
+                P4Info::instance().p4InfoResource(actionId);
+            P4InfoActionPtr p4InfoAction =
+                std::dynamic_pointer_cast<P4InfoAction>(resAction);
 
-                  p4InfoAction->display();
+            p4InfoAction->display();
 
-				  for (const auto &p : action.params()) {
-				      Log(DEBUG) << "paramt id: "<< p.param_id();
+            for (const auto &p : action.params()) {
+                Log(DEBUG) << "paramt id: " << p.param_id();
 
+                const char *c = p.value().data();
 
-                      const char *c = p.value().data();
+                size_t s = p.value().size();
+                Log(DEBUG) << "bytes size: " << s;
 
-                      size_t s = p.value().size();
-				      Log(DEBUG) << "bytes size: "<< s;
+                for (size_t i = 0; i < s; i++) {
+                    std::cout << int(c[i]) << "\n";
+                }
 
-                      for (size_t i =0 ; i < s ; i++) {
-                           std::cout << int(c[i]) << "\n"; 
-                      }
+                std::string paramName =
+                    p4InfoAction->actionParamName(p.param_id());
 
-                      std::string paramName = p4InfoAction->actionParamName(p.param_id());
-
-                      if (paramName.compare("port") == 0) {
-                          assert(p.value().size() == 2);
-                          portId = ntohs(*(uint16_t *)(c)); 
-                          //std::cout<<"portId :" << portId << "\n";
-                      }
-				  }
-
-              }
-              break;
+                if (paramName.compare("port") == 0) {
+                    assert(p.value().size() == 2);
+                    portId = ntohs(*(uint16_t *)(c));
+                    // std::cout<<"portId :" << portId << "\n";
+                }
+            }
+        } break;
         case p4::TableAction::kActionProfileMemberId:
-        	  Log(DEBUG) << "tableAction : ActionProfileMemberId ";
-              break;
+            Log(DEBUG) << "tableAction : ActionProfileMemberId ";
+            break;
         case p4::TableAction::kActionProfileGroupId:
-        	  Log(DEBUG) << "tableAction : ActionProfileGroupId";
-              break;
+            Log(DEBUG) << "tableAction : ActionProfileGroupId";
+            break;
         default:
-        	  Log(ERROR) << "tableAction : error";
-              break;
+            Log(ERROR) << "tableAction : error";
+            break;
     }
 
-
     P4InfoResourcePtr resTable = P4Info::instance().p4InfoResource(tableId);
-    P4InfoTablePtr p4InfoTable = std::dynamic_pointer_cast<P4InfoTable>(resTable);
+    P4InfoTablePtr    p4InfoTable =
+        std::dynamic_pointer_cast<P4InfoTable>(resTable);
 
     p4InfoTable->display();
 
-
     P4InfoResourcePtr resAction = P4Info::instance().p4InfoResource(actionId);
-    P4InfoActionPtr p4InfoAction = std::dynamic_pointer_cast<P4InfoAction>(resAction);
+    P4InfoActionPtr   p4InfoAction =
+        std::dynamic_pointer_cast<P4InfoAction>(resAction);
 
     p4InfoAction->display();
 
-    Log(DEBUG) <<"portId              :" << portId;
-
-
+    Log(DEBUG) << "portId              :" << portId;
 
     AfiObjectPtr afiObjPtr = _afiDevCfg.getAfiTree(p4InfoTable->name());
 
     AfiTreePtr afiTreePtr = std::dynamic_pointer_cast<AfiTree>(afiObjPtr);
 
-
-    std::cout<<"afiTree :" << afiTreePtr << "\n";
+    std::cout << "afiTree :" << afiTreePtr << "\n";
 
     AftNodeToken afiTreeToken = 0;
     if (afiTreePtr != nullptr) {
         afiTreeToken = afiTreePtr->token();
     }
-    std::cout<<"afiTreePtr->token() :" << afiTreeToken << "\n";
+    std::cout << "afiTreePtr->token() :" << afiTreeToken << "\n";
 
-
-    AftNodeToken outputPortToken = jP4Agent->afiClient().outputPortToken(portId);
-    std::cout<<"outputPortToken:" << outputPortToken << "\n";
+    AftNodeToken outputPortToken =
+        jP4Agent->afiClient().outputPortToken(portId);
+    std::cout << "outputPortToken:" << outputPortToken << "\n";
 
     AftNodeToken etherEncapToken = jP4Agent->afiClient().addEtherEncapNode(
-                                        "32:26:0a:2e:ff:f1",
-                                        "5e:d8:f9:32:bd:85",
-                                         outputPortToken);
+        "32:26:0a:2e:ff:f1", "5e:d8:f9:32:bd:85", outputPortToken);
 
-    std::cout<<"etherEncapToken:" << etherEncapToken << "\n";
-    //jP4Agent->afiClient().addRoute(afiTreeToken, "1.1.1.1/10", etherEncapToken);
-    std::cout<<"Adding route...\n";
-    for (int i =0; i < num_prefix_bytes; i++) {
-         std::cout << int(prefix_bytes[i]) << "." "\n"; 
+    std::cout << "etherEncapToken:" << etherEncapToken << "\n";
+    // jP4Agent->afiClient().addRoute(afiTreeToken, "1.1.1.1/10",
+    // etherEncapToken);
+    std::cout << "Adding route...\n";
+    for (int i = 0; i < num_prefix_bytes; i++) {
+        std::cout << int(prefix_bytes[i])
+                  << "."
+                     "\n";
     }
-    jP4Agent->afiClient().addRoute(afiTreeToken, prefix_bytes, num_prefix_bytes, prefix_len, etherEncapToken);
+    jP4Agent->afiClient().addRoute(afiTreeToken, prefix_bytes, num_prefix_bytes,
+                                   prefix_len, etherEncapToken);
 #endif
 
     return status;
 }
 
-
 Status
-P4RuntimeServiceImpl::tableWrite(p4::Update_Type update,
+P4RuntimeServiceImpl::tableWrite(p4::Update_Type       update,
                                  const p4::TableEntry &table_entry)
 {
-    Log(DEBUG) << "tableWrite: table_id: "<< table_entry.table_id();
-    //if (!check_p4_id(table_entry.table_id(), P4ResourceType::TABLE))
+    Log(DEBUG) << "tableWrite: table_id: " << table_entry.table_id();
+    // if (!check_p4_id(table_entry.table_id(), P4ResourceType::TABLE))
     //  return make_invalid_p4_id_status();
     if (table_entry.has_meter_config() || table_entry.has_counter_data()) {
-      Log(DEBUG) << "Direct resources not supported in TableEntry yet: ";
-      return Status::OK;
-    }    
-    //Status status;
+        Log(DEBUG) << "Direct resources not supported in TableEntry yet: ";
+        return Status::OK;
+    }
+    // Status status;
     Status status = Status::OK;
     switch (update) {
-      case p4::Update_Type_UNSPECIFIED:
-        Log(DEBUG) << "p4::Update_Type_UNSPECIFIED";
-        break;
-      case p4::Update_Type_INSERT:
-        Log(DEBUG) << "p4::Update_Type_INSERT";
-        return tableInsert(table_entry);
-        break;
-      case p4::Update_Type_MODIFY:
-        Log(DEBUG) << "p4::Update_Type_MODIFY";
-        break;
-      case p4::Update_Type_DELETE:
-        Log(DEBUG) << "p4::Update_Type_DELETE";
-        break;
-      default:
-        Log(DEBUG) << "tableWrite: ____ default";
-        break;
-    }    
+        case p4::Update_Type_UNSPECIFIED:
+            Log(DEBUG) << "p4::Update_Type_UNSPECIFIED";
+            break;
+        case p4::Update_Type_INSERT:
+            Log(DEBUG) << "p4::Update_Type_INSERT";
+            return tableInsert(table_entry);
+            break;
+        case p4::Update_Type_MODIFY:
+            Log(DEBUG) << "p4::Update_Type_MODIFY";
+            break;
+        case p4::Update_Type_DELETE:
+            Log(DEBUG) << "p4::Update_Type_DELETE";
+            break;
+        default:
+            Log(DEBUG) << "tableWrite: ____ default";
+            break;
+    }
     return status;
 }
-
 
 Status
 P4RuntimeServiceImpl::_write(const p4::WriteRequest &request)
 {
     Status status = Status::OK;
-    //status.set_code(Code::OK);
+    // status.set_code(Code::OK);
     for (const auto &update : request.updates()) {
-      const auto &entity = update.entity();
-      switch (entity.entity_case()) {
-        case p4::Entity::kExternEntry:
-          Log(DEBUG) << "p4::Entity::kExternEntry";
-          break;
-        case p4::Entity::kTableEntry:
-          Log(DEBUG) << "p4::Entity::kTableEntry";
-          status = tableWrite(update.type(), entity.table_entry());
-          break;
-        case p4::Entity::kActionProfileMember:
-          Log(DEBUG) << "p4::Entity::kActionProfileMember";
-          break;
-        case p4::Entity::kActionProfileGroup:
-          Log(DEBUG) << "p4::Entity::kActionProfileGroup";
-          break;
-        case p4::Entity::kMeterEntry:
-          Log(DEBUG) << "p4::Entity::kMeterEntry";
-          break;
-        case p4::Entity::kDirectMeterEntry:
-          Log(DEBUG) << "p4::Entity::kDirectMeterEntry";
-          break;
-        case p4::Entity::kCounterEntry:
-          Log(DEBUG) << "p4::Entity::kCounterEntry";
-          break;
-        case p4::Entity::kDirectCounterEntry:
-          Log(DEBUG) << "p4::Entity::kDirectCounterEntry";
-          break;
-        default:
-          Log(DEBUG) << "_____default";
-          break;
-      }
-      //if (status.code() != Code::OK) break;
+        const auto &entity = update.entity();
+        switch (entity.entity_case()) {
+            case p4::Entity::kExternEntry:
+                Log(DEBUG) << "p4::Entity::kExternEntry";
+                break;
+            case p4::Entity::kTableEntry:
+                Log(DEBUG) << "p4::Entity::kTableEntry";
+                status = tableWrite(update.type(), entity.table_entry());
+                break;
+            case p4::Entity::kActionProfileMember:
+                Log(DEBUG) << "p4::Entity::kActionProfileMember";
+                break;
+            case p4::Entity::kActionProfileGroup:
+                Log(DEBUG) << "p4::Entity::kActionProfileGroup";
+                break;
+            case p4::Entity::kMeterEntry:
+                Log(DEBUG) << "p4::Entity::kMeterEntry";
+                break;
+            case p4::Entity::kDirectMeterEntry:
+                Log(DEBUG) << "p4::Entity::kDirectMeterEntry";
+                break;
+            case p4::Entity::kCounterEntry:
+                Log(DEBUG) << "p4::Entity::kCounterEntry";
+                break;
+            case p4::Entity::kDirectCounterEntry:
+                Log(DEBUG) << "p4::Entity::kDirectCounterEntry";
+                break;
+            default:
+                Log(DEBUG) << "_____default";
+                break;
+        }
+        // if (status.code() != Code::OK) break;
     }
     return status;
 }
 
-
 Status
-P4RuntimeServiceImpl::Write(ServerContext *context,
+P4RuntimeServiceImpl::Write(ServerContext *         context,
                             const p4::WriteRequest *request,
-                            p4::WriteResponse *rep)
+                            p4::WriteResponse *     rep)
 {
-    auto tracer = opentracing::Tracer::Global();
-    auto span = tracer->StartSpan("Route Table");
-    std::this_thread::sleep_for(std::chrono::milliseconds{10});
-    opentracing::string_view tag("Name");
-    opentracing::Value       table_name("Route Table");
-    span->SetTag(tag, table_name);
-
     if (_debugmode.find("debug-pi") != std::string::npos) {
         Log(DEBUG) << "_____ P4Runtime Write _____\n";
         Log(DEBUG) << request->DebugString();
     }
     Log(DEBUG) << "_____ P4Runtime Write _____\n";
-    //Log(DEBUG) << request->DebugString();
-    (void) rep;
+    // Log(DEBUG) << request->DebugString();
+    (void)rep;
 
     auto deviceId = request->device_id();
     Log(DEBUG) << "Device id :" << deviceId;
-    if(request->has_election_id()) {
-       Log(DEBUG) << "Request has election id";
+    if (request->has_election_id()) {
+        Log(DEBUG) << "Request has election id";
     }
     auto electionId = convert_u128(request->election_id());
-    //Log(DEBUG) << "Election id :" << static_cast<int>(electionId);
-    //std::cout << "Election id :" << electionId << "\n";
+    // Log(DEBUG) << "Election id :" << static_cast<int>(electionId);
+    // std::cout << "Election id :" << electionId << "\n";
 
     std::stringstream ds, es;
     ds << deviceId;
     es << electionId;
-    opentracing::string_view  device_id("Device ID");
-    opentracing::string_view  device_val(ds.str());
+
+    opentracing::string_view device_id("PI:Write:Device ID");
+    opentracing::string_view device_val(ds.str());
     span->SetBaggageItem(device_id, device_val);
 
-    opentracing::string_view  election_id("Election ID");
-    opentracing::string_view  election_val(es.str());
+    opentracing::string_view election_id("PI:Write:Election ID");
+    opentracing::string_view election_val(es.str());
     span->SetBaggageItem(election_id, election_val);
 
     auto status = _write(*request);
 
-    span->Finish();
     std::this_thread::sleep_for(std::chrono::seconds{5});
-    //return Status::OK;
+    // return Status::OK;
     return status;
 }
 
 Status
-P4RuntimeServiceImpl::Read(ServerContext *context,
-              const p4::ReadRequest *request,
-              ServerWriter<p4::ReadResponse> *writer)
+P4RuntimeServiceImpl::Read(ServerContext *                 context,
+                           const p4::ReadRequest *         request,
+                           ServerWriter<p4::ReadResponse> *writer)
 {
     if (_debugmode.find("debug-pi") != std::string::npos) {
         Log(DEBUG) << "_____ P4Runtime Read _____\n";
@@ -431,24 +430,23 @@ P4RuntimeServiceImpl::Read(ServerContext *context,
     return Status::OK;
 }
 
-
 Status
 P4RuntimeServiceImpl::GetForwardingPipelineConfig(
-              ServerContext *context,
-              const p4::GetForwardingPipelineConfigRequest *request,
-      p4::GetForwardingPipelineConfigResponse *rep)
+    ServerContext *                               context,
+    const p4::GetForwardingPipelineConfigRequest *request,
+    p4::GetForwardingPipelineConfigResponse *     rep)
 {
     if (_debugmode.find("debug-pi") != std::string::npos) {
         Log(DEBUG) << "_____ P4Runtime GetForwardingPipelineConfig _____\n";
         Log(DEBUG) << request->DebugString();
     }
-    (void) rep;
+    (void)rep;
     return Status::OK;
 }
 
 Status
-P4RuntimeServiceImpl::StreamChannel(ServerContext *context,
-				    StreamChannelReaderWriter *stream)
+P4RuntimeServiceImpl::StreamChannel(ServerContext *            context,
+                                    StreamChannelReaderWriter *stream)
 {
     // Update the handle to the StreamChannelReaderWriter.
     controller_conn.set_stream(stream);
@@ -456,8 +454,7 @@ P4RuntimeServiceImpl::StreamChannel(ServerContext *context,
     p4::StreamMessageRequest request;
     while (stream->Read(&request)) {
         switch (request.update_case()) {
-            case p4::StreamMessageRequest::kArbitration:
-            {
+            case p4::StreamMessageRequest::kArbitration: {
                 if (_debugmode.find("debug-pi") != std::string::npos) {
                     Log(DEBUG) << "p4::StreamMessageRequest::kArbitration\n";
                 }
@@ -470,25 +467,21 @@ P4RuntimeServiceImpl::StreamChannel(ServerContext *context,
                 }
                 p4::StreamMessageResponse response;
                 auto arbitration = response.mutable_arbitration();
-                auto status = arbitration->mutable_status();
+                auto status      = arbitration->mutable_status();
                 status->set_code(::google::rpc::Code::OK);
 
                 stream->Write(response);
-            }
-            break;
+            } break;
 
-            case p4::StreamMessageRequest::kPacket:
-            {
+            case p4::StreamMessageRequest::kPacket: {
                 if (_debugmode.find("debug-pi") != std::string::npos) {
                     Log(DEBUG) << "p4::StreamMessageRequest::kPacket\n";
                 }
-                //const std::string &payload = request.packet().payload();
+                const std::string &payload = request.packet().payload();
 
                 // Received L2 pkt. Send to the device on the UDP socket.
-                // TBD: Fix and uncomment following line
-                //jP4Agent->send_packet_out(payload);
-            }
-            break;
+                _hpPktHdl.sendPacketOut(payload);
+            } break;
 
             default:
                 break;

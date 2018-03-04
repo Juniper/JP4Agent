@@ -20,7 +20,7 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "pvtPI.h"
+#include "ControllerConnection.h"
 
 ControllerConnection controller_conn;
 
