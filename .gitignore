@@ -1,0 +1,25 @@
+# Compiled source #
+###################
+*.so
+*.o
+*.a
+obj
+
+# cscope/tags #
+###############
+cscope.*
+tags
+
+# grpc/protobuf generated files #
+#################################
+*.pb.cc
+*.pb.h
+
+# More files to ignore #
+########################
+*.swp
+*.pyc
+*.bak
+.depend
+AFI/protos/juniper
+CPPLINT.cfg
