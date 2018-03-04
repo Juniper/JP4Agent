@@ -1,13 +1,29 @@
 
 
+
+<br>
+<div style="text-align:center" align="center"><img src ="docs/resources/JP4Agent_layers.png" width="200"/></div>
+<br>
+<br>
 ### Compile jp4agent
 ```
-make -j4
+cd build
+
+To build JPAgent with aft target:
+./make-all-aft.sh
+
+To build JPAgent with aft target:
+./make-all-null.sh
 ```
 
 ### Run jp4agent
 ```
-LD_LIBRARY_PATH=../lib/afi ./jp4agent
-or use provided script
-./run-jp4agent
+To run JPAgent (aft target):
+cd src/targets/aft/bin
+./run-jp4agent 
+
+To run JPAgent (null target):
+cd src/targets/null/bin
+./run-jp4agent 
+
 ```
