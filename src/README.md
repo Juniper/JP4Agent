@@ -1,8 +1,6 @@
 
-
-
 <br>
-<div style="text-align:center" align="center"><img src ="docs/resources/JP4Agent_layers.png" width="200"/></div>
+<div style="text-align:center" align="center"><img src ="../docs/resources/JP4Agent_layers.png" width="200"/></div>
 <br>
 <br>
 ### Compile jp4agent
