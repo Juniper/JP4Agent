@@ -3,10 +3,7 @@ Jaeger documentation
 
 ## Working with Jaeger
 
-### Jaeger basics
-```
-https://jaeger.readthedocs.io/en/latest/architecture/
-```
+### Jaeger 
 
 <br>
 <div style="text-align:center" align="center"><img src ="resources/JaegerIntegration.png" width="800"/></div>
