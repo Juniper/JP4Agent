@@ -21,13 +21,15 @@
 //
 
 #include "Null.h"
+#include <string>
 
 AFIHAL::AfiDeviceUPtr
-createDevice (const std::string &name)
+createDevice(const std::string &name)
 {
     Log(DEBUG) << "___ createDevice_______";
     return NULLHALP::NullDevice::create(name);
 }
 
-namespace NULLHALP {
+namespace NULLHALP
+{
 }  // namespace NULLHALP

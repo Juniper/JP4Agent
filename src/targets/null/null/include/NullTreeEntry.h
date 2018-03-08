@@ -20,42 +20,50 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __NULLHALP_NullTreeEntry__
-#define __NULLHALP_NullTreeEntry__
+#ifndef SRC_TARGETS_NULL_NULL_INCLUDE_NULLTREEENTRY_H_
+#define SRC_TARGETS_NULL_NULL_INCLUDE_NULLTREEENTRY_H_
 
-namespace NULLHALP {
+#include <memory>
+#include "NullObject.h"
+#include "NullTree.h"
 
+namespace NULLHALP
+{
 class NullTreeEntry;
-using NullTreeEntryPtr = std::shared_ptr<NullTreeEntry>;
+using NullTreeEntryPtr     = std::shared_ptr<NullTreeEntry>;
 using NullTreeEntryWeakPtr = std::weak_ptr<NullTreeEntry>;
 
-class NullTreeEntry: public NullObjectTemplate<AFIHAL::AfiTreeEntry, NullTreeEntry>
+class NullTreeEntry
+    : public NullObjectTemplate<AFIHAL::AfiTreeEntry, NullTreeEntry>
 {
     using NullObjectTemplate::NullObjectTemplate;
-public:
-    //NullTreeEntry (const AfiJsonResource &jsonRes) : AfiTree(jsonRes) {}
-    //~NullTreeEntry () {}
 
-    /// 
+ public:
+    // NullTreeEntry (const AfiJsonResource &jsonRes) : AfiTree(jsonRes) {}
+    // ~NullTreeEntry () {}
+
+    ///
     /// @brief  Create the JNH handler
-    /// 
-    /// @param [in] sandbox Em sandbox pointer which holds the JnhSandbox pointer
-    /// 
+    ///
+    /// @param [in] sandbox Em sandbox pointer which holds the JnhSandbox
+    /// pointer
+    ///
     /// @return Jnh handle shared pointer
-    /// 
+    ///
     void _bind() override;
-    
+
     //
     // Debug
     //
-    std::ostream &description (std::ostream &os) const;
-    
-    friend std::ostream &operator<< (std::ostream &os,
-                                     const NullTreeEntryPtr &NullTreeEntry) {
+    std::ostream &description(std::ostream &os) const;
+
+    friend std::ostream &operator<<(std::ostream &          os,
+                                    const NullTreeEntryPtr &NullTreeEntry)
+    {
         return NullTreeEntry->description(os);
     }
 };
 
 }  // namespace NULLHALP
 
-#endif // __NULLHALP_NullTreeEntry__
+#endif  // SRC_TARGETS_NULL_NULL_INCLUDE_NULLTREEENTRY_H_

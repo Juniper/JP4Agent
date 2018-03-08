@@ -20,42 +20,48 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __NullTree__
-#define __NullTree__
+#ifndef SRC_TARGETS_NULL_NULL_INCLUDE_NULLTREE_H_
+#define SRC_TARGETS_NULL_NULL_INCLUDE_NULLTREE_H_
 
-namespace NULLHALP {
+#include <memory>
+#include "NullObject.h"
 
+namespace NULLHALP
+{
 class NullTree;
-using NullTreePtr = std::shared_ptr<NullTree>;
+using NullTreePtr     = std::shared_ptr<NullTree>;
 using NullTreeWeakPtr = std::weak_ptr<NullTree>;
 
-class NullTree: public NullObjectTemplate<AFIHAL::AfiTree, NullTree>
+class NullTree : public NullObjectTemplate<AFIHAL::AfiTree, NullTree>
 {
     using NullObjectTemplate::NullObjectTemplate;
-public:
-    //NullTree (const AfiJsonResource &jsonRes) : AfiTree(jsonRes) {}
-    //~NullTree () {}
 
-    /// 
+ public:
+    // NullTree (const AfiJsonResource &jsonRes) : AfiTree(jsonRes) {}
+    // ~NullTree () {}
+
+    ///
     /// @brief  Create the JNH handler
-    /// 
-    /// @param [in] sandbox Em sandbox pointer which holds the JnhSandbox pointer
-    /// 
+    ///
+    /// @param [in] sandbox Em sandbox pointer which holds the JnhSandbox
+    /// pointer
+    ///
     /// @return Jnh handle shared pointer
-    /// 
+    ///
     void _bind() override;
-    
+
     //
     // Debug
     //
-    std::ostream &description (std::ostream &os) const;
-    
-    friend std::ostream &operator<< (std::ostream &os,
-                                     const NullTreePtr &NullTree) {
+    std::ostream &description(std::ostream &os) const;
+
+    friend std::ostream &operator<<(std::ostream &     os,
+                                    const NullTreePtr &NullTree)
+    {
         return NullTree->description(os);
     }
 };
 
 }  // namespace NULLHALP
 
-#endif // __NullTree__
+#endif  // SRC_TARGETS_NULL_NULL_INCLUDE_NULLTREE_H_

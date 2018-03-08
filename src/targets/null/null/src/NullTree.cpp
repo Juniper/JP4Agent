@@ -20,23 +20,24 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "Null.h"
+#include "NullTree.h"
+#include <memory>
 
 extern std::unique_ptr<opentracing::v1::Span> span;
 
-namespace NULLHALP {
-
-void NullTree::_bind()
+namespace NULLHALP
+{
+void
+NullTree::_bind()
 {
     std::cout << "NullTree: _bind" << std::endl;
-    Log(DEBUG)<< "Pushing NullTree to ASIC";
-
+    Log(DEBUG) << "Pushing NullTree to ASIC";
 
     ::ywrapper::StringValue key_field = _tree.key_field();
     Log(DEBUG) << "key_field: " << key_field.value();
 
     std::stringstream ks;
-    ks  << key_field.value();
+    ks << key_field.value();
     opentracing::string_view key("Null:NullTree:Key Field");
     opentracing::string_view key_val(ks.str());
     span->SetBaggageItem(key, key_val);
@@ -47,17 +48,18 @@ void NullTree::_bind()
     gtestFile.close();
 }
 
-//  
+//
 // Description
-//  
-std::ostream & NullTree::description (std::ostream &os) const
+//
+std::ostream &
+NullTree::description(std::ostream &os) const
 {
-    os << "_________ NullTree _______"   << std::endl;
-    os << "Name                :" << this->name()  << std::endl;
-    os << "Id                  :" << this->id()    << std::endl;
-    //os << "_defaultTargetToken :" << this->_defaultTargetToken << std::endl;
-    //os << "_token              :" << this->_token << std::endl;
-    
+    os << "_________ NullTree _______" << std::endl;
+    os << "Name                :" << this->name() << std::endl;
+    os << "Id                  :" << this->id() << std::endl;
+    // os << "_defaultTargetToken :" << this->_defaultTargetToken << std::endl;
+    // os << "_token              :" << this->_token << std::endl;
+
 #if 0
     os << "match_type     :" << _match_type   << std::endl;
     os << "table_type     :" << _table_type   << std::endl;

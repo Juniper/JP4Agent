@@ -20,17 +20,20 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "Null.h"
+#include "NullTreeEntry.h"
+#include <memory>
+#include <string>
 
 extern std::unique_ptr<opentracing::v1::Span> span;
 
-namespace NULLHALP {
-
-//NullNodeToken NullTreeEntry::bind(void)
-void NullTreeEntry::_bind()
+namespace NULLHALP
+{
+// NullNodeToken NullTreeEntry::bind(void)
+void
+NullTreeEntry::_bind()
 {
     std::cout << "NullTreeEntry: _bind" << std::endl;
-    Log(DEBUG)<< "Pushing NullTreeEntry to ASIC";
+    Log(DEBUG) << "Pushing NullTreeEntry to ASIC";
 
     Log(DEBUG) << "tree.ByteSize(): " << _treeEntry.ByteSize();
 
@@ -44,31 +47,33 @@ void NullTreeEntry::_bind()
     Log(DEBUG) << "target_afi_object: " << target_afi_object.value();
 
     ::ywrapper::StringValue prefix_bytes = _treeEntry.prefix_bytes();
-    //Log(DEBUG) << "prefix: " << prefix.value();
+    // Log(DEBUG) << "prefix: " << prefix.value();
     std::string prefix_bytes_str = prefix_bytes.value();
 
     ::ywrapper::UintValue prefix_length = _treeEntry.prefix_length();
 
-    //AfiObjectPtr afiObjPtr = AFIHAL::Afi::instance().getAfiObject(entry_name.value());
-    
-    //AfiTreePtr afiTreePtr = std::dynamic_pointer_cast<AfiTree>(afiObjPtr);
-    NullTreePtr nullTreePtr = std::dynamic_pointer_cast<NullTree>(AFIHAL::Afi::instance().getAfiObject(parent_name.value()));
+    // AfiObjectPtr afiObjPtr =
+    // AFIHAL::Afi::instance().getAfiObject(entry_name.value());
+
+    // AfiTreePtr afiTreePtr = std::dynamic_pointer_cast<AfiTree>(afiObjPtr);
+    NullTreePtr nullTreePtr = std::dynamic_pointer_cast<NullTree>(
+        AFIHAL::Afi::instance().getAfiObject(parent_name.value()));
 
     if (nullTreePtr == nullptr) {
         Log(ERROR) << "Could not find parent AfiTree";
         return;
     }
 
-    std::cout<<"nullTree :" << nullTreePtr << "\n";
+    std::cout << "nullTree :" << nullTreePtr << "\n";
 
     std::stringstream es;
-    es  << entry_name.value();
+    es << entry_name.value();
     opentracing::string_view name("Null:NullTreeEntry:Name");
     opentracing::string_view name_val(es.str());
     span->SetBaggageItem(name, name_val);
 
     std::stringstream ps;
-    ps  << parent_name.value();
+    ps << parent_name.value();
     opentracing::string_view parent("Null:NullTreeEntry:Parent Name");
     opentracing::string_view parent_val(ps.str());
     span->SetBaggageItem(parent, parent_val);
@@ -88,20 +93,20 @@ void NullTreeEntry::_bind()
     gtestFile << "parent_name: " << parent_name.value() << "\n";
     gtestFile << "target_afi_object: " << target_afi_object.value() << "\n";
     gtestFile.close();
-
 }
 
-//  
+//
 // Description
-//  
-std::ostream & NullTreeEntry::description (std::ostream &os) const
+//
+std::ostream &
+NullTreeEntry::description(std::ostream &os) const
 {
-    os << "_________ NullTreeEntry _______"   << std::endl;
-    os << "Name                :" << this->name()  << std::endl;
-    os << "Id                  :" << this->id()    << std::endl;
-    //os << "_defaultTargetToken :" << this->_defaultTargetToken << std::endl;
-    //os << "_token              :" << this->_token << std::endl;
-    
+    os << "_________ NullTreeEntry _______" << std::endl;
+    os << "Name                :" << this->name() << std::endl;
+    os << "Id                  :" << this->id() << std::endl;
+    // os << "_defaultTargetToken :" << this->_defaultTargetToken << std::endl;
+    // os << "_token              :" << this->_token << std::endl;
+
 #if 0
     os << "match_type     :" << _match_type   << std::endl;
     os << "table_type     :" << _table_type   << std::endl;

@@ -20,10 +20,12 @@
 // as noted in the Third-Party source code file.
 //
 
-#include "Null.h"
+#include "NullDevice.h"
+#include <memory>
+#include <string>
 
-namespace NULLHALP {
-
+namespace NULLHALP
+{
 void
 NullDevice::setObjectCreators()
 {
@@ -36,7 +38,7 @@ NullDevice::setObjectCreators()
 // Factory creation method, constructors and destructors
 //
 NullDeviceUPtr
-NullDevice::create (const std::string &name)
+NullDevice::create(const std::string &name)
 {
     Log(DEBUG) << "___ NullDevice::create ___";
     auto device = std::make_unique<NullDevice>(name);
@@ -50,18 +52,20 @@ NullDevice::create (const std::string &name)
 }
 
 void
-NullDevice::destroy() {}
+NullDevice::destroy()
+{
+}
 
-NullDevice::NullDevice (const std::string &name): AfiDevice(name)
+NullDevice::NullDevice(const std::string &name) : AfiDevice(name)
 {
     //
     // create() function does all the work
     //
-};
+}
 
-NullDevice::~NullDevice ()
+NullDevice::~NullDevice()
 {
     destroy();
-};
+}
 
 }  // namespace NULLHALP

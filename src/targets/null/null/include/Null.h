@@ -20,26 +20,22 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __Null__
-#define __Null__
+#ifndef SRC_TARGETS_NULL_NULL_INCLUDE_NULL_H_
+#define SRC_TARGETS_NULL_NULL_INCLUDE_NULL_H_
 
-#include <memory>
-#include <map>
-#include <cstdint>
-#include <jsoncpp/json/json.h>
-
-#include "Log.h"
-#include "Utils.h"
+#include <string>
 #include "Afi.h"
+#include "Log.h"
 #include "NullDevice.h"
 #include "NullObject.h"
 #include "NullTree.h"
 #include "NullTreeEntry.h"
-
+#include "Utils.h"
 
 AFIHAL::AfiDeviceUPtr createDevice(const std::string &name);
 
-namespace NULLHALP {
+namespace NULLHALP
+{
 }  // namespace NULLHALP
 
-#endif // __Null__
+#endif  // SRC_TARGETS_NULL_NULL_INCLUDE_NULL_H_

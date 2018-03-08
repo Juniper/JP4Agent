@@ -20,37 +20,41 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __NullDevice__
-#define __NullDevice__
+#ifndef SRC_TARGETS_NULL_NULL_INCLUDE_NULLDEVICE_H_
+#define SRC_TARGETS_NULL_NULL_INCLUDE_NULLDEVICE_H_
 
-#include "Null.h"
+#include <memory>
+#include <string>
+#include "Afi.h"
+#include "NullTree.h"
+#include "NullTreeEntry.h"
 
-namespace NULLHALP {
-
+namespace NULLHALP
+{
 //
 // NullDevice
 //
 
 class NullDevice;
-using NullDeviceUPtr = std::unique_ptr<NullDevice>;
-using NullDevicePtr = std::shared_ptr<NullDevice>;
+using NullDeviceUPtr    = std::unique_ptr<NullDevice>;
+using NullDevicePtr     = std::shared_ptr<NullDevice>;
 using NullDeviceWeakPtr = std::weak_ptr<NullDevice>;
 
 class NullDevice final : public AFIHAL::AfiDevice
 {
-public:
+ public:
     //
     // Constructor and destructor
     //
-    NullDevice(const std::string &name);
+    explicit NullDevice(const std::string &name);
     ~NullDevice();
-    
+
     static NullDeviceUPtr create(const std::string &newName);
-    void destroy();
+    void                  destroy();
 
     void setObjectCreators();
 };
 
 }  // namespace NULLHALP
 
-#endif
+#endif  // SRC_TARGETS_NULL_NULL_INCLUDE_NULLDEVICE_H_

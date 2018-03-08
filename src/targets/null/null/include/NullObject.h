@@ -20,38 +20,37 @@
 // as noted in the Third-Party source code file.
 //
 
+#ifndef SRC_TARGETS_NULL_NULL_INCLUDE_NULLOBJECT_H_
+#define SRC_TARGETS_NULL_NULL_INCLUDE_NULLOBJECT_H_
 
-#ifndef __NullObject__
-#define __NullObject__
-
-#include "Afi.h"
 #include <fstream>
+#include <map>
+#include <memory>
+#include <string>
+#include "Afi.h"
 
-using namespace std;
-
-namespace NULLHALP {
-
+namespace NULLHALP
+{
 class NullObject;
-class AfiTree;       /// TBD: remove me
+class AfiTree;  /// TBD: remove me
 
-using NullObjectPtr = std::shared_ptr<NullObject>;
+using NullObjectPtr     = std::shared_ptr<NullObject>;
 using NullObjectWeakPtr = std::weak_ptr<NullObject>;
 
 using NullObjectNameMap = std::map<std::string, NullObjectPtr>;
-using NullObjectIdMap = std::map<uint32_t, NullObjectPtr>;
+using NullObjectIdMap   = std::map<uint32_t, NullObjectPtr>;
 
 class NullObject
 {
-    
-public:
-    NullObject () {};
-    virtual ~NullObject () {};
+ public:
+    NullObject() {}
+    virtual ~NullObject() {}
 };
 
 ///
 /// Forward decalaration
 ///
-template<typename AfiObjType, typename NullObjType>
+template <typename AfiObjType, typename NullObjType>
 class NullObjectTemplate;
 
 ///
@@ -59,8 +58,9 @@ class NullObjectTemplate;
 /// @brief Template base class for all Null Objects
 ///
 template <typename AfiObjType, typename NullObjType>
-class NullObjectTemplate: public NullObject, public AfiObjType {
-public:
+class NullObjectTemplate : public NullObject, public AfiObjType
+{
+ public:
     ///
     /// Template share pointer alias
     ///
@@ -69,18 +69,24 @@ public:
     ///
     /// Construction and destruction
     ///
-    NullObjectTemplate<AfiObjType, NullObjType>(const AFIHAL::AfiJsonResource &res): AfiObjType(res) {}
+    NullObjectTemplate<AfiObjType, NullObjType>(
+        const AFIHAL::AfiJsonResource &res)
+        : AfiObjType(res)
+    {
+    }
     virtual ~NullObjectTemplate<AfiObjType, NullObjType>() {}
 
     ///
-    /// @brief Utility creation function. This can be overriden by subclasses if required
+    /// @brief Utility creation function. This can be overriden by subclasses if
+    /// required
     ///        to implement any node specific features
     ///
     /// @param [in] newNullObj   Null Object pointer
     ///
     /// @return Shared pointer to EmTrio object
     ///
-    std::shared_ptr<NullObjType> _create(const std::shared_ptr<NullObjType> &newNullObj)
+    std::shared_ptr<NullObjType> _create(
+        const std::shared_ptr<NullObjType> &newNullObj)
     {
         return newNullObj;
     };
@@ -93,19 +99,20 @@ public:
     /// @return Shared pointer to Null object
     ///
     ///
-    static std::shared_ptr<NullObjType> create(const AFIHAL::AfiJsonResource &res)
+    static std::shared_ptr<NullObjType> create(
+        const AFIHAL::AfiJsonResource &res)
     {
         //
         // Create our object and return a shared pointer to it
         //
-        std::shared_ptr<NullObjType> _newNullObj = std::make_shared<NullObjType>(res);
+        std::shared_ptr<NullObjType> _newNullObj =
+            std::make_shared<NullObjType>(res);
 
         //
         // See if there's any subclass specific noodling
         //
         return _newNullObj->_create(_newNullObj);
     }
-
 
     ///
     /// @brief  Default bind function for EmTrio class.i
@@ -118,9 +125,8 @@ public:
     ///
     virtual void _bind()
     {
-         //return nullptr;
+        // return nullptr;
     }
-
 
     ///
     /// @brief  Bind function which creates JNH handle
@@ -131,7 +137,6 @@ public:
     ///
     virtual bool bind() override
     {
-
         //
         // Let the caller know whether it worked or not
         //
@@ -143,7 +148,7 @@ public:
     ///
     /// Destroy routine to uninstall JNH handle
     ///
-    void destroy ()
+    void destroy()
     {
         //
         // Release any hardware memory
@@ -167,15 +172,15 @@ public:
     ///
     /// Debugging
     ///
-    virtual std::ostream& description (std::ostream &os) const override
+    virtual std::ostream &description(std::ostream &os) const override
     {
         os << "NullObjectTemplate: description \n";
         return os;
     }
 
-    ofstream gtestFile;
+    std::ofstream gtestFile;
 };
 
 }  // namespace NULLHALP
 
-#endif // __NullObject__
+#endif  // SRC_TARGETS_NULL_NULL_INCLUDE_NULLOBJECT_H_
