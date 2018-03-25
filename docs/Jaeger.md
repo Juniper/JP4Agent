@@ -3,7 +3,8 @@ Jaeger documentation
 
 ## Working with Jaeger
 
-### Jaeger 
+### Jaeger Integration
+Jaeger is an open source distributed tracing system. Details about Jaeger can be found [here](https://github.com/jaegertracing/jaeger). Jaeger can be enabled in JP4Agent for tracing.
 
 <br>
 <div style="text-align:center" align="center"><img src ="resources/JaegerIntegration.png" width="800"/></div>
