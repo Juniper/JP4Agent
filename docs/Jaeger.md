@@ -1,5 +1,8 @@
 ## Jaeger
 
+<br>
+<div style="text-align:center" align="center"><img src ="resources/jaeger-vector.svg" width="100"/></div>
+<br>
 
 [Jaeger](https://github.com/jaegertracing/jaeger) is an open source distributed tracing system. Jaeger tracer is built using OpenTracing compatible data model. [Opentracing](http://opentracing.io/) is a vendor-neutral open standard for distributed tracing. JP4Agent uses its C++ client library to integrate with Jaeger. Use of Jaeger for tracing is optional – it can be disabled for setups where Jaeger collector sub-system cannot be made available for collecting the traces.
 
