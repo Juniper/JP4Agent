@@ -6,7 +6,7 @@ Jaeger is an open source distributed tracing system. Details about Jaeger can be
 ### Jaeger Integration
 
 <br>
-<div style="text-align:center" align="center"><img src ="resources/JaegerIntegration.png" width="800"/></div>
+<div style="text-align:center" align="center"><img src ="resources/JaegerIntegration.png" width="600"/></div>
 <br>
 <br>
 
