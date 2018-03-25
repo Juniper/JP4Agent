@@ -2,7 +2,5 @@
 
 P4 Resources
 ============
-[https://p4.org/](https://p4.org/)
-
-P4 and Juniper
-============
+* [P4 Language Consortium](https://p4.org/)
+* [P4 on GitHub](https://github.com/p4lang/)
