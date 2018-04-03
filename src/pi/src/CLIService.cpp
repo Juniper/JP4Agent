@@ -25,13 +25,11 @@
 #include <sstream>
 #include <string>
 #include <thread>
-#include <jaegertracing/Tracer.h>
 #include <boost/algorithm/string.hpp>
 
 #include "Afi.h"
 #include "CLIService.h"
-
-extern std::unique_ptr<opentracing::v1::Span> span;
+#include "JaegerLog.h"
 
 Status
 CmdHandlerSvcImpl::SendCmd(ServerContext *context, const CmdRequest *req,
@@ -99,12 +97,7 @@ CLIService::runGrpcServer()
     std::unique_ptr<Server> server{builder.BuildAndStart()};
     std::cout << "CLI Server listening on " << _cli_serv_addr << std::endl;
 
-    // TBD : Remove later. HACK: Create a span for route table
-    auto tracer = opentracing::Tracer::Global();
-    if (!span) {
-        span = tracer->StartSpan("Route Table");
-    }
-
+    JaegerLog::getInstance()->startSpan("CLI Service");
     server->Wait();
 }
 

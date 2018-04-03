@@ -25,6 +25,10 @@
         "TargetConfig" : {
             "Note"                 : "Target config", 
             "config-file"          : "/root/JP4Agent/src/targets/aft/config/aft-cfg.json"
+        },
+        "JaegerConfig" : {
+            "Note"                 : "Jaeger config",
+            "jaeger-config-file"   : "/root/JP4Agent/src/config.yaml"
         }
     }
 }

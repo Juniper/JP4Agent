@@ -49,7 +49,8 @@ all: $(OBJDIR)/$(TARGET_LIB)
 
 SRCS = \
 	uint128.cpp \
-	Utils.cpp
+	Utils.cpp \
+	JaegerLog.cpp
 
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 OBJS := $(addprefix $(OBJDIR)/,$(OBJS))

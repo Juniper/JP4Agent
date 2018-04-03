@@ -23,8 +23,7 @@
 #include "NullTreeEntry.h"
 #include <memory>
 #include <string>
-
-extern std::unique_ptr<opentracing::v1::Span> span;
+#include "JaegerLog.h"
 
 namespace NULLHALP
 {
@@ -68,23 +67,17 @@ NullTreeEntry::_bind()
 
     std::stringstream es;
     es << entry_name.value();
-    opentracing::string_view name("Null:NullTreeEntry:Name");
-    opentracing::string_view name_val(es.str());
-    span->SetBaggageItem(name, name_val);
+    JaegerLog::getInstance()->Log("Null:NullTreeEntry:Name", es.str());
 
     std::stringstream ps;
     ps << parent_name.value();
-    opentracing::string_view parent("Null:NullTreeEntry:Parent Name");
-    opentracing::string_view parent_val(ps.str());
-    span->SetBaggageItem(parent, parent_val);
+    JaegerLog::getInstance()->Log("Null:NullTreeEntry:Parent Name", ps.str());
 
     std::stringstream as;
     as << target_afi_object.value();
-    opentracing::string_view afi("Null:NullTreeEntry:Target AFI Object");
-    opentracing::string_view afi_val(as.str());
-    span->SetBaggageItem(afi, afi_val);
+    JaegerLog::getInstance()->Log("Null:NullTreeEntry:Target AFI Object", as.str());
 
-    span->Finish();
+    JaegerLog::getInstance()->finishSpan();
 
     // Write into file
     gtestFile.open("../NullTest.txt", std::fstream::app);

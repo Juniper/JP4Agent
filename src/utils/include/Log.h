@@ -26,9 +26,7 @@
 
 
 #include <iostream>
-#include <sstream>
 #include <unistd.h>
-#include "jaegertracing/Logging.h"
 
 //
 // Log
@@ -47,7 +45,6 @@ public:
     ~Log() { std::cout << std::endl; }
     template<class T>
     Log &operator<<(const T &msg) {
-        std::ostringstream buffer;
         if (_hdrDisplayed == false) {
 	  std::cout << currentDateTime();
             //std::cout << " {" << ::getpid() << "}";

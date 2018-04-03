@@ -22,8 +22,7 @@
 
 #include "NullTree.h"
 #include <memory>
-
-extern std::unique_ptr<opentracing::v1::Span> span;
+#include "JaegerLog.h"
 
 namespace NULLHALP
 {
@@ -38,10 +37,7 @@ NullTree::_bind()
 
     std::stringstream ks;
     ks << key_field.value();
-    opentracing::string_view key("Null:NullTree:Key Field");
-    opentracing::string_view key_val(ks.str());
-    span->SetBaggageItem(key, key_val);
-
+    JaegerLog::getInstance()->Log("Null:NullTree:Key Field", ks.str());
     // Write into file for null test
     gtestFile.open("../NullTest.txt", std::fstream::app);
     gtestFile << "key_field: " << key_field.value() << "\n";

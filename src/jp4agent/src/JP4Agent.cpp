@@ -24,6 +24,7 @@
 
 #include "JP4Agent.h"
 #include "PI.h"
+#include "JaegerLog.h"
 
 //
 // @fn
@@ -56,7 +57,9 @@ JP4Agent::Config::readConfig()
     _hostpathPort =
         cfg_root["JP4AgentConfig"]["HostpathConfig"]["hostpath-server-port"]
             .asUInt();
-
+    _jaegerConfigFile =
+        cfg_root["JP4AgentConfig"]["JaegerConfig"]["jaeger-config-file"]
+            .asString();
     return true;
 }
 
@@ -100,6 +103,7 @@ JP4Agent::Config::displayConfig()
     Log(DEBUG) << "pktIOServerAddr : " << _pktIOServerAddr;
     Log(DEBUG) << "dbgCLIServAddr  : " << _cliServerAddr;
     Log(DEBUG) << "hostpathPort    : " << _hostpathPort;
+    Log(DEBUG) << "jaegerConfigFile: " << _jaegerConfigFile;
 }
 
 //
@@ -113,16 +117,18 @@ JP4Agent::Config::displayConfig()
 // @return void
 //
 
-std::unique_ptr<opentracing::v1::Span> span;
 
 void
 JP4Agent::init()
 {
-    initTracing();
-
     _config.readConfig();
     _config.validateConfig();
     _config.displayConfig();
+
+    std::string cfg = _config._jaegerConfigFile;
+    if (!cfg.empty()) {
+      JaegerLog::getInstance()->initTracing(cfg);
+    }
 
     _pi = std::make_unique<PI>(_config._piServerAddr,
                                _config._hostpathPort,

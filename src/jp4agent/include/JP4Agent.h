@@ -28,7 +28,6 @@
 #include "Afi.h"
 #include "Log.h"
 #include "PI.h"
-#include <jaegertracing/Tracer.h>
 
 extern const std::string _debugmode;
 
@@ -37,31 +36,11 @@ class JP4Agent
 public:
     explicit JP4Agent(const std::string &configFile) : _config(configFile){};
     ~JP4Agent()
-    {
-      teardownTracing();
-    }
+    {}
     //
     // Init
     //
     void init();
-    void initTracing()
-    {
-      try {
-          YAML::Node cfgFile = YAML::LoadFile("/root/JP4Agent/src/config.yaml");
-          const auto cfg = jaegertracing::Config::parse(cfgFile);
-          auto tracer = jaegertracing::Tracer::make("JP4Agent", cfg);
-          opentracing::Tracer::InitGlobal(tracer);
-      } catch (const std::exception& e) {
-           Log(ERROR) << "Failed to create Jaeger tracer: %s" << e.what();
-        }
-      Log(DEBUG) << "Created Jaeger tracer successfully";
-    }
-
-    void teardownTracing()
-    {
-      opentracing::Tracer::Global()->Close();
-    }
-
 private:
     class Config
     {
@@ -89,6 +68,7 @@ private:
         std::string _piServerAddr;
         std::string _pktIOServerAddr;
         std::string _cliServerAddr;
+	std::string _jaegerConfigFile;
         uint16_t    _hostpathPort;
     };
 

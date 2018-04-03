@@ -21,14 +21,12 @@
 //
 
 #include "AfiTree.h"
-#include <jaegertracing/Tracer.h>
 #include <cstring>
 #include <memory>
 
 #include "Log.h"
 #include "Utils.h"
-
-extern std::unique_ptr<opentracing::v1::Span> span;
+#include "JaegerLog.h"
 
 namespace AFIHAL
 {
@@ -62,9 +60,7 @@ AfiTree::AfiTree(const AfiJsonResource &jsonRes) : AfiObject(jsonRes)
 
     std::stringstream ks;
     ks << key_field.value();
-    opentracing::string_view key("AFI:AFITree:Key Field");
-    opentracing::string_view key_val(ks.str());
-    span->SetBaggageItem(key, key_val);
+    JaegerLog::getInstance()->Log("AFI:AFITree:Key Field", ks.str());
 }
 
 }  // namespace AFIHAL

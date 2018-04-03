@@ -22,8 +22,7 @@
 
 #include <memory>
 #include "Aft.h"
-
-extern std::unique_ptr<opentracing::v1::Span> span;
+#include "JaegerLog.h"
 
 namespace AFTHALP
 {
@@ -38,9 +37,7 @@ AftTree::_bind()
 
     std::stringstream ks;
     ks << key_field.value();
-    opentracing::string_view key("Aft:AftTree:Key Field");
-    opentracing::string_view key_val(ks.str());
-    span->SetBaggageItem(key, key_val);
+    JaegerLog::getInstance()->Log("Aft:AftTree:Key Field", ks.str());
 
     AftNodeToken puntToken = AftClient::instance().puntPortToken();
     setDefaultTargetToken(puntToken);

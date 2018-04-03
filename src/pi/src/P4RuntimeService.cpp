@@ -20,14 +20,12 @@
 // as noted in the Third-Party source code file.
 //
 
-#include <jaegertracing/Tracer.h>
 #include "Afi.h"
 #include "ControllerConnection.h"
 #include "pvtPI.h"
+#include "JaegerLog.h"
 
 const std::string _debugmode = "debug-afi-objects:debug-pi";
-
-extern std::unique_ptr<opentracing::v1::Span> span;
 
 Status
 P4RuntimeServiceImpl::SetForwardingPipelineConfig(
@@ -41,9 +39,7 @@ P4RuntimeServiceImpl::SetForwardingPipelineConfig(
     }
     (void)rep;
     // Create a span for route table
-    auto tracer = opentracing::Tracer::Global();
-    span   = tracer->StartSpan("Route Table");
-    std::this_thread::sleep_for(std::chrono::milliseconds{10});
+    JaegerLog::getInstance()->startSpan("Route Table");
 
     p4::SetForwardingPipelineConfigRequest_Action a      = request->action();
     p4::ForwardingPipelineConfig                  config = request->config();
@@ -103,10 +99,7 @@ P4RuntimeServiceImpl::SetForwardingPipelineConfig(
 
     std::string dd_str =
         std::string((char *)device_data.data(), device_data.size());
-
-    opentracing::string_view id("PI:SetFwdPpln:Device Data");
-    opentracing::string_view id_val(dd_str);
-    span->SetBaggageItem(id, id_val);
+    JaegerLog::getInstance()->Log("PI:SetFwdPpln:Device Data", dd_str);
 
     if (_debugmode.find("debug-pi") != std::string::npos) {
         Log(DEBUG) << "device_data.data():" << device_data.data();
@@ -139,14 +132,8 @@ P4RuntimeServiceImpl::tableInsert(const p4::TableEntry &tableEntry)
     std::stringstream ts, ps;
     ts << tableId;
     ps << priority;
-
-    opentracing::string_view id("PI:Tbl Insert:Table ID");
-    opentracing::string_view id_val(ts.str());
-    span->SetBaggageItem(id, id_val);
-
-    opentracing::string_view prio("PI:Tbl Insert:Priority");
-    opentracing::string_view prio_val(ps.str());
-    span->SetBaggageItem(prio, prio_val);
+    JaegerLog::getInstance()->Log("PI:Tbl Insert:Table ID", ts.str());
+    JaegerLog::getInstance()->Log("PI:Tbl Insert:Priority", ps.str());
 
     Status status = Status::OK;
 
@@ -401,14 +388,8 @@ P4RuntimeServiceImpl::Write(ServerContext *         context,
     std::stringstream ds, es;
     ds << deviceId;
     es << electionId;
-
-    opentracing::string_view device_id("PI:Write:Device ID");
-    opentracing::string_view device_val(ds.str());
-    span->SetBaggageItem(device_id, device_val);
-
-    opentracing::string_view election_id("PI:Write:Election ID");
-    opentracing::string_view election_val(es.str());
-    span->SetBaggageItem(election_id, election_val);
+    JaegerLog::getInstance()->Log("PI:Write:Device ID", ds.str());
+    JaegerLog::getInstance()->Log("PI:Write:Election ID", es.str());
 
     auto status = _write(*request);
 
