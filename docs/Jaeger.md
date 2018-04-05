@@ -45,4 +45,7 @@ http://127.0.0.1:16686
     1. Jaeger backend should be run on a host different from the one running vMX
     2. Jaeger Backend must be started prior to launching JP4Agent.
     3. Ensure that date and time on the servers running JP4Agent and Jaeger backend are in synch.
+    4. If you do not intend to run Jaeger, specify Jaeger config file as  "" in
+       JP4Agent/config/jp4agent-cfg.json as below:
+       "jaeger-config-file"   : ""
 ```

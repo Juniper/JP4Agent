@@ -68,6 +68,7 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 LDFLAGS += \
+	-L/usr/local/lib \
 	-L../../../src/pi/protos \
 	-L../../../src/utils/obj
 
@@ -85,7 +86,10 @@ LDLIBS = \
 	-lpthread \
 	-lpcap \
 	-lnet \
-	-lutils
+	-lutils \
+	-ljaegertracing \
+	-lyaml-cpp
+
 
 ifdef CODE_COVERAGE
 	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov

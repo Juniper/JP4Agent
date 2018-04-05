@@ -23,8 +23,7 @@
 #include <memory>
 #include <string>
 #include "Aft.h"
-
-extern std::unique_ptr<opentracing::v1::Span> span;
+#include "JaegerLog.h"
 
 namespace AFTHALP
 {
@@ -61,23 +60,16 @@ AftTreeEntry::_bind()
 
     std::stringstream es;
     es << entry_name.value();
-    opentracing::string_view name("AFT:AFTTreeEntry:Name");
-    opentracing::string_view name_val(es.str());
-    span->SetBaggageItem(name, name_val);
+    JaegerLog::getInstance()->Log("AFT:AFTTreeEntry:Name", es.str());
 
     std::stringstream ps;
     ps << parent_name.value();
-    opentracing::string_view parent("AFT:AFTTreeEntry:Parent Name");
-    opentracing::string_view parent_val(ps.str());
-    span->SetBaggageItem(parent, parent_val);
+    JaegerLog::getInstance()->Log("AFT:AFTTreeEntry:Parent Name", ps.str());
 
     std::stringstream as;
     as << target_afi_object.value();
-    opentracing::string_view afi("AFT:AFTTreeEntry:Target AFI Object");
-    opentracing::string_view afi_val(as.str());
-    span->SetBaggageItem(afi, afi_val);
-
-    span->Finish();
+    JaegerLog::getInstance()->Log("AFT:AFTTreeEntry:Target AFI Object", as.str());
+    JaegerLog::getInstance()->finishSpan();
 
     if (aftTreePtr == nullptr) {
         Log(ERROR) << "Could not find parent AfiTree";

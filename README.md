@@ -149,7 +149,9 @@ cd $JP4AGENT_REPO/tools/scripts
 
 ### STEP 8. Setup VMX
 
-NOTE: This step runs Docker with netwroking mode 'host' (--network=host), <br>
+NOTE:
+1. vMX instance runs on the Host.
+2. This step runs Docker with networking mode 'host' (--network=host), <br>
 to make all host interfaces availabe inside docker. <br>
 Please note this mode disables network isolation of the Docker container i.e. <br>
 container shares the networking namespace of the host.
