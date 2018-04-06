@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/Juniper/JP4Agent.svg?token=MxjFSwkncDCE55YiaJFy&branch=master)](https://travis-ci.com/Juniper/JP4Agent)
+[![Build Status](https://travis-ci.org/Juniper/JP4Agent.svg?branch=master)](https://travis-ci.org/Juniper/JP4Agent)
 
 ##### Note: Use of this software is governed by an Apache 2.0 license, and can be found in the “LICENSE” file.
 
