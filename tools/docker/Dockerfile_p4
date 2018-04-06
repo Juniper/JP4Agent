@@ -175,11 +175,15 @@ RUN cd /root/downloads/opentracing-cpp/.build && make install
 # Jaeger
 #
 
-# Install thrift first
-RUN cd /root/downloads && git clone https://apache.googlesource.com/thrift
+# Install thrift first. Note Jaeger works only with Thrift 0.9.3
+# https://github.com/jaegertracing/jaeger-client-cpp/issues/45
+#
+RUN cd /root/downloads && git clone https://github.com/apache/thrift
+RUN cd /root/downloads/thrift && git checkout 0.9.3
 RUN cd /root/downloads/thrift && ./bootstrap.sh
-RUN cd /root/downloads/thrift && ./configure
-RUN cd /root/downloads/thrift && make
+RUN cd /root/downloads/thrift && ./configure --with-cpp --with-java=no --with-python=no \
+--with-lua=no --with-perl=no --enable-shared=yes --enable-static=no --enable-tutorial=no --with-qt4=no
+RUN cd /root/downloads/thrift && make -s
 RUN cd /root/downloads/thrift && make install
 
 # Now install cpp client for Jaeger
