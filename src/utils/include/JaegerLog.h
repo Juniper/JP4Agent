@@ -34,7 +34,7 @@ class JaegerLog
 {
   private:
     static JaegerLog* _instance;
-    std::unique_ptr<opentracing::v1::Span> _span; 
+    std::unique_ptr<opentracing::v1::Span> _span;
     JaegerLog();
     ~JaegerLog();
   public:
