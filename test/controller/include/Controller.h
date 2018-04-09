@@ -26,6 +26,9 @@
 
 #include <chrono>
 #include <string>
+#ifndef SUD
+#include <typeinfo>
+#endif // SUD
 
 int ControllerSetConfig();
 
@@ -60,5 +63,36 @@ struct interface_t {
     uint8_t  ip_addr[4];
     uint8_t  mac_addr[6];
 };
+
+#ifndef SUD
+class Utils {
+public:
+    template <typename T>
+    std::string uint2Str(T i)
+    {
+        std::string ret;
+
+        if (typeid(T) == typeid(uint16_t)) {
+            i = ntohs(i);
+            ret = std::string(reinterpret_cast<char *>(&i), sizeof(i));
+        } else if (typeid(T) == typeid(uint32_t)) {
+            i = ntohl(i);
+            ret = std::string(reinterpret_cast<char *>(&i), sizeof(i));
+        } else if (typeid(T) == typeid(uint64_t)) {
+            unsigned char c[6];
+
+            for (int j = 5; j > 0; j--) {
+                c[j] = i & 0xff;
+                i = i >> 8;
+            }
+            c[0] = i & 0xff;
+
+            ret = std::string(reinterpret_cast<const char *>(c), sizeof(c));
+        }
+
+        return ret;
+    }
+};
+#endif // SUD
 
 #endif // __Controller__

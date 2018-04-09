@@ -1,0 +1,31 @@
+{
+    "Note" : "JP4Agent cofiguration file",
+    "JP4AgentConfig" : {
+        "PIConfig" : {
+            "Note"                 : "JP4Agent's PI server listen address", 
+            "pi-server-address"    : "0.0.0.0:50051"
+        },
+        "HostpathConfig" : {
+            "Note"                 : "Address where JP4Agent listens for hostpath packets from PacketIO", 
+            "hostpath-server-ip"   : "0.0.0.0",
+            "hostpath-server-port" : 64015
+        },
+        "DevicePktIOConfig" : {
+            "Note"                 : "Address where PacketIO listens for hostpath packets from JP4Agent", 
+            "pktio-server-address" : "10.207.66.110:64014"
+        },
+        "DebugConfig" : {
+            "Note"                 : "Debug mode", 
+            "debug-mode"           : "debug-afi-objects"
+        },
+        "DebugCLIConfig" : {
+            "Note"                 : "Debug CLI config", 
+            "cli-server-address"   : "0.0.0.0:53421"
+        },
+        "TargetConfig" : {
+            "Note"                 : "Target config", 
+            "target-address"       : "10.207.66.110",
+            "config-file"          : "/root/JP4Agent/src/targets/aft/config/aft-cfg.json"
+        }
+    }
+}

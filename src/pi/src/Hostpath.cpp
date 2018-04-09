@@ -92,10 +92,14 @@ int Hostpath::handlePacketFromDevice()
     memset(&cpu_hdr, 0, cpu_hdr_sz);
     cpu_hdr.port = htons(pkt->portIndex());
 
+#ifdef SUD
     // XXX: HACK ALERT: Possible bug in VMXZT leads to 5 extra bytes being
     // appended to the punted packet. Work around this for now.
     size_t payload_len =
         (pkt->dataSize() > 5) ? pkt->dataSize() - 5 : pkt->dataSize();
+#else
+    size_t payload_len = pkt->dataSize();
+#endif // SUD
     std::string payload(cpu_hdr_sz + payload_len, '\0');
     memcpy(&payload[0], &cpu_hdr, cpu_hdr_sz);
     memcpy(&payload[cpu_hdr_sz], pkt->data(), payload_len);

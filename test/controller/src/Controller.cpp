@@ -53,9 +53,9 @@ using google::protobuf::util::MessageDifferencer;
 using namespace std::chrono_literals;
 
 constexpr char test_json[] =
-    "/root/JP4Agent/test/controller/testdata/afi_switch.json";
+    "/b/sgopinath/code/JP4Agent/test/controller/testdata/afi_switch.json";
 constexpr char test_proto_txt[] =
-    "/root/JP4Agent/test/controller/testdata/simple_router.proto.txt";
+    "/b/sgopinath/code/JP4Agent/test/controller/testdata/simple_router.proto.txt";
 
 // Static configuration for interfaces
 constexpr interface_t intfs[] = {
@@ -202,7 +202,7 @@ ControllerICMPEcho(std::chrono::milliseconds timeout_ms)
         stream->WritesDone();
         Status s = stream->Finish();
         if (s.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED) {
-            std::cout << __func__ << ": Read packet timed out.\n";
+            //std::cout << __func__ << ": Read packet timed out.\n";
         }
     }
     if (response.update_case() != p4::StreamMessageResponse::kPacket) {
@@ -221,6 +221,7 @@ ControllerICMPEcho(std::chrono::milliseconds timeout_ms)
         return false;
     }
 
+    std::cout << "Recvd ICMP Echo request.\n";
     // Use info in received pkt to construct ICMP echo reply
     const auto *cpu_hdr = (struct cpu_header_t *)recvd_pkt.data();
     const auto *eth_hdr = (struct ether_header *)(cpu_hdr + 1);
@@ -281,7 +282,7 @@ ControllerHandleArpReq(std::chrono::milliseconds timeout_ms)
         stream->WritesDone();
         Status s = stream->Finish();
         if (s.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED) {
-            std::cout << __func__ << ": Read packet timed out.\n";
+            //std::cout << __func__ << ": Read packet timed out.\n";
         }
     }
     if (response.update_case() != p4::StreamMessageResponse::kPacket) {
@@ -358,6 +359,85 @@ ControllerHandleArpReq(std::chrono::milliseconds timeout_ms)
     return false;
 }
 
+#ifndef SUD
+static int
+routeAdd(p4::config::P4Info& p4Info,
+         std::unique_ptr<p4::P4Runtime::Stub>& pi_stub_,
+         uint32_t dAddr,
+         uint16_t pLen,
+         uint64_t mac,
+         uint16_t oPort)
+{
+    int dev_id = 0;
+
+    auto set_election_id = [](p4::Uint128 *election_id) {
+        election_id->set_high(0);
+        election_id->set_low(1);
+    };
+
+    std::cout << "Write: Adding route table entry...";
+
+    Utils utils;
+    std::string dstAddr  = utils.uint2Str(dAddr);
+    std::string macAddr  = utils.uint2Str(mac);
+    std::string oPortStr = utils.uint2Str(oPort);
+
+    auto tId  = get_table_id(p4Info, "ipv4_lpm");
+    auto mfId = get_mf_id(p4Info, "ipv4_lpm", "ipv4.dstAddr");
+    auto aId  = get_action_id(p4Info, "set_nhop");
+    auto p0Id = get_param_id(p4Info, "set_nhop", "nhop_ipv4");
+    auto p1Id = get_param_id(p4Info, "set_nhop", "port");
+
+    p4::Entity entity;
+    auto tableEntry = entity.mutable_table_entry();
+
+    tableEntry->set_table_id(tId);
+    auto match = tableEntry->add_match();
+    match->set_field_id(mfId);
+
+    auto lpm = match->mutable_lpm();
+    lpm->set_value(dstAddr);
+    lpm->set_prefix_len(pLen);
+
+    auto tableAction = tableEntry->mutable_action();
+    auto action = tableAction->mutable_action();
+    action->set_action_id(aId);
+    {
+        auto param = action->add_params();
+        param->set_param_id(p0Id);
+        std::string nhAddr;
+        param->set_value(nhAddr);
+    }
+    {
+        auto param = action->add_params();
+        param->set_param_id(p1Id);
+        param->set_value(oPortStr);
+    }
+
+    // add entry
+    {
+        p4::WriteRequest request;
+        set_election_id(request.mutable_election_id());
+        request.set_device_id(dev_id);
+        auto update = request.add_updates();
+        update->set_type(p4::Update_Type_INSERT);
+        update->set_allocated_entity(&entity);
+
+        ClientContext context;
+        p4::WriteResponse rep;
+
+        auto status = pi_stub_->Write(&context, request, &rep);
+        assert(status.ok());
+
+        update->release_entity();
+    }
+
+    std::cout << "Done.\n";
+
+    return 0;
+}
+#endif // SUD
+
 int
 ControllerAddRouteEntry()
 {
@@ -390,6 +470,18 @@ ControllerAddRouteEntry()
         assert(response.arbitration().status().code() ==
                ::google::rpc::Code::OK);
     }
+
+#ifndef SUD
+    // transit routes
+    std::cout << "Adding transit routes.." << std::endl;
+    routeAdd(p4info, pi_stub_, 0x2c2c2c02, 24, 0x88a25e91c0a9, 9);
+    routeAdd(p4info, pi_stub_, 0x37373702, 24, 0x88a25e9175ff, 13);
+
+    // local routes
+    std::cout << "Adding local routes.." << std::endl;
+    routeAdd(p4info, pi_stub_, 0x2c2c2c01, 32, 0x88a25e91a2a8, 0);
+    routeAdd(p4info, pi_stub_, 0x37373701, 32, 0x88a25e91a2a9, 0);
+#else // SUD
 
     std::cout << "Write: Adding route table entry...";
     auto t_id = get_table_id(p4info, "ipv4_lpm");
@@ -441,6 +533,7 @@ ControllerAddRouteEntry()
     }
 
     std::cout << "Done.\n";
+#endif // SUD
 
     // Close the bidirectional stream.
     {

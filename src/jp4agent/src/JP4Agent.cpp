@@ -57,6 +57,8 @@ JP4Agent::Config::readConfig()
     _hostpathPort =
         cfg_root["JP4AgentConfig"]["HostpathConfig"]["hostpath-server-port"]
             .asUInt();
+    _targetAddr =
+        cfg_root["JP4AgentConfig"]["TargetConfig"]["target-address"].asString();
     _jaegerConfigFile =
         cfg_root["JP4AgentConfig"]["JaegerConfig"]["jaeger-config-file"]
             .asString();
@@ -142,5 +144,5 @@ JP4Agent::init()
     //
     // Initialize Afi
     //
-    AFIHAL::Afi::instance().init();
+    AFIHAL::Afi::instance().init(_config._targetAddr);
 }

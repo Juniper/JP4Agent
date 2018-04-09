@@ -1,10 +1,11 @@
 //
-// Main.cpp
+// Juniper P4 Agent
 //
-// Test controller
+/// @file  Brcm.h
+/// @brief Brcm target includes
 //
-// Created by Sandesh Kumar Sodhi, December 2017
-// Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+// Created by Sudheendra Gopinath, March 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
 //
 // All rights reserved.
 //
@@ -19,21 +20,27 @@
 // as noted in the Third-Party source code file.
 //
 
+#ifndef __Brcm__
+#define __Brcm__
 
-#include "Controller.h"
-using namespace std::chrono_literals;
+#include <memory>
+#include <map>
+#include <cstdint>
+#include <jsoncpp/json/json.h>
 
-int main()
-{
-    int status = ControllerSetConfig();
+#include "Log.h"
+#include "Utils.h"
+#include "Afi.h"
+#include "BrcmDevice.h"
+#include "BrcmObject.h"
+#include "BrcmTree.h"
+#include "BrcmTreeEntry.h"
 
-    status = ControllerAddRouteEntry();
+#include "BrcmRpc.h"
 
-#ifndef SUD
-    while (1) {
-        ControllerICMPEcho(15s);
-    }
-#endif // SUD
+AFIHAL::AfiDeviceUPtr createDevice(const std::string &name);
 
-    return status;
-}
+namespace BRCMHALP {
+}  // namespace BRCMHALP
+
+#endif // __Brcm__
