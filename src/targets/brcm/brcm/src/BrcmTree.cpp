@@ -21,8 +21,7 @@
 //
 
 #include "Brcm.h"
-
-extern std::unique_ptr<opentracing::v1::Span> span;
+#include "JaegerLog.h"
 
 namespace BRCMHALP {
 
@@ -37,9 +36,7 @@ void BrcmTree::_bind()
 
     std::stringstream ks;
     ks  << key_field.value();
-    opentracing::string_view key("Brcm:BrcmTree:Key Field");
-    opentracing::string_view key_val(ks.str());
-    span->SetBaggageItem(key, key_val);
+    JaegerLog::getInstance()->Log("Brcm:BrcmTree:Key Field", ks.str());
 
     // Write into file for Brcm test
     gtestFile.open("../BrcmTest.txt", std::fstream::app);

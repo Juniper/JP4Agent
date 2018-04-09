@@ -24,12 +24,11 @@
 #include <vector>
 
 #include "Brcm.h"
+#include "JaegerLog.h"
 
 #include "BrcmL3Intf.h"
 #include "BrcmNh.h"
 #include "BrcmRt.h"
-
-extern std::unique_ptr<opentracing::v1::Span> span;
 
 namespace BRCMHALP {
 
@@ -71,24 +70,18 @@ void BrcmTreeEntry::_bind()
     std::cout<<"BrcmTree :" << BrcmTreePtr << "\n";
 
     std::stringstream es;
-    es  << entry_name.value();
-    opentracing::string_view name("Brcm:BrcmTreeEntry:Name");
-    opentracing::string_view name_val(es.str());
-    span->SetBaggageItem(name, name_val);
+    es << entry_name.value();
+    JaegerLog::getInstance()->Log("Brcm:BrcmTreeEntry:Name", es.str());
 
     std::stringstream ps;
-    ps  << parent_name.value();
-    opentracing::string_view parent("Brcm:BrcmTreeEntry:Parent Name");
-    opentracing::string_view parent_val(ps.str());
-    span->SetBaggageItem(parent, parent_val);
+    ps << parent_name.value();
+    JaegerLog::getInstance()->Log("Brcm:BrcmTreeEntry:Parent Name", ps.str());
 
     std::stringstream as;
     as << target_afi_object.value();
-    opentracing::string_view afi("Brcm:BrcmTreeEntry:Target AFI Object");
-    opentracing::string_view afi_val(as.str());
-    span->SetBaggageItem(afi, afi_val);
+    JaegerLog::getInstance()->Log("Brcm:BrcmTreeEntry:Target AFI Object", as.str());
 
-    span->Finish();
+    JaegerLog::getInstance()->finishSpan();
 
     uint32_t              dstAddr;
     uint16_t              port;
