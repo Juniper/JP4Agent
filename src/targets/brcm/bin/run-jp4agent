@@ -1,0 +1,21 @@
+#!/bin/bash
+
+JP4AGENT_LOC=../../../..
+export LD_LIBRARY_PATH=/usr/local/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/jp4agent/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/utils/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/pi/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/afi/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/pi/protos
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/AFI
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/targets/brcm/brcm/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BCM_HALP_DIR_PATH/obj/
+ 
+if [ "$#" -eq 1 ]; then
+    #
+    # If provided first arguments is the log file
+    #
+    $JP4AGENT_LOC/src/targets/brcm/bin/jp4agent | tee $1
+else
+    $JP4AGENT_LOC/src/targets/brcm/bin/jp4agent
+fi
