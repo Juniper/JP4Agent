@@ -19,20 +19,19 @@
 // as noted in the Third-Party source code file.
 //
 
-#include <limits.h>
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <future>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "gtest/gtest.h"
+#include "Controller.h"
+#include "TapIf.h"
 #include "TestPacket.h"
 #include "TestUtils.h"
-#include "TapIf.h"
-#include "Controller.h"
-#include <boost/filesystem.hpp>
-#include <iostream>
-#include <iomanip>
-#include <ctime>
-#include <future>
-#include <fstream>
-
-using namespace std;
 
 using namespace std::chrono_literals;
 
@@ -42,7 +41,7 @@ using namespace std::chrono_literals;
 // Junos RE CLI Sandbox configuration
 // ==================================
 //
-// root# show forwarding-options 
+// root# show forwarding-options
 // forwarding-sandbox jp4agent {
 //     port p1 {
 //         interface xe-0/0/0:1;
@@ -113,10 +112,9 @@ using namespace std::chrono_literals;
 // root@de5cf35cd169:~#
 //
 
-//const std::string afiServerAddr   = "128.0.0.16:50051"; // grpc/tcp
-const std::string afiServerAddr   = "172.18.0.1:65051"; // grpc/tcp
-const std::string afiHospathAddr  = "128.0.0.16:9002";  // udp
-
+// const std::string afiServerAddr   = "128.0.0.16:50051"; // grpc/tcp
+const std::string afiServerAddr  = "172.18.0.1:65051";  // grpc/tcp
+const std::string afiHospathAddr = "128.0.0.16:9002";   // udp
 
 //
 //              |
@@ -205,7 +203,7 @@ const std::string VMX_LINK7_IP_ADDR_STR = "103.30.170.2";
 // here.
 class P4 : public ::testing::Test
 {
-protected:
+ protected:
     static void SetUpTestCase()
     {
         ControllerSetConfig();
@@ -217,13 +215,13 @@ protected:
 // receipt at vmx_link2.
 TEST_F(P4, injectL2Pkt)
 {
-    constexpr uint16_t egress_port = 0;
-    constexpr int num_pkts = 1;
-    constexpr int pcap_timeout_sec = 10;
+    constexpr uint16_t egress_port      = 0;
+    constexpr int      num_pkts         = 1;
+    constexpr int      pcap_timeout_sec = 10;
 
     // Start listening for pkts.
     const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
+    std::vector<pid_t>             pcap_pids;
     ASSERT_NO_FATAL_FAILURE(
         start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
     sleep_thread_log(3s);
@@ -231,9 +229,9 @@ TEST_F(P4, injectL2Pkt)
     std::cout << "Injecting L2 packet on egress port " << egress_port << "...";
     TestPacket *testPkt = testPacketLibrary.getTestPacket(
         TestPacketLibrary::TEST_PKT_ID_IPV4_ECHO_REQ_TO_TAP2);
-    char pktbuf[ETHER_PAYLOAD_BUF_SIZE];
+    char   pktbuf[ETHER_PAYLOAD_BUF_SIZE];
     size_t pktlen = testPkt->getEtherPacket(pktbuf, ETHER_PAYLOAD_BUF_SIZE);
-    std::string l2_pkt{pktbuf, pktlen};
+    std::string l2_pkt(pktbuf, pktlen);
 
     // Call controller to inject the L2 pkt on the JP4Agent connection.
     EXPECT_TRUE(ControllerInjectL2Pkt(l2_pkt, egress_port))
@@ -257,21 +255,22 @@ TEST_F(P4, injectL2Pkt)
     tVerifyPackets(capture_ifs);
 }
 
-// Test2: Punt path: Inject L2 pkt in vmx_link2 and verify receipt at controller.
+// Test2: Punt path: Inject L2 pkt in vmx_link2 and verify receipt at
+// controller.
 TEST_F(P4, puntL2Pkt)
 {
     constexpr uint16_t expected_ingress_port = 0;
 
     // Start Controller and listen.
-    uint16_t ingress_port = 0;
+    uint16_t    ingress_port = 0;
     std::string recvd_pkt;
-    auto fut = std::async(std::launch::async, ControllerPuntPkt,
+    auto        fut = std::async(std::launch::async, ControllerPuntPkt,
                           std::ref(recvd_pkt), std::ref(ingress_port), 15s);
 
-    constexpr int num_pkts = 1;
-    constexpr int pcap_timeout_sec = 10;
+    constexpr int                  num_pkts         = 1;
+    constexpr int                  pcap_timeout_sec = 10;
     const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
+    std::vector<pid_t>             pcap_pids;
     ASSERT_NO_FATAL_FAILURE(
         start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
     sleep_thread_log(3s);
@@ -298,7 +297,7 @@ TEST_F(P4, puntL2Pkt)
     // Compare and verify
     TestPacket *testPkt = testPacketLibrary.getTestPacket(
         TestPacketLibrary::VMXZT_TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3);
-    char pktbuf[ETHER_PAYLOAD_BUF_SIZE];
+    char   pktbuf[ETHER_PAYLOAD_BUF_SIZE];
     size_t pktlen = testPkt->getEtherPacket(pktbuf, ETHER_PAYLOAD_BUF_SIZE);
 
     EXPECT_EQ(0, memcmp(pktbuf, recvd_pkt.data(), pktlen))
@@ -311,10 +310,10 @@ TEST_F(P4, hostPing)
     // Start Controller to handle ping.
     auto fut = std::async(std::launch::async, ControllerICMPEcho, 15s);
 
-    constexpr int num_pkts = 2;
-    constexpr int pcap_timeout_sec = 10;
+    constexpr int                  num_pkts         = 2;
+    constexpr int                  pcap_timeout_sec = 10;
     const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
+    std::vector<pid_t>             pcap_pids;
     ASSERT_NO_FATAL_FAILURE(
         start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
     sleep_thread_log(3s);
@@ -343,10 +342,10 @@ TEST_F(P4, sendArpReq)
     std::string recvd_pkt;
     auto fut = std::async(std::launch::async, ControllerHandleArpReq, 15s);
 
-    constexpr int num_pkts = 2; // ARP request and reply.
-    constexpr int pcap_timeout_sec = 10;
+    constexpr int                  num_pkts = 2;  // ARP request and reply.
+    constexpr int                  pcap_timeout_sec = 10;
     const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
+    std::vector<pid_t>             pcap_pids;
     ASSERT_NO_FATAL_FAILURE(
         start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
     sleep_thread_log(3s);
@@ -379,7 +378,7 @@ TEST_F(P4, ipv4Router)
     // Start packet capture on ingress and egress interfaces.
     const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME,
                                                GE_0_0_3_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
+    std::vector<pid_t>             pcap_pids;
     ASSERT_NO_FATAL_FAILURE(start_pktcap(capture_ifs, num_pkts_to_send,
                                          pcap_timeout_sec, pcap_pids));
     sleep_thread_log(3s);
@@ -401,29 +400,31 @@ TEST_F(P4, ipv4Router)
     tVerifyPackets(capture_ifs);
 }
 
-// Test5: Null Target Test.
+// Test1: Null Target Test.
 TEST_F(P4, nullTest)
 {
     // Launch controller to add route entry.
     ControllerAddRouteEntry();
-    sleep_thread_log(15s);
-    ifstream gtestFile;
-    std::string line, log;
-    const std::string expectedString = "key_field: packet.ip4.daddr\ntree.ByteSize(): 69\nentry_name: entry1\nparent_name: ipv4_lpm\ntarget_afi_object: etherencap1\n";
-    gtestFile.open("/root/JP4Agent/src/targets/null/NullTest.txt");
-    while ( getline (gtestFile,line) )
-        {
-            log += line + "\n";
-	}
-    gtestFile.close();
-    EXPECT_TRUE(log.compare(expectedString) == 0);
-}
+    sleep_thread_log(1s);
 
+    const std::string expectedString =
+        "key_field: packet.ip4.daddr\ntree.ByteSize(): 69\nentry_name: "
+        "entry1\nparent_name: ipv4_lpm\ntarget_afi_object: etherencap1\n";
+    std::ifstream gtestFile{"/root/JP4Agent/src/targets/null/NullTest.txt"};
+
+    std::string line, log;
+    while (getline(gtestFile, line)) {
+        log += line + "\n";
+    }
+
+    EXPECT_EQ(log, expectedString);
+}
 
 //
 // gtest main
 //
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     // Create result dir.
     gtestOutputDirName = "GTEST_RESULT_" + getTimeStr();
@@ -432,12 +433,11 @@ int main(int argc, char **argv)
     ::testing::InitGoogleTest(&argc, argv);
     if (argc == 1) {
         ::testing::GTEST_FLAG(filter) = "P4.*-P4.nullTest";
-    }
-    else {
+    } else {
         ::testing::GTEST_FLAG(filter) = "*nullTest*";
     }
-   //::testing::GTEST_FLAG(filter) = "*ipv4Router*";
-   //::testing::GTEST_FLAG(filter) = "*injectL2Pkt*:*puntL2Pkt*:*hostPing*";
+    // ::testing::GTEST_FLAG(filter) = "*ipv4Router*";
+    // ::testing::GTEST_FLAG(filter) = "*injectL2Pkt*:*puntL2Pkt*:*hostPing*";
 
     return RUN_ALL_TESTS();
 }

@@ -18,13 +18,17 @@
 // components is subject to the terms and conditions of the respective license
 // as noted in the Third-Party source code file.
 //
+#ifndef TEST_GTEST_INCLUDE_TESTUTILS_H_
+#define TEST_GTEST_INCLUDE_TESTUTILS_H_
 
-#ifndef __TestUtils__
-#define __TestUtils__
-
-#include <net/if.h>
 #include <linux/if_tun.h>
+#include <net/if.h>
+
 #include <chrono>
+#include <string>
+#include <vector>
+
+#include "TestPacket.h"
 
 extern std::string gTestTimeStr;
 extern std::string gtestOutputDirName;
@@ -32,15 +36,15 @@ extern std::string gtestExpectedDirName;
 extern std::string tsharkBinary;
 
 std::string getTimeStr();
-void sleep_thread_log(std::chrono::milliseconds nms);
-void tVerifyPackets(const std::vector<std::string> &interfaces);
+void        sleep_thread_log(std::chrono::milliseconds nms);
+void        tVerifyPackets(const std::vector<std::string> &interfaces);
 void start_pktcap(const std::vector<std::string> &intfs, unsigned int num_pkts,
                   unsigned int timeout_sec, std::vector<pid_t> &pids);
 bool stop_pktcap(const std::vector<std::string> &intfs,
-                 const std::vector<pid_t> &pids);
+                 const std::vector<pid_t> &      pids);
 
-extern int SendRawEth(const std::string &ifNameStr,
+extern int SendRawEth(const std::string &             ifNameStr,
                       TestPacketLibrary::TestPacketId tcPktNum);
-void send_arp_req(const std::string &ifname, const char *target_ip_addr);
+void       send_arp_req(const std::string &ifname, const char *target_ip_addr);
 
-#endif // __TestUtils__
+#endif  // TEST_GTEST_INCLUDE_TESTUTILS_H_
