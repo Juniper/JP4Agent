@@ -18,6 +18,7 @@
 // components is subject to the terms and conditions of the respective license
 // as noted in the Third-Party source code file.
 //
+
 #include "TestUtils.h"
 
 #include <arpa/inet.h>
@@ -32,7 +33,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <boost/filesystem.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -50,25 +50,7 @@
 #define ETHER_PAYLOAD_BUF_SIZE 5000
 #define SEND_BUF_STR_SIZE 5000
 
-std::string gtestOutputDirName;
-std::string gtestExpectedDirName = "GTEST_EXPECTED";
-std::string tsharkBinary         = "/usr/bin/tshark -o ip.check_checksum:TRUE";
-
 static pcap_t *pcap_hdl;  // Packet capture handle.
-
-std::string
-getTimeStr()
-{
-    time_t    rawtime;
-    struct tm timeinfo;
-
-    time(&rawtime);
-    localtime_r(&rawtime, &timeinfo);
-
-    char buffer[80];
-    strftime(buffer, 80, "%d%m%Y_%I%M%S", &timeinfo);
-    return std::string(buffer);
-}
 
 void
 sleep_thread_log(std::chrono::milliseconds nms)
@@ -156,20 +138,14 @@ quit:
  * Capture packets on the specified interfaces by forking off a process per
  * interface.
  */
-void
-start_pktcap(const std::vector<std::string> &intfs, unsigned int num_pkts,
-             unsigned int timeout_sec, std::vector<pid_t> &pids)
+std::vector<pid_t>
+start_pktcap(const std::string &             tOutputDir,
+             const std::vector<std::string> &intfs, unsigned int num_pkts,
+             unsigned int timeout_sec)
 {
-    const ::testing::TestInfo *const test_info =
-        ::testing::UnitTest::GetInstance()->current_test_info();
-    const std::string tOutputDir = gtestOutputDirName + "/" +
-                                   std::string(test_info->test_case_name()) +
-                                   "/" + std::string(test_info->name());
+    std::string        ifPcapFile;
+    std::vector<pid_t> pids;
 
-    ASSERT_TRUE(boost::filesystem::create_directories(tOutputDir));
-
-    std::string ifPcapFile;
-    pids.clear();
     for (const auto &intf : intfs) {
         ifPcapFile = tOutputDir + "/" + intf + ".pcap";
         pid_t cid  = fork();
@@ -186,8 +162,8 @@ start_pktcap(const std::vector<std::string> &intfs, unsigned int num_pkts,
         stop_pktcap(intfs, pids);
         pids.clear();
     }
-    ASSERT_EQ(intfs.size(), pids.size())
-        << "Failed to listen on all the specified interfaces";
+
+    return pids;
 }
 
 // Wait for pcap child processes and verify exit status.
@@ -211,28 +187,24 @@ stop_pktcap(const std::vector<std::string> &intfs,
 }
 
 void
-tVerifyPackets(const std::vector<std::string> &interfaces)
+tVerifyPackets(const std::string &tOutputDir, const std::string &tExpectedDir,
+               const std::vector<std::string> &interfaces)
 {
-    int                              ret = 0;
-    std::string                      cmd;
-    const ::testing::TestInfo *const test_info =
-        ::testing::UnitTest::GetInstance()->current_test_info();
-    const std::string tDir = std::string(test_info->test_case_name()) + "/" +
-                             std::string(test_info->name());
-    const std::string tOutputDir   = gtestOutputDirName + "/" + tDir;
-    const std::string tExpectedDir = gtestExpectedDirName + "/" + tDir;
+    const std::string tsharkBinary =
+        "/usr/bin/tshark -o ip.check_checksum:TRUE";
 
-    for (auto interface : interfaces) {
-        std::string ifPcapFile = tOutputDir + "/" + interface + ".pcap";
-        std::string ifPktsFile = tOutputDir + "/" + interface + ".pkts";
-        std::string ifExpectedPcapFile =
-            tExpectedDir + "/" + interface + ".pcap";
-        std::string ifExpectedPktsFile =
-            tOutputDir + "/" + interface + ".pkts.expected";
+    std::string cmd, ifPcapFile, ifPktsFile, ifExpectedPcapFile,
+        ifExpectedPktsFile;
+
+    for (const auto &interface : interfaces) {
+        ifPcapFile         = tOutputDir + "/" + interface + ".pcap";
+        ifPktsFile         = tOutputDir + "/" + interface + ".pkts";
+        ifExpectedPcapFile = tExpectedDir + "/" + interface + ".pcap";
+        ifExpectedPktsFile = tOutputDir + "/" + interface + ".pkts.expected";
 
         cmd = tsharkBinary + " -nx " + " -r " + ifExpectedPcapFile + " > " +
               ifExpectedPktsFile + " 2> /dev/null";
-        ret = system(cmd.c_str());
+        int ret = system(cmd.c_str());
         EXPECT_EQ(0, ret);
         cmd = tsharkBinary + " -nx " + " -r " + ifPcapFile + " > " +
               ifPktsFile + " 2> /dev/null";

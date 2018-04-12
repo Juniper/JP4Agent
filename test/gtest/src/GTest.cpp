@@ -19,6 +19,8 @@
 // as noted in the Third-Party source code file.
 //
 
+#include <time.h>
+
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <future>
@@ -167,15 +169,64 @@ static constexpr intf vmx_links[] = {
  * Input Packet
  */
 
-// Test fixture class for common setup. We setup the forwarding pipeline config
-// here.
+// Global context for all tests.
+class TestEnv : public testing::Environment
+{
+ public:
+    std::string result_dir;
+
+    void SetUp() override
+    {
+        // Create the result directory and store its name.
+        time_t    rawtime;
+        struct tm timeinfo;
+
+        time(&rawtime);
+        localtime_r(&rawtime, &timeinfo);
+
+        char time_str[80];
+        strftime(time_str, 80, "%d%m%Y_%I%M%S", &timeinfo);
+
+        result_dir = "GTEST_RESULT_" + std::string(time_str);
+
+        ASSERT_TRUE(boost::filesystem::create_directories(result_dir))
+            << "Failed to create GTest result directory.";
+    }
+};
+
+static const ::testing::Environment *genv;
+
+// Common setup for all tests in this test fixture. We setup the forwarding
+// pipeline config here.
 class P4 : public ::testing::Test
 {
  protected:
+    std::string test_out_dir;
+    std::string test_exp_dir;
+
     static void SetUpTestCase()
     {
         ControllerSetConfig();
         sleep_thread_log(15s);
+    }
+
+    void SetUp() override
+    {
+        // Populate expected and output directory names for this test.
+        const auto *tenv = dynamic_cast<const TestEnv *>(genv);
+        ASSERT_NE(tenv, nullptr);
+
+        const ::testing::TestInfo *const tInfo =
+            ::testing::UnitTest::GetInstance()->current_test_info();
+        const std::string tDir = std::string(tInfo->test_case_name()) + "/" +
+                                 std::string(tInfo->name());
+
+        test_out_dir = tenv->result_dir + "/" + tDir;
+        test_exp_dir = "GTEST_EXPECTED/" + tDir;
+
+        // Create output directory.
+        ASSERT_TRUE(boost::filesystem::create_directories(test_out_dir))
+            << "Failed to create test output directory " << test_out_dir;
     }
 };
 
@@ -189,9 +240,10 @@ TEST_F(P4, injectL2Pkt)
 
     // Start listening for pkts.
     const std::vector<std::string> capture_ifs{ge_intfs[2].if_name};
-    std::vector<pid_t>             pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(
-        start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
+    std::vector<pid_t>             pcap_pids =
+        start_pktcap(test_out_dir, capture_ifs, num_pkts, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     std::cout << "Injecting L2 packet on egress port " << egress_port << "...";
@@ -220,7 +272,7 @@ TEST_F(P4, injectL2Pkt)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 }
 
 // Test2: Punt path: Inject L2 pkt in vmx_link2 and verify receipt at
@@ -238,9 +290,10 @@ TEST_F(P4, puntL2Pkt)
     constexpr int                  num_pkts         = 1;
     constexpr int                  pcap_timeout_sec = 10;
     const std::vector<std::string> capture_ifs{ge_intfs[2].if_name};
-    std::vector<pid_t>             pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(
-        start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
+    std::vector<pid_t>             pcap_pids =
+        start_pktcap(test_out_dir, capture_ifs, num_pkts, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     // Send RawEth pkt on vmx_link2
@@ -254,7 +307,7 @@ TEST_F(P4, puntL2Pkt)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 
     // Wait for controller thread
     ASSERT_TRUE(fut.get()) << "Timed out waiting for packet";
@@ -281,9 +334,10 @@ TEST_F(P4, hostPing)
     constexpr int                  num_pkts         = 2;
     constexpr int                  pcap_timeout_sec = 10;
     const std::vector<std::string> capture_ifs{ge_intfs[2].if_name};
-    std::vector<pid_t>             pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(
-        start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
+    std::vector<pid_t>             pcap_pids =
+        start_pktcap(test_out_dir, capture_ifs, num_pkts, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     // Send ICMP Echo request.
@@ -297,7 +351,7 @@ TEST_F(P4, hostPing)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 
     // Wait for controller thread
     ASSERT_TRUE(fut.get()) << "Timed out waiting for pkt";
@@ -313,9 +367,10 @@ TEST_F(P4, sendArpReq)
     constexpr int                  num_pkts = 2;  // ARP request and reply.
     constexpr int                  pcap_timeout_sec = 10;
     const std::vector<std::string> capture_ifs{ge_intfs[2].if_name};
-    std::vector<pid_t>             pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(
-        start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
+    std::vector<pid_t>             pcap_pids =
+        start_pktcap(test_out_dir, capture_ifs, num_pkts, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     // Construct and send ARP request
@@ -327,7 +382,7 @@ TEST_F(P4, sendArpReq)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 
     // Wait for controller thread
     ASSERT_TRUE(fut.get()) << "Timed out waiting for ARP request packet.";
@@ -346,9 +401,10 @@ TEST_F(P4, ipv4Router)
     // Start packet capture on ingress and egress interfaces.
     const std::vector<std::string> capture_ifs{ge_intfs[2].if_name,
                                                ge_intfs[3].if_name};
-    std::vector<pid_t>             pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(start_pktcap(capture_ifs, num_pkts_to_send,
-                                         pcap_timeout_sec, pcap_pids));
+    std::vector<pid_t>             pcap_pids = start_pktcap(
+        test_out_dir, capture_ifs, num_pkts_to_send, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     // Send L2 packet.
@@ -365,7 +421,7 @@ TEST_F(P4, ipv4Router)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 }
 
 // Test1: Null Target Test.
@@ -394,11 +450,11 @@ TEST_F(P4, nullTest)
 int
 main(int argc, char **argv)
 {
-    // Create result dir.
-    gtestOutputDirName = "GTEST_RESULT_" + getTimeStr();
-    boost::filesystem::create_directories(gtestOutputDirName);
-
     ::testing::InitGoogleTest(&argc, argv);
+
+    // Init global environment.
+    genv = ::testing::AddGlobalTestEnvironment(new TestEnv);
+
     if (argc == 1) {
         ::testing::GTEST_FLAG(filter) = "P4.*-P4.nullTest";
     } else {
