@@ -48,10 +48,8 @@
 
 #define SEND_BUF_SIZE 1500
 #define ETHER_PAYLOAD_BUF_SIZE 5000
-
 #define SEND_BUF_STR_SIZE 5000
 
-std::string gTestTimeStr;
 std::string gtestOutputDirName;
 std::string gtestExpectedDirName = "GTEST_EXPECTED";
 std::string tsharkBinary         = "/usr/bin/tshark -o ip.check_checksum:TRUE";
@@ -272,8 +270,7 @@ tVerifyPackets(const std::vector<std::string> &interfaces)
 }
 
 int
-SendRawEth(const std::string &             ifNameStr,
-           TestPacketLibrary::TestPacketId tcPktNum)
+SendRawEth(const char *ifName, TestPacketLibrary::TestPacketId tcPktNum)
 {
     int   i;
     int   ether_type;
@@ -287,7 +284,6 @@ SendRawEth(const std::string &             ifNameStr,
     char                 sendbuf[SEND_BUF_SIZE];
     struct ether_header *eh = (struct ether_header *)sendbuf;
     struct sockaddr_ll   socket_address;
-    char                 ifName[IFNAMSIZ];
     int                  byte_count;
 
     TestPacket *testPkt = testPacketLibrary.getTestPacket(tcPktNum);
@@ -296,9 +292,6 @@ SendRawEth(const std::string &             ifNameStr,
     dst_mac       = testPkt->getDstMac();
     ether_payload = testPkt->getEtherPayloadStr();
 
-    strncpy(ifName, ifNameStr.c_str(), IFNAMSIZ);
-    ifName[IFNAMSIZ - 1] = '\0';
-
     // RAW socket
     if ((sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) == -1) {
         perror("socket");
@@ -306,7 +299,7 @@ SendRawEth(const std::string &             ifNameStr,
 
     // Get interface index */
     memset(&if_idx, 0, sizeof(struct ifreq));
-    strncpy(if_idx.ifr_name, ifName, IFNAMSIZ - 1);
+    strncpy(if_idx.ifr_name, ifName, IFNAMSIZ);
 
     if (ioctl(sockfd, SIOCGIFINDEX, &if_idx) < 0) {
         perror("SIOCGIFINDEX");
@@ -314,7 +307,7 @@ SendRawEth(const std::string &             ifNameStr,
 
     // Get the MAC address of the interface to send on
     memset(&if_mac, 0, sizeof(struct ifreq));
-    strncpy(if_mac.ifr_name, ifName, IFNAMSIZ - 1);
+    strncpy(if_mac.ifr_name, ifName, IFNAMSIZ);
     if (ioctl(sockfd, SIOCGIFHWADDR, &if_mac) < 0) {
         perror("SIOCGIFHWADDR");
     }
@@ -371,10 +364,10 @@ SendRawEth(const std::string &             ifNameStr,
 }
 
 void
-send_arp_req(const std::string &ifname, const char *target_ip_addr)
+send_arp_req(const char *ifname, const char *target_ip_addr)
 {
     char      errbuf[LIBNET_ERRBUF_SIZE]{};
-    libnet_t *l = libnet_init(LIBNET_LINK, ifname.c_str(), errbuf);
+    libnet_t *l = libnet_init(LIBNET_LINK, ifname, errbuf);
     ASSERT_NE(nullptr, l) << "libnet_init() failed: " << errbuf;
 
     std::unique_ptr<libnet_t, decltype(&libnet_destroy)> lup{l, libnet_destroy};

@@ -43,8 +43,7 @@ void start_pktcap(const std::vector<std::string> &intfs, unsigned int num_pkts,
 bool stop_pktcap(const std::vector<std::string> &intfs,
                  const std::vector<pid_t> &      pids);
 
-extern int SendRawEth(const std::string &             ifNameStr,
-                      TestPacketLibrary::TestPacketId tcPktNum);
-void       send_arp_req(const std::string &ifname, const char *target_ip_addr);
+int  SendRawEth(const char *ifName, TestPacketLibrary::TestPacketId tcPktNum);
+void send_arp_req(const char *ifname, const char *target_ip_addr);
 
 #endif  // TEST_GTEST_INCLUDE_TESTUTILS_H_
