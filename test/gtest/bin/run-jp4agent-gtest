@@ -10,7 +10,10 @@ then
     echo "Deleting file NullTest.txt\n"
     rm -f $JP4AGENT_LOC/src/targets/null/NullTest.txt
     $JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest $1
+elif [ "$1" == "brcm" ]
+then
+    $JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest $1 --gtest_output=xml:./
 else
-$JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest --gtest_output=xml:./
+    $JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest --gtest_output=xml:./
 fi
  

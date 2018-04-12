@@ -95,8 +95,8 @@ BrcmDevice::create (const std::string &name)
     // TODO
     // 1. Ports' MAC addresses must come from device config
     // 2. L3 interfaces must come from device config or P4 program
-    BrcmL3Intf::brcmAddL3Intf(9, 0x2c2c2c01, 0xffffff00, 0x88a25e91a2a8, 0);
-    BrcmL3Intf::brcmAddL3Intf(13, 0x37373701, 0xffffff00, 0x88a25e91a2a9, 0);
+    BrcmL3Intf::brcmAddTestL3Intf(9, 0x2c2c2c01, 0xffffff00, 0x88a25e91a2a8, 0, 1);
+    BrcmL3Intf::brcmAddTestL3Intf(13, 0x37373701, 0xffffff00, 0x88a25e91a2a9, 0, 0);
 
     return device;
 }

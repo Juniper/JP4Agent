@@ -32,7 +32,7 @@
 //
 // Defaults
 //
-const std::string defConfigFile("/b/sgopinath/code/JP4Agent/config/jp4agent-brcm-cfg.json");
+const std::string defConfigFile("/root/JP4Agent/config/jp4agent-brcm-cfg.json");
 const std::string _debugmode = "debug-afi-objects";
 
 //

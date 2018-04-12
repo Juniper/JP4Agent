@@ -27,13 +27,7 @@ int main()
 {
     int status = ControllerSetConfig();
 
-    status = ControllerAddRouteEntry();
-
-#ifndef SUD
-    while (1) {
-        ControllerICMPEcho(15s);
-    }
-#endif // SUD
+    status = ControllerAddRouteEntry(0x0a000001, 16, 0x0a000001, 0x88a25e9175ff, 1);
 
     return status;
 }

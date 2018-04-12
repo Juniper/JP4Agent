@@ -370,7 +370,7 @@ TEST_F(P4, sendArpReq)
 TEST_F(P4, ipv4Router)
 {
     // Launch controller to add route entry.
-    ControllerAddRouteEntry();
+    ControllerAddRouteEntry(0x0a000001, 16, 0x0a000001, 0x88a25e9175ff, 1);
     sleep_thread_log(5s);
 
     const int num_pkts_to_send = 1;
@@ -401,11 +401,11 @@ TEST_F(P4, ipv4Router)
     tVerifyPackets(capture_ifs);
 }
 
-// Test5: Null Target Test.
+// Test6: Null Target Test.
 TEST_F(P4, nullTest)
 {
     // Launch controller to add route entry.
-    ControllerAddRouteEntry();
+    ControllerAddRouteEntry(0x0a000001, 16, 0x0a000001, 0x88a25e9175ff, 1);
     sleep_thread_log(15s);
     ifstream gtestFile;
     std::string line, log;
@@ -418,7 +418,6 @@ TEST_F(P4, nullTest)
     gtestFile.close();
     EXPECT_TRUE(log.compare(expectedString) == 0);
 }
-
 
 //
 // gtest main
@@ -434,7 +433,11 @@ int main(int argc, char **argv)
         ::testing::GTEST_FLAG(filter) = "P4.*-P4.nullTest";
     }
     else {
-        ::testing::GTEST_FLAG(filter) = "*nullTest*";
+        if (strcmp(argv[1], "brcm")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCM.*";
+        } else {
+            ::testing::GTEST_FLAG(filter) = "*nullTest*";
+        }
     }
    //::testing::GTEST_FLAG(filter) = "*ipv4Router*";
    //::testing::GTEST_FLAG(filter) = "*injectL2Pkt*:*puntL2Pkt*:*hostPing*";
