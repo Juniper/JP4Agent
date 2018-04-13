@@ -11,7 +11,14 @@ cd build
 To build JPAgent with aft target:
 ./make-all-aft.sh
 
-To build JPAgent with aft target:
+To build JPAgent with Broadcom target:
+1. Set the following environment variables:
+   export BCM_HALP_DIR_PATH=<path to halp-directory>
+   export BCM_SDK_DIR_PATH=<path to sdk-directory>
+
+2. ./make-all-brcm.sh
+
+To build JPAgent with null target:
 ./make-all-null.sh
 ```
 
@@ -19,6 +26,10 @@ To build JPAgent with aft target:
 ```
 To run JPAgent (aft target):
 cd src/targets/aft/bin
+./run-jp4agent 
+
+To run JPAgent (Broadcom target):
+cd src/targets/brcm/bin
 ./run-jp4agent 
 
 To run JPAgent (null target):
