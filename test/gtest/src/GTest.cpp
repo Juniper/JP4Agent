@@ -19,20 +19,21 @@
 // as noted in the Third-Party source code file.
 //
 
-#include <limits.h>
+#include <time.h>
+
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <future>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "gtest/gtest.h"
+#include "Controller.h"
+#include "TapIf.h"
 #include "TestPacket.h"
 #include "TestUtils.h"
-#include "TapIf.h"
-#include "Controller.h"
-#include <boost/filesystem.hpp>
-#include <iostream>
-#include <iomanip>
-#include <ctime>
-#include <future>
-#include <fstream>
-
-using namespace std;
 
 using namespace std::chrono_literals;
 
@@ -42,7 +43,7 @@ using namespace std::chrono_literals;
 // Junos RE CLI Sandbox configuration
 // ==================================
 //
-// root# show forwarding-options 
+// root# show forwarding-options
 // forwarding-sandbox jp4agent {
 //     port p1 {
 //         interface xe-0/0/0:1;
@@ -113,11 +114,6 @@ using namespace std::chrono_literals;
 // root@de5cf35cd169:~#
 //
 
-//const std::string afiServerAddr   = "128.0.0.16:50051"; // grpc/tcp
-const std::string afiServerAddr   = "172.18.0.1:65051"; // grpc/tcp
-const std::string afiHospathAddr  = "128.0.0.16:9002";  // udp
-
-
 //
 //              |
 //   ,-----.    |
@@ -128,59 +124,31 @@ const std::string afiHospathAddr  = "128.0.0.16:9002";  // udp
 //              |
 //
 
-const std::string GE_0_0_0_MAC_STR = "fe:26:0a:2e:aa:f0";
-const std::string GE_0_0_1_MAC_STR = "fe:26:0a:2e:aa:f1";
-const std::string GE_0_0_2_MAC_STR = "fe:26:0a:2e:aa:f2";
-const std::string GE_0_0_3_MAC_STR = "fe:26:0a:2e:aa:f3";
-const std::string GE_0_0_4_MAC_STR = "fe:26:0a:2e:aa:f4";
-const std::string GE_0_0_5_MAC_STR = "fe:26:0a:2e:aa:f5";
-const std::string GE_0_0_6_MAC_STR = "fe:26:0a:2e:aa:f6";
-const std::string GE_0_0_7_MAC_STR = "fe:26:0a:2e:aa:f7";
+struct intf {
+    const char *if_name;
+    const char *mac_str;
+    const char *ip_addr;
+};
 
-const std::string GE_0_0_0_VMX_IF_NAME = "ge-0.0.0-vmx1";
-const std::string GE_0_0_1_VMX_IF_NAME = "ge-0.0.1-vmx1";
-const std::string GE_0_0_2_VMX_IF_NAME = "ge-0.0.2-vmx1";
-const std::string GE_0_0_3_VMX_IF_NAME = "ge-0.0.3-vmx1";
-const std::string GE_0_0_4_VMX_IF_NAME = "ge-0.0.4-vmx1";
-const std::string GE_0_0_5_VMX_IF_NAME = "ge-0.0.5-vmx1";
-const std::string GE_0_0_6_VMX_IF_NAME = "ge-0.0.6-vmx1";
-const std::string GE_0_0_7_VMX_IF_NAME = "ge-0.0.7-vmx1";
+static constexpr intf ge_intfs[] = {
+    {"ge-0.0.0-vmx1", "fe:26:0a:2e:aa:f0", "103.30.100.1"},
+    {"ge-0.0.1-vmx1", "fe:26:0a:2e:aa:f1", "103.30.110.1"},
+    {"ge-0.0.2-vmx1", "fe:26:0a:2e:aa:f2", "103.30.120.1"},
+    {"ge-0.0.3-vmx1", "fe:26:0a:2e:aa:f3", "103.30.130.1"},
+    {"ge-0.0.4-vmx1", "fe:26:0a:2e:aa:f4", "103.30.140.1"},
+    {"ge-0.0.5-vmx1", "fe:26:0a:2e:aa:f5", "103.30.150.1"},
+    {"ge-0.0.6-vmx1", "fe:26:0a:2e:aa:f6", "103.30.160.1"},
+    {"ge-0.0.7-vmx1", "fe:26:0a:2e:aa:f7", "103.30.170.1"}};
 
-const std::string GE_0_0_0_IP_ADDR_STR = "103.30.100.1";
-const std::string GE_0_0_1_IP_ADDR_STR = "103.30.110.1";
-const std::string GE_0_0_2_IP_ADDR_STR = "103.30.120.1";
-const std::string GE_0_0_3_IP_ADDR_STR = "103.30.130.1";
-const std::string GE_0_0_4_IP_ADDR_STR = "103.30.140.1";
-const std::string GE_0_0_5_IP_ADDR_STR = "103.30.150.1";
-const std::string GE_0_0_6_IP_ADDR_STR = "103.30.160.1";
-const std::string GE_0_0_7_IP_ADDR_STR = "103.30.170.1";
-
-const std::string VMX_LINK0_NAME_STR = "vmx_link10";
-const std::string VMX_LINK1_NAME_STR = "vmx_link11";
-const std::string VMX_LINK2_NAME_STR = "vmx_link12";
-const std::string VMX_LINK3_NAME_STR = "vmx_link13";
-const std::string VMX_LINK4_NAME_STR = "vmx_link14";
-const std::string VMX_LINK5_NAME_STR = "vmx_link15";
-const std::string VMX_LINK6_NAME_STR = "vmx_link16";
-const std::string VMX_LINK7_NAME_STR = "vmx_link17";
-
-const std::string VMX_LINK0_MAC_STR = "32:26:0a:2e:bb:f0";
-const std::string VMX_LINK1_MAC_STR = "32:26:0a:2e:bb:f1";
-const std::string VMX_LINK2_MAC_STR = "32:26:0a:2e:bb:f2";
-const std::string VMX_LINK3_MAC_STR = "32:26:0a:2e:bb:f3";
-const std::string VMX_LINK4_MAC_STR = "32:26:0a:2e:bb:f4";
-const std::string VMX_LINK5_MAC_STR = "32:26:0a:2e:bb:f5";
-const std::string VMX_LINK6_MAC_STR = "32:26:0a:2e:bb:f6";
-const std::string VMX_LINK7_MAC_STR = "32:26:0a:2e:bb:f7";
-
-const std::string VMX_LINK0_IP_ADDR_STR = "103.30.100.2";
-const std::string VMX_LINK1_IP_ADDR_STR = "103.30.110.2";
-const std::string VMX_LINK2_IP_ADDR_STR = "103.30.120.2";
-const std::string VMX_LINK3_IP_ADDR_STR = "103.30.130.2";
-const std::string VMX_LINK4_IP_ADDR_STR = "103.30.140.2";
-const std::string VMX_LINK5_IP_ADDR_STR = "103.30.150.2";
-const std::string VMX_LINK6_IP_ADDR_STR = "103.30.160.2";
-const std::string VMX_LINK7_IP_ADDR_STR = "103.30.170.2";
+static constexpr intf vmx_links[] = {
+    {"vmx_link10", "32:26:0a:2e:bb:f0", "103.30.100.2"},
+    {"vmx_link11", "32:26:0a:2e:bb:f1", "103.30.110.2"},
+    {"vmx_link12", "32:26:0a:2e:bb:f2", "103.30.120.2"},
+    {"vmx_link13", "32:26:0a:2e:bb:f3", "103.30.130.2"},
+    {"vmx_link14", "32:26:0a:2e:bb:f4", "103.30.140.2"},
+    {"vmx_link15", "32:26:0a:2e:bb:f5", "103.30.150.2"},
+    {"vmx_link16", "32:26:0a:2e:bb:f6", "103.30.160.2"},
+    {"vmx_link17", "32:26:0a:2e:bb:f7", "103.30.170.2"}};
 
 /*
  * IPv4 Router
@@ -201,15 +169,64 @@ const std::string VMX_LINK7_IP_ADDR_STR = "103.30.170.2";
  * Input Packet
  */
 
-// Test fixture class for common setup. We setup the forwarding pipeline config
-// here.
+// Global context for all tests.
+class TestEnv : public testing::Environment
+{
+ public:
+    std::string result_dir;
+
+    void SetUp() override
+    {
+        // Create the result directory and store its name.
+        time_t    rawtime;
+        struct tm timeinfo;
+
+        time(&rawtime);
+        localtime_r(&rawtime, &timeinfo);
+
+        char time_str[80];
+        strftime(time_str, 80, "%d%m%Y_%I%M%S", &timeinfo);
+
+        result_dir = "GTEST_RESULT_" + std::string(time_str);
+
+        ASSERT_TRUE(boost::filesystem::create_directories(result_dir))
+            << "Failed to create GTest result directory.";
+    }
+};
+
+static const ::testing::Environment *genv;
+
+// Common setup for all tests in this test fixture. We setup the forwarding
+// pipeline config here.
 class P4 : public ::testing::Test
 {
-protected:
+ protected:
+    std::string test_out_dir;
+    std::string test_exp_dir;
+
     static void SetUpTestCase()
     {
         ControllerSetConfig();
         sleep_thread_log(15s);
+    }
+
+    void SetUp() override
+    {
+        // Populate expected and output directory names for this test.
+        const auto *tenv = dynamic_cast<const TestEnv *>(genv);
+        ASSERT_NE(tenv, nullptr);
+
+        const ::testing::TestInfo *const tInfo =
+            ::testing::UnitTest::GetInstance()->current_test_info();
+        const std::string tDir = std::string(tInfo->test_case_name()) + "/" +
+                                 std::string(tInfo->name());
+
+        test_out_dir = tenv->result_dir + "/" + tDir;
+        test_exp_dir = "GTEST_EXPECTED/" + tDir;
+
+        // Create output directory.
+        ASSERT_TRUE(boost::filesystem::create_directories(test_out_dir))
+            << "Failed to create test output directory " << test_out_dir;
     }
 };
 
@@ -217,23 +234,24 @@ protected:
 // receipt at vmx_link2.
 TEST_F(P4, injectL2Pkt)
 {
-    constexpr uint16_t egress_port = 0;
-    constexpr int num_pkts = 1;
-    constexpr int pcap_timeout_sec = 10;
+    constexpr uint16_t egress_port      = 0;
+    constexpr int      num_pkts         = 1;
+    constexpr int      pcap_timeout_sec = 10;
 
     // Start listening for pkts.
-    const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(
-        start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
+    const std::vector<std::string> capture_ifs{ge_intfs[2].if_name};
+    std::vector<pid_t>             pcap_pids =
+        start_pktcap(test_out_dir, capture_ifs, num_pkts, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     std::cout << "Injecting L2 packet on egress port " << egress_port << "...";
     TestPacket *testPkt = testPacketLibrary.getTestPacket(
         TestPacketLibrary::TEST_PKT_ID_IPV4_ECHO_REQ_TO_TAP2);
-    char pktbuf[ETHER_PAYLOAD_BUF_SIZE];
+    char   pktbuf[ETHER_PAYLOAD_BUF_SIZE];
     size_t pktlen = testPkt->getEtherPacket(pktbuf, ETHER_PAYLOAD_BUF_SIZE);
-    std::string l2_pkt{pktbuf, pktlen};
+    std::string l2_pkt(pktbuf, pktlen);
 
     // Call controller to inject the L2 pkt on the JP4Agent connection.
     EXPECT_TRUE(ControllerInjectL2Pkt(l2_pkt, egress_port))
@@ -254,31 +272,33 @@ TEST_F(P4, injectL2Pkt)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 }
 
-// Test2: Punt path: Inject L2 pkt in vmx_link2 and verify receipt at controller.
+// Test2: Punt path: Inject L2 pkt in vmx_link2 and verify receipt at
+// controller.
 TEST_F(P4, puntL2Pkt)
 {
     constexpr uint16_t expected_ingress_port = 0;
 
     // Start Controller and listen.
-    uint16_t ingress_port = 0;
+    uint16_t    ingress_port = 0;
     std::string recvd_pkt;
-    auto fut = std::async(std::launch::async, ControllerPuntPkt,
+    auto        fut = std::async(std::launch::async, ControllerPuntPkt,
                           std::ref(recvd_pkt), std::ref(ingress_port), 15s);
 
-    constexpr int num_pkts = 1;
-    constexpr int pcap_timeout_sec = 10;
-    const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(
-        start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
+    constexpr int                  num_pkts         = 1;
+    constexpr int                  pcap_timeout_sec = 10;
+    const std::vector<std::string> capture_ifs{ge_intfs[2].if_name};
+    std::vector<pid_t>             pcap_pids =
+        start_pktcap(test_out_dir, capture_ifs, num_pkts, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     // Send RawEth pkt on vmx_link2
     int ret = SendRawEth(
-        VMX_LINK2_NAME_STR,
+        vmx_links[2].if_name,
         TestPacketLibrary::VMXZT_TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3);
     EXPECT_EQ(0, ret) << "Failed to send pkt to VMX_LINK2";
 
@@ -287,7 +307,7 @@ TEST_F(P4, puntL2Pkt)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 
     // Wait for controller thread
     ASSERT_TRUE(fut.get()) << "Timed out waiting for packet";
@@ -298,7 +318,7 @@ TEST_F(P4, puntL2Pkt)
     // Compare and verify
     TestPacket *testPkt = testPacketLibrary.getTestPacket(
         TestPacketLibrary::VMXZT_TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3);
-    char pktbuf[ETHER_PAYLOAD_BUF_SIZE];
+    char   pktbuf[ETHER_PAYLOAD_BUF_SIZE];
     size_t pktlen = testPkt->getEtherPacket(pktbuf, ETHER_PAYLOAD_BUF_SIZE);
 
     EXPECT_EQ(0, memcmp(pktbuf, recvd_pkt.data(), pktlen))
@@ -311,17 +331,18 @@ TEST_F(P4, hostPing)
     // Start Controller to handle ping.
     auto fut = std::async(std::launch::async, ControllerICMPEcho, 15s);
 
-    constexpr int num_pkts = 2;
-    constexpr int pcap_timeout_sec = 10;
-    const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(
-        start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
+    constexpr int                  num_pkts         = 2;
+    constexpr int                  pcap_timeout_sec = 10;
+    const std::vector<std::string> capture_ifs{ge_intfs[2].if_name};
+    std::vector<pid_t>             pcap_pids =
+        start_pktcap(test_out_dir, capture_ifs, num_pkts, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     // Send ICMP Echo request.
     int ret = SendRawEth(
-        VMX_LINK2_NAME_STR,
+        vmx_links[2].if_name,
         TestPacketLibrary::VMXZT_TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3);
     EXPECT_EQ(0, ret) << "Failed to send pkt to VMX_LINK2";
 
@@ -330,7 +351,7 @@ TEST_F(P4, hostPing)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 
     // Wait for controller thread
     ASSERT_TRUE(fut.get()) << "Timed out waiting for pkt";
@@ -343,24 +364,25 @@ TEST_F(P4, sendArpReq)
     std::string recvd_pkt;
     auto fut = std::async(std::launch::async, ControllerHandleArpReq, 15s);
 
-    constexpr int num_pkts = 2; // ARP request and reply.
-    constexpr int pcap_timeout_sec = 10;
-    const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(
-        start_pktcap(capture_ifs, num_pkts, pcap_timeout_sec, pcap_pids));
+    constexpr int                  num_pkts = 2;  // ARP request and reply.
+    constexpr int                  pcap_timeout_sec = 10;
+    const std::vector<std::string> capture_ifs{ge_intfs[2].if_name};
+    std::vector<pid_t>             pcap_pids =
+        start_pktcap(test_out_dir, capture_ifs, num_pkts, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     // Construct and send ARP request
     EXPECT_NO_FATAL_FAILURE(
-        send_arp_req(VMX_LINK2_NAME_STR, GE_0_0_2_IP_ADDR_STR.c_str()));
+        send_arp_req(vmx_links[2].if_name, ge_intfs[2].ip_addr));
 
     // Wait for pcap child processes
     ASSERT_TRUE(stop_pktcap(capture_ifs, pcap_pids))
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 
     // Wait for controller thread
     ASSERT_TRUE(fut.get()) << "Timed out waiting for ARP request packet.";
@@ -377,17 +399,18 @@ TEST_F(P4, ipv4Router)
     const int pcap_timeout_sec = 10;
 
     // Start packet capture on ingress and egress interfaces.
-    const std::vector<std::string> capture_ifs{GE_0_0_2_VMX_IF_NAME,
-                                               GE_0_0_3_VMX_IF_NAME};
-    std::vector<pid_t> pcap_pids;
-    ASSERT_NO_FATAL_FAILURE(start_pktcap(capture_ifs, num_pkts_to_send,
-                                         pcap_timeout_sec, pcap_pids));
+    const std::vector<std::string> capture_ifs{ge_intfs[2].if_name,
+                                               ge_intfs[3].if_name};
+    std::vector<pid_t>             pcap_pids = start_pktcap(
+        test_out_dir, capture_ifs, num_pkts_to_send, pcap_timeout_sec);
+    ASSERT_EQ(capture_ifs.size(), pcap_pids.size())
+        << "Failed to listen on all the specified interfaces";
     sleep_thread_log(3s);
 
     // Send L2 packet.
     for (int i = 0; i < num_pkts_to_send; i++) {
         int ret = SendRawEth(
-            VMX_LINK2_NAME_STR,
+            vmx_links[2].if_name,
             TestPacketLibrary::VMXZT_TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3);
         EXPECT_EQ(0, ret);
         std::this_thread::sleep_for(1s);
@@ -398,7 +421,7 @@ TEST_F(P4, ipv4Router)
         << "Packet capture failed or timed out";
 
     // Verify packets
-    tVerifyPackets(capture_ifs);
+    tVerifyPackets(test_out_dir, test_exp_dir, capture_ifs);
 }
 
 // Test6: Null Target Test.
@@ -406,41 +429,42 @@ TEST_F(P4, nullTest)
 {
     // Launch controller to add route entry.
     ControllerAddRouteEntry(0x0a000001, 16, 0x0a000001, 0x88a25e9175ff, 1);
-    sleep_thread_log(15s);
-    ifstream gtestFile;
+    sleep_thread_log(1s);
+  
+    const std::string expectedString =
+        "key_field: packet.ip4.daddr\ntree.ByteSize(): 69\nentry_name: "
+        "entry1\nparent_name: ipv4_lpm\ntarget_afi_object: etherencap1\n";
+    std::ifstream gtestFile{"/root/JP4Agent/src/targets/null/NullTest.txt"};
     std::string line, log;
-    const std::string expectedString = "key_field: packet.ip4.daddr\ntree.ByteSize(): 69\nentry_name: entry1\nparent_name: ipv4_lpm\ntarget_afi_object: etherencap1\n";
-    gtestFile.open("/root/JP4Agent/src/targets/null/NullTest.txt");
-    while ( getline (gtestFile,line) )
-        {
-            log += line + "\n";
-	}
-    gtestFile.close();
-    EXPECT_TRUE(log.compare(expectedString) == 0);
+    while (getline(gtestFile, line)) {
+        log += line + "\n";
+    }
+
+    EXPECT_EQ(log, expectedString);
 }
 
 //
 // gtest main
 //
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
-    // Create result dir.
-    gtestOutputDirName = "GTEST_RESULT_" + getTimeStr();
-    boost::filesystem::create_directories(gtestOutputDirName);
-
     ::testing::InitGoogleTest(&argc, argv);
+
+    // Init global environment.
+    genv = ::testing::AddGlobalTestEnvironment(new TestEnv);
+
     if (argc == 1) {
         ::testing::GTEST_FLAG(filter) = "P4.*-P4.nullTest";
-    }
-    else {
+    } else {
         if (strcmp(argv[1], "brcm")  == 0) {
             ::testing::GTEST_FLAG(filter) = "P4BRCM.*";
         } else {
             ::testing::GTEST_FLAG(filter) = "*nullTest*";
         }
     }
-   //::testing::GTEST_FLAG(filter) = "*ipv4Router*";
-   //::testing::GTEST_FLAG(filter) = "*injectL2Pkt*:*puntL2Pkt*:*hostPing*";
+    // ::testing::GTEST_FLAG(filter) = "*ipv4Router*";
+    // ::testing::GTEST_FLAG(filter) = "*injectL2Pkt*:*puntL2Pkt*:*hostPing*";
 
     return RUN_ALL_TESTS();
 }
