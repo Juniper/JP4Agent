@@ -1,12 +1,13 @@
 #!/bin/bash
 
-JP4AGENT_LOC=../../..
-
+JP4AGENT_LOC=../../../..
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/jp4agent/obj
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/utils/obj
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/pi/obj
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/afi/obj
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/pi/protos
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/AFI
-
-$JP4AGENT_LOC/test/controller/obj/controller
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JP4AGENT_LOC/src/targets/brcm/brcm/obj
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BCM_HALP_DIR_PATH/obj/
+ 
+gdb $JP4AGENT_LOC/src/targets/brcm/bin/jp4agent

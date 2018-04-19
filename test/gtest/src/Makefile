@@ -40,6 +40,7 @@ endif
 
 SRCS = \
 	GTest.cpp \
+	GTestBrcm.cpp \
 	TestUtils.cpp \
 	TestPacket.cpp \
 	TapIf.cpp

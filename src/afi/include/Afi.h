@@ -71,12 +71,14 @@ class Afi
     //    return _afiDevice;
     //}
 
-    void init()
+    void init(const std::string &name)
     {
         // AfiDeviceUPtr createDevice(const std::string &name);
 
         Log(DEBUG) << "___ Afi::init : creating device ___";
-        _afiDevice = createDevice("_device_");
+        (name == "") ?
+            _afiDevice = createDevice("_device_") :
+            _afiDevice = createDevice(name);
     }
 
     bool handleAfiJsonObject(const Json::Value &cfg_obj);

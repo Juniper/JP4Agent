@@ -33,11 +33,22 @@ bool ControllerInjectL2Pkt(const std::string&, uint16_t);
 
 bool ControllerPuntPkt(std::string&, uint16_t&, std::chrono::milliseconds);
 
+bool
+ControllerInjectPuntL2Pkt(const std::string &inject_l2_pkt,
+                          std::string &punt_l2_pkt,
+                          uint16_t egress_port,
+                          uint16_t ingress_port,
+                          std::chrono::milliseconds timeout_ms);
+
 bool ControllerICMPEcho(std::chrono::milliseconds);
 
 bool ControllerHandleArpReq(std::chrono::milliseconds);
 
-int ControllerAddRouteEntry();
+int ControllerAddRouteEntry(uint32_t dAddr,
+                            uint16_t pLen,
+                            uint32_t nAddr,
+                            uint64_t mac,
+                            uint16_t oPort);
 
 // Packet header definitions
 struct __attribute__((packed)) cpu_header_t {

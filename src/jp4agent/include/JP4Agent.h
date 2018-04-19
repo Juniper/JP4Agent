@@ -70,6 +70,7 @@ private:
         std::string _cliServerAddr;
 	std::string _jaegerConfigFile;
         uint16_t    _hostpathPort;
+        std::string _targetAddr;
     };
 
     Config _config;

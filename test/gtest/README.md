@@ -21,8 +21,15 @@
 
 Compilation
 ===========
+cd src
 make
 
-Running the example client
-==========================
-./run-gtests
+Running the example VMX client
+==============================
+cd bin
+./run-jp4agent-gtest
+
+Running the example Broadcom client
+===================================
+cd bin
+./run-jp4agent-gtest brcm

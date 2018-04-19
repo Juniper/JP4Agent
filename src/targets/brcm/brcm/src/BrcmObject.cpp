@@ -1,10 +1,11 @@
 //
-// Main.cpp
+// Juniper P4 Agent
 //
-// Test controller
+/// @file  BrcmObject.cpp
+/// @brief Brcm Object
 //
-// Created by Sandesh Kumar Sodhi, December 2017
-// Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+// Created by Sudheendra Gopinath, January 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
 //
 // All rights reserved.
 //
@@ -20,14 +21,5 @@
 //
 
 
-#include "Controller.h"
-using namespace std::chrono_literals;
-
-int main()
-{
-    int status = ControllerSetConfig();
-
-    status = ControllerAddRouteEntry(0x0a000001, 16, 0x0a000001, 0x88a25e9175ff, 1);
-
-    return status;
-}
+namespace BRCMHALP {
+}  // namespace BRCMHALP

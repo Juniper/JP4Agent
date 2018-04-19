@@ -198,4 +198,64 @@ TestPacketLibrary::buildTestPacketLibrary(void)
         "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
         "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
         "3637");
+  
+    //
+    // TEST_PKT_ID_BRCM_TEST_INJECT
+    //
+        // Mac    : 88:a2:5e:91:a2:a9
+        // Src IP : 55.55.55.2
+        // Dst IP : 55.55.55.1
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_INJECT];
+
+    testPkt->setDstMac("88:a2:5e:91:a2:a9");
+    testPkt->setSrcMac("32:26:0A:2E:FF:F3");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 1ae7 0000 4001 8351"
+                "3737 3702 3737 3701 "
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_TRANSIT_INJECT
+    //
+        // Mac    : 88:a2:5e:91:a2:a8
+        // Src IP : 44.44.44.2
+        // Dst IP : 55.55.55.2
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_TRANSIT_INJECT];
+
+    testPkt->setDstMac("88:a2:5e:91:a2:a8");
+    testPkt->setSrcMac("32:26:0A:2E:FF:F3");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 5e3c 0000 4001 5606"
+                "2c2c 2c02 3737 3702"
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_TRANSIT_PUNT
+    //
+        // Mac    : 88:a2:5e:91:a2:a8
+        // Src IP : 44.44.44.2
+        // Dst IP : 55.55.55.2
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_TRANSIT_PUNT];
+
+    testPkt->setDstMac("88:a2:5e:91:75:ff");
+    testPkt->setSrcMac("88:a2:5e:91:a2:a9");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 5e3c 0000 4001 5606"
+                "2c2c 2c02 3737 3702"
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
 }

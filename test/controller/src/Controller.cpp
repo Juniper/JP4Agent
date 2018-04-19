@@ -42,6 +42,7 @@
 #include <netinet/ip_icmp.h>
 
 #include "P4InfoUtils.h"
+#include "Utils.h"
 #include "Controller.h"
 
 using grpc::Channel;
@@ -161,6 +162,63 @@ ControllerPuntPkt(std::string &l2_pkt, uint16_t &ingress_port,
     return true;
 }
 
+bool
+ControllerInjectPuntL2Pkt(const std::string &inject_l2_pkt,
+                          std::string &punt_l2_pkt,
+                          uint16_t egress_port,
+                          uint16_t ingress_port,
+                          std::chrono::milliseconds timeout_ms)
+{
+    // Create gRPC stub and open the stream channel
+    auto channel = grpc::CreateChannel("localhost:50051",
+                                       grpc::InsecureChannelCredentials());
+
+    StreamChannelSyncClient sc{channel, timeout_ms};
+
+    // Encapsulate L2 pkt with cpu_header
+    cpu_header_t cpu_hdr;
+    memset(&cpu_hdr, 0, cpu_hdr_sz);
+    cpu_hdr.port = htons(ingress_port);
+
+    std::string payload{(char *)&cpu_hdr, cpu_hdr_sz};
+    payload.append(inject_l2_pkt);
+
+    // Inject L2 pkt on the stream
+    sc.send_pkt_out(std::move(payload));
+
+    // Listen for L2 pkt on the stream channel
+    auto *stream = sc.get_stream();
+    p4::StreamMessageResponse response;
+    bool rdstatus = stream->Read(&response);
+    if (!rdstatus) {
+        stream->WritesDone();
+        Status s = stream->Finish();
+        if (s.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED) {
+            std::cout << __func__ << ": Read packet timed out.\n";
+        }
+    }
+    if (response.update_case() != p4::StreamMessageResponse::kPacket) {
+        return false;
+    }
+    std::string recvd_pkt = response.packet().payload();
+
+    // Decapsulate cpu_header
+    char zero[8]{};
+    if ((recvd_pkt.size() <= cpu_hdr_sz) ||
+        (memcmp(zero, recvd_pkt.data(), 8) != 0)) {
+        return false;
+    }
+
+    egress_port = ntohs(((struct cpu_header_t *)recvd_pkt.data())->port);
+    std::cout << __PRETTY_FUNCTION__
+              << ": Received L2 pkt (size: " << recvd_pkt.size() - cpu_hdr_sz
+              << " bytes) on egress port " << egress_port << "\n";
+
+    // Copy L2 pkt payload alone
+    punt_l2_pkt.assign(recvd_pkt.begin() + cpu_hdr_sz, recvd_pkt.end());
+    return true;
+}
+
 uint16_t csum(uint16_t *addr, int len)
 {
     int nleft = len;
@@ -202,7 +260,7 @@ ControllerICMPEcho(std::chrono::milliseconds timeout_ms)
         stream->WritesDone();
         Status s = stream->Finish();
         if (s.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED) {
-            std::cout << __func__ << ": Read packet timed out.\n";
+            //std::cout << __func__ << ": Read packet timed out.\n";
         }
     }
     if (response.update_case() != p4::StreamMessageResponse::kPacket) {
@@ -221,6 +279,7 @@ ControllerICMPEcho(std::chrono::milliseconds timeout_ms)
         return false;
     }
 
+    std::cout << "Recvd ICMP Echo request.\n";
     // Use info in received pkt to construct ICMP echo reply
     const auto *cpu_hdr = (struct cpu_header_t *)recvd_pkt.data();
     const auto *eth_hdr = (struct ether_header *)(cpu_hdr + 1);
@@ -281,7 +340,7 @@ ControllerHandleArpReq(std::chrono::milliseconds timeout_ms)
         stream->WritesDone();
         Status s = stream->Finish();
         if (s.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED) {
-            std::cout << __func__ << ": Read packet timed out.\n";
+            //std::cout << __func__ << ": Read packet timed out.\n";
         }
     }
     if (response.update_case() != p4::StreamMessageResponse::kPacket) {
@@ -359,7 +418,11 @@ ControllerHandleArpReq(std::chrono::milliseconds timeout_ms)
 }
 
 int
-ControllerAddRouteEntry()
+ControllerAddRouteEntry(uint32_t dAddr,
+                        uint16_t pLen,
+                        uint32_t nAddr,
+                        uint64_t mac,
+                        uint16_t oPort)
 {
     int dev_id = 0;
     auto channel = grpc::CreateChannel("localhost:50051",
@@ -392,6 +455,13 @@ ControllerAddRouteEntry()
     }
 
     std::cout << "Write: Adding route table entry...";
+
+    Utils utils;
+    std::string dstAddr  = utils.uint2Str(dAddr);
+    std::string nhAddr  = utils.uint2Str(nAddr);
+    std::string macAddr  = utils.uint2Str(mac);
+    std::string oPortStr = utils.uint2Str(oPort);
+
     auto t_id = get_table_id(p4info, "ipv4_lpm");
     auto mf_id = get_mf_id(p4info, "ipv4_lpm", "ipv4.dstAddr");
     auto a_id = get_action_id(p4info, "set_nhop");
@@ -407,8 +477,8 @@ ControllerAddRouteEntry()
 
     auto lpm = match->mutable_lpm();
     // lpm->set_value(std::string("\x0a\x00\x00\x01", 4));  // 10.0.0.1
-    lpm->set_value(std::string("\x67\x1e\x1e\x03", 4));  // 10.0.0.1
-    lpm->set_prefix_len(16);
+    lpm->set_value(dstAddr);
+    lpm->set_prefix_len(pLen);
 
     auto table_action = table_entry->mutable_action();
     auto action = table_action->mutable_action();
@@ -416,13 +486,13 @@ ControllerAddRouteEntry()
     {
         auto param = action->add_params();
         param->set_param_id(p0_id);
-        param->set_value(std::string("\x0a\x00\x00\x01", 4));  // 10.0.0.1
+        param->set_value(nhAddr);
     }
     {
         auto param = action->add_params();
         param->set_param_id(p1_id);
         // param->set_value(std::string("\x00\x09", 2));
-        param->set_value(std::string("\x00\x01", 2));
+        param->set_value(oPortStr);
     }
 
     // add entry
