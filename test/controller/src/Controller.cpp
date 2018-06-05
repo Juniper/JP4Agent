@@ -266,7 +266,14 @@ ControllerICMPEcho(std::chrono::milliseconds timeout_ms)
     if (response.update_case() != p4::StreamMessageResponse::kPacket) {
         return false;
     }
-    std::string recvd_pkt = response.packet().payload();
+    std::string tmp_recvd_pkt = response.packet().payload();
+
+    // XXX: HACK ALERT: Possible bug in VMXZT leads to 5 extra bytes being
+    // appended to the punted packet. Work around this for now.
+    const size_t tmp_payload_len = (tmp_recvd_pkt.size() > 5)
+                                       ? (tmp_recvd_pkt.size() - 5)
+                                       : tmp_recvd_pkt.size();
+    std::string recvd_pkt(tmp_recvd_pkt, 0, tmp_payload_len);
     
     // Sanity check
     char zero[8]{};
@@ -291,7 +298,7 @@ ControllerICMPEcho(std::chrono::milliseconds timeout_ms)
         return false;
     }
 
-    std::string send_pkt{recvd_pkt};
+    std::string send_pkt(recvd_pkt);
 
     // cpu_hdr copied as is, since ingress & egress ports are the same.
     // Ret ethernet hdr: switch source and dest mac. copy ether_type.
