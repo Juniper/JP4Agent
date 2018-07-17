@@ -30,6 +30,7 @@
 class P4InfoResource;
 
 using P4InfoResourceId    = uint32_t;
+using P4InfoMatchFieldId  = uint32_t;
 using P4InfoActionParamId = uint32_t;
 
 using P4InfoResourcePtr     = std::shared_ptr<P4InfoResource>;
@@ -94,6 +95,35 @@ class P4InfoTable : public P4InfoResource
         std::cout << "table.size():" << _table.size() << std::endl;
     }
 
+    const std::string matchFieldName(const P4InfoMatchFieldId fieldId)
+    {
+        const auto &fields = _table.match_fields();
+        for (const auto &field : fields) {
+            if (field.id() == fieldId) {
+                return field.name();
+            }
+        }
+        // TBD: FIXME : revisit
+        return "";
+    }
+
+    bool matchFieldInfo(const P4InfoMatchFieldId fieldId,
+                        std::string& name,
+                        uint32_t& bitWidth)
+    {
+        const auto &fields = _table.match_fields();
+        for (const auto &field : fields) {
+            if (field.id() == fieldId) {
+                name = field.name();
+                bitWidth = field.bitwidth();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+ private:
     //
     // Debug
     //

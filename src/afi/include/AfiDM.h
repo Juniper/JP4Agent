@@ -25,6 +25,12 @@
 
 #include "afi_tree/afi_tree.pb.h"
 #include "afi_tree_entry/afi_tree_entry.pb.h"
+#include "afi_cap/afi_cap.pb.h"
+#include "afi_cap_match/afi_cap_match.pb.h"
+#include "afi_cap_action/afi_cap_action.pb.h"
+#include "afi_cap_entry/afi_cap_entry.pb.h"
+#include "afi_cap_entry_match/afi_cap_entry_match.pb.h"
+#include "afi_cap_entry_action/afi_cap_entry_action.pb.h"
 
 namespace AFIHAL
 {

@@ -1,10 +1,10 @@
 //
-// GTestBrcm.cpp - GTESTs
+// GTestBrcmSpine.cpp - GTESTs
 //
 // GTESTs
 //
-// Created by Sudheendra Gopinath, March 2018
-// Copyright (c) [2017] Juniper Networks, Inc. All rights reserved.
+// Created by Sudheendra Gopinath, June 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
 //
 // All rights reserved.
 //
@@ -57,19 +57,28 @@ using namespace std::chrono_literals;
 
 // Test fixture class for common setup.
 // We setup the forwarding pipeline config here.
-class P4BRCM : public ::testing::Test
+class P4BRCMSPINE : public ::testing::Test
 {
 protected:
     static void SetUpTestCase()
     {
+        std::string pFile("/root/JP4Agent/test/controller/testdata/spine.json");
+        std::string rFile("/root/JP4Agent/test/controller/testdata/spine.p4rt");
+        ControllerSetP4Input(pFile, rFile);
+
         ControllerSetConfig();
         sleep_thread_log(5s);
     }
 };
 
-// Test1: Inject and Punt Test.
-TEST_F(P4BRCM, BrcmInjectPuntL2Pkt)
+// Test1: VRF Classifier Table
+TEST_F(P4BRCMSPINE, VrfClassifier)
 {
+    unsigned char m[6] = {0x88, 0xa2, 0x5e, 0x91, 0x75, 0xff};
+    std::string mac((char *) &m[0], 6);
+    ControllerAddVrfEntry(0x800, mac, 0x37373702, 5);
+    EXPECT_EQ(1, 1);
+#ifdef SUD
     uint16_t port = 13;
 
     TestPacket *testPkt = testPacketLibrary.getTestPacket(
@@ -94,10 +103,12 @@ TEST_F(P4BRCM, BrcmInjectPuntL2Pkt)
     // Verify packets
     EXPECT_EQ(0, memcmp(pktbuf, recvd_pkt.data(), pktlen))
         << "Sent and received pkts differ";
+#endif // SUD
 }
 
+#ifdef SUD
 // Test2: Transit Packet Test.
-TEST_F(P4BRCM, BrcmIpv4Router)
+TEST_F(P4BRCMSPINE, BrcmIpv4Router)
 {
     uint16_t iport = 9;
     uint16_t eport = 13;
@@ -134,3 +145,4 @@ TEST_F(P4BRCM, BrcmIpv4Router)
                   memcmp(pktbuf + 25, recvd_pkt.data() + 25, pktlen - 26)))
         << "Sent and received pkts differ";
 }
+#endif // SUD

@@ -27,6 +27,8 @@
 #include <chrono>
 #include <string>
 
+void ControllerSetP4Input(std::string pipelineFile, std::string runtimeFile);
+
 int ControllerSetConfig();
 
 bool ControllerInjectL2Pkt(const std::string&, uint16_t);
@@ -49,6 +51,11 @@ int ControllerAddRouteEntry(uint32_t dAddr,
                             uint32_t nAddr,
                             uint64_t mac,
                             uint16_t oPort);
+
+int ControllerAddVrfEntry(uint16_t etype,
+                          std::string mac,
+                          uint32_t addr,
+                          uint32_t vrf);
 
 // Packet header definitions
 struct __attribute__((packed)) cpu_header_t {

@@ -431,13 +431,12 @@ int main(int argc, char **argv)
     ::testing::InitGoogleTest(&argc, argv);
     if (argc == 1) {
         ::testing::GTEST_FLAG(filter) = "P4.*-P4.nullTest";
-    }
-    else {
-        if (strcmp(argv[1], "brcm")  == 0) {
+    } else if (strcmp(argv[1], "brcm")  == 0) {
             ::testing::GTEST_FLAG(filter) = "P4BRCM.*";
-        } else {
-            ::testing::GTEST_FLAG(filter) = "*nullTest*";
-        }
+    } else if (strcmp(argv[1], "brcmspine")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.*";
+    } else {
+        ::testing::GTEST_FLAG(filter) = "*nullTest*";
     }
    //::testing::GTEST_FLAG(filter) = "*ipv4Router*";
    //::testing::GTEST_FLAG(filter) = "*injectL2Pkt*:*puntL2Pkt*:*hostPing*";

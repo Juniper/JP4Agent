@@ -55,6 +55,28 @@ module afi-types {
         }
     }
 
+    typedef afi-inet-family {
+        description "AFI IPv4 protocol family";
+        type enumeration {
+            enum tcp {
+             description
+              "TCP";
+            }
+            enum udp {
+             description
+              "UDP";
+            }
+            enum igmp {
+             description
+              "IGMP";
+            }
+            enum icmp {
+             description
+              "ICMP";
+            }
+        }
+    }
+
     typedef afi-field {
         description "AFI field";
         type enumeration {
@@ -83,12 +105,10 @@ module afi-types {
               "Packet Ethernet vlan1 tag vlan id";
             }
 
-
             enum packet-arp-target-proto-addr {
              description
               "ARP packet target proto address";
             }
-
 
             enum packet-ether-vlan1-tag-pcp {
              description
@@ -171,5 +191,32 @@ module afi-types {
             }
         }
     }
-}
 
+    typedef afi-class-id {
+        description "Packet classification identifier";
+        // platform-specific type, range
+        type int16 {
+            range "0..4095";
+        }
+    }
+
+    typedef afi-port {
+        description "AFI Port";
+        // platform-specific type, range
+        type uint8;
+    }
+
+    typedef afi-trunk-group-id {
+        description "AFI Trunk Group id";
+        // platform-specific type, range
+        type uint16;
+    }
+
+    typedef afi-vrf-id {
+        description "VRF ID";
+        // platform-specific type, range
+        type int16 {
+            range "0..4095";
+        }
+    }
+}

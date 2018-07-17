@@ -13,6 +13,9 @@ then
 elif [ "$1" == "brcm" ]
 then
     $JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest $1 --gtest_output=xml:./
+elif [ "$1" == "brcmspine" ]
+then
+    $JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest $1 --gtest_output=xml:./
 else
     $JP4AGENT_LOC/test/gtest/obj/jp4agent-gtest --gtest_output=xml:./
 fi

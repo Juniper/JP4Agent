@@ -38,6 +38,8 @@ CPPFLAGS += \
 	-I. \
 	-I../include \
 	-I../../utils/include \
+	-I../../pi/protos \
+	-I../../pi/include \
 	-I../../../AFI/protos \
 	-I../../../AFI/protos/juniper \
 	-I/usr/include/jsoncpp
@@ -56,7 +58,13 @@ SRCS = \
 	AfiDevice.cpp \
 	AfiJsonResource.cpp \
 	AfiTree.cpp \
-	AfiTreeEntry.cpp
+	AfiTreeEntry.cpp \
+	AfiCap.cpp \
+	AfiCapMatch.cpp \
+	AfiCapAction.cpp \
+	AfiCapEntry.cpp \
+	AfiCapEntryMatch.cpp \
+	AfiCapEntryAction.cpp
 
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 OBJS := $(addprefix $(OBJDIR)/,$(OBJS))

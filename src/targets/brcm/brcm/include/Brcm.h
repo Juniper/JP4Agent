@@ -31,10 +31,13 @@
 #include "Log.h"
 #include "Utils.h"
 #include "Afi.h"
+#include "BrcmFp.h"
 #include "BrcmDevice.h"
 #include "BrcmObject.h"
 #include "BrcmTree.h"
 #include "BrcmTreeEntry.h"
+#include "BrcmCap.h"
+#include "BrcmCapEntry.h"
 
 #include "BrcmRpc.h"
 

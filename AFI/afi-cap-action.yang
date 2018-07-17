@@ -1,0 +1,68 @@
+//
+// Juniper AFI : AFI Content Aware Processor Action Set
+//
+// Created by Sudheendra Gopinath, June 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-cap-action {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-cap-action/junos/17.3";
+    prefix "afi-cap-action";
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Content Aware Processor Action Set";
+
+    revision 2019-06-02 {
+        description "Initial revision.";
+    }
+
+    container afi-cap-action {
+        description "AFI Content Aware Processor Action Set";
+
+        leaf drop {
+            type empty;
+            description "Drop packet.";
+        }
+    
+        leaf drop-cancel {
+            type empty;
+            description "Cancel lower priority Drop action.";
+        }
+    
+        leaf copy-to-cpu {
+            type empty;
+            description "Copy to CPU.";
+        }
+    
+        leaf copy-to-cpu-cancel {
+            type empty;
+            description "Cancel lower priority Copy to CPU Action.";
+        }
+    
+        leaf destination-class-id {
+            type empty;
+            description "Set destination address lookup class ID.";
+        }
+    
+        leaf source-class-id {
+            type empty;
+            description "Set source address lookup class ID.";
+        }
+    
+        leaf vrf {
+            type empty;
+            description "Set VRF ID.";
+        }
+    }
+}

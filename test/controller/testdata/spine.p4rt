@@ -1,0 +1,388 @@
+tables {
+  preamble {
+    id: 33554443
+    name: "ingress.vrf.vrf_classifier_table"
+    alias: "vrf_classifier_table"
+    annotations: "@proto_package(\"vrf\")"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.ether_type"
+    annotations: "@proto_tag(1)"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.src_addr"
+    annotations: "@proto_tag(2)"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "hdr.ipv4_base.diffserv"
+    annotations: "@proto_tag(3)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "hdr.ipv4_base.dst_addr"
+    annotations: "@proto_tag(4)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "standard_metadata.ingress_port"
+    annotations: "@proto_tag(5)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "hdr.ipv6_base.traffic_class"
+    annotations: "@proto_tag(6)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "hdr.ipv6_base.dst_addr"
+    annotations: "@proto_tag(7)"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "hdr.ipv4_base.src_addr"
+    annotations: "@proto_tag(8)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 16777232
+    annotations: "@proto_tag(1)"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554433
+    name: "ingress.class_id.class_id_assignment_table"
+    alias: "class_id_assignment_table"
+    annotations: "@proto_package(\"class_id\")"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.ether_type"
+    annotations: "@proto_tag(1)"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ipv4_base.ttl"
+    annotations: "@proto_tag(2)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "hdr.ipv6_base.hop_limit"
+    annotations: "@proto_tag(3)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "hdr.ipv4_base.dst_addr"
+    annotations: "@proto_tag(4)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "hdr.ipv6_base.dst_addr"
+    annotations: "@proto_tag(5)"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "hdr.ipv4_base.protocol"
+    annotations: "@proto_tag(6)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "hdr.ipv6_base.next_header"
+    annotations: "@proto_tag(7)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "local_metadata.l4_src_port"
+    annotations: "@proto_tag(8)"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "local_metadata.l4_dst_port"
+    annotations: "@proto_tag(9)"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 10
+    name: "hdr.vlan_tag[0].vid"
+    annotations: "@proto_tag(10)"
+    bitwidth: 12
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 11
+    name: "hdr.vlan_tag[0].pcp"
+    annotations: "@proto_tag(11)"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 16777218
+    annotations: "@proto_tag(1)"
+  }
+  const_default_action_id: 16777218
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554459
+    name: "ingress.packet_length_check.ipv4_length_check_table"
+    alias: "ipv4_length_check_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4_base.total_len"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 16777248
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554460
+    name: "ingress.packet_length_check.ipv6_length_check_table"
+    alias: "ipv6_length_check_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6_base.payload_length"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 16777248
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554454
+    name: "ingress.l3_admit.cluster_mac_table"
+    alias: "cluster_mac_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dst_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16777221
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554434
+    name: "ingress.l3_admit.dst_mac_classifier_table"
+    alias: "dst_mac_classifier_table"
+    annotations: "@proto_package(\"l3_admit\")"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dst_addr"
+    annotations: "@proto_tag(1)"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16777221
+    annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554461
+    name: "egress.packetio_egress.packet_in_lag_table"
+    alias: "packet_in_lag_table"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16777250
+  }
+  action_refs {
+    id: 16827749
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16779027
+    name: "ingress.NoAction"
+    alias: "ingress.NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16777232
+    name: "ingress.vrf.set_vrf"
+    alias: "set_vrf"
+    annotations: "@proto_package(\"vrf\")"
+  }
+  params {
+    id: 1
+    name: "vrf_id"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16777218
+    name: "ingress.class_id.set_class_id"
+    alias: "set_class_id"
+    annotations: "@proto_package(\"class_id\")"
+  }
+  params {
+    id: 1
+    name: "class_id_value"
+    annotations: "@proto_tag(1)"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 16777248
+    name: "ingress.packet_length_check.drop_and_exit"
+    alias: "drop_and_exit"
+  }
+}
+actions {
+  preamble {
+    id: 16777221
+    name: "ingress.l3_admit.set_l3_admit"
+    alias: "set_l3_admit"
+    annotations: "@proto_package(\"l3_admit\")"
+  }
+}
+actions {
+  preamble {
+    id: 16827749
+    name: "egress.NoAction"
+    alias: "egress.NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16777249
+    name: "egress.packetio_egress.encap_packet_in_header"
+    alias: "encap_packet_in_header"
+  }
+}
+actions {
+  preamble {
+    id: 16777250
+    name: "egress.packetio_egress.set_packet_in_ingress_lag_port"
+    alias: "set_packet_in_ingress_lag_port"
+  }
+  params {
+    id: 1
+    name: "ingress_lag_port"
+    bitwidth: 32
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 2868941301
+    name: "packet_in"
+    annotations: "@controller_header(\"packet_in\")"
+  }
+  metadata {
+    id: 1
+    name: "ingress_singleton_port"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+  }
+  metadata {
+    id: 2
+    name: "ingress_lag_port"
+    annotations: "@proto_tag(2)"
+    bitwidth: 32
+  }
+  metadata {
+    id: 3
+    name: "target_egress_port"
+    annotations: "@proto_tag(3)"
+    bitwidth: 32
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 2868916615
+    name: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "egress_singleton_port"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+  }
+  metadata {
+    id: 2
+    name: "submit_to_ingress"
+    annotations: "@proto_tag(2)"
+    bitwidth: 1
+  }
+}

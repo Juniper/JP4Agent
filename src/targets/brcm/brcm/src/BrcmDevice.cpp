@@ -39,6 +39,12 @@ BrcmDevice::setObjectCreators()
     Log(DEBUG) << "___ BrcmDevice::setObjectCreators _______";
     setObjectCreator("afi-tree", &BrcmTree::create);
     setObjectCreator("afi-tree-entry", &BrcmTreeEntry::create);
+    setObjectCreator("afi-cap", &BrcmCap::create);
+    setObjectCreator("afi-cap-match", &BrcmCapMatch::create);
+    setObjectCreator("afi-cap-action", &BrcmCapAction::create);
+    setObjectCreator("afi-cap-entry", &BrcmCapEntry::create);
+    setObjectCreator("afi-cap-entry-match", &BrcmCapEntryMatch::create);
+    setObjectCreator("afi-cap-entry-action", &BrcmCapEntryAction::create);
 }
 
 //

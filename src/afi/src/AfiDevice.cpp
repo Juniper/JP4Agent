@@ -25,7 +25,8 @@
 namespace AFIHAL
 {
 AfiObjectPtr
-AfiDevice::handleDMObject(const AfiJsonResource& res)
+AfiDevice::handleDMObject(const AfiJsonResource& res,
+                          const bool& pipelineStage)
 {
     Log(DEBUG) << "____ AfiDevice::handleDMObject ____\n";
     AfiObjectPtr afiObj = _objCreator.create(res.type(), res);
@@ -40,15 +41,17 @@ AfiDevice::handleDMObject(const AfiJsonResource& res)
 
     insertToObjectMap(afiObj);
 
-    //
-    // Now bind the afi object.
-    //
-    if (!(afiObj->bind())) {
+    if (pipelineStage == false) {
         //
-        // Unable to bind
+        // Now bind the afi object.
         //
-        Log(ERROR) << ": Unable to bind afi object ";
-        return nullptr;
+        if (!(afiObj->bind())) {
+            //
+            // Unable to bind
+            //
+            Log(ERROR) << ": Unable to bind afi object ";
+            return nullptr;
+        }
     }
     return afiObj;
 }

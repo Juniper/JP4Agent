@@ -1,0 +1,60 @@
+//
+// Juniper AFI : AFI Content Aware Processor
+//
+// Created by Sudheendra Gopinath, June 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-cap {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-cap/junos/17.3";
+    prefix "afi-cap";
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Content Aware Processor";
+
+    revision 2019-06-02 {
+        description "Initial revision.";
+    }
+
+    container afi-cap {
+        leaf cap-type {
+            type enumeration {
+                enum "VLAN";
+                enum "INGRESS";
+                enum "EGRESS";
+            }
+            description "Content Aware Processor Type";
+        }
+
+        leaf group-id {
+            type uint8;
+            description "Group ID";
+        }
+
+        leaf group-priority {
+            type uint8;
+            description "Group Priority";
+        }
+
+        leaf match-object {
+            type string;
+            description "Match set";
+        }
+
+        leaf action-object {
+            type string;
+            description "Action set";
+        }
+    }
+}

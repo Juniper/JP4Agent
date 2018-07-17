@@ -36,10 +36,10 @@ public:
         std::string ret;
 
         if (typeid(T) == typeid(uint16_t)) {
-            i = ntohs(i);
+            i = htons(i);
             ret = std::string(reinterpret_cast<char *>(&i), sizeof(i));
         } else if (typeid(T) == typeid(uint32_t)) {
-            i = ntohl(i);
+            i = htonl(i);
             ret = std::string(reinterpret_cast<char *>(&i), sizeof(i));
         } else if (typeid(T) == typeid(uint64_t)) {
             unsigned char c[6];
