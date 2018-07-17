@@ -19,22 +19,25 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef __TestPacket__
-#define __TestPacket__
+#ifndef TEST_GTEST_INCLUDE_TESTPACKET_H_
+#define TEST_GTEST_INCLUDE_TESTPACKET_H_
 
 #include <netinet/ether.h>
-#include <vector>
-#include <map>
-#include <boost/algorithm/string.hpp>
-#include "Utils.h"
-#include "P4InfoUtils.h"
 
-#define MAC_ADDR_LEN            6
-#define ETHER_PAYLOAD_BUF_SIZE	5000
+#include <boost/algorithm/string.hpp>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "P4InfoUtils.h"
+#include "Utils.h"
+
+#define MAC_ADDR_LEN 6
+#define ETHER_PAYLOAD_BUF_SIZE 5000
 
 class TestPacket
 {
-public:
+ public:
     int setSrcMac(const std::string &mac)
     {
         std::vector<std::string> mac_sub_strings;
@@ -76,60 +79,60 @@ public:
 
     int getEtherPacket(char *pktData, int pktDataBuffLen)
     {
-#define ETH_HEADER_LEN    14
+#define ETH_HEADER_LEN 14
         int i = 0;
 
         if (pktDataBuffLen < ETH_HEADER_LEN) {
-		    return -1;
-		}
+            return -1;
+        }
 
-		for (i = 0; i < MAC_ADDR_LEN; i++) {
+        for (i = 0; i < MAC_ADDR_LEN; i++) {
             pktData[i] = _dstMac[i];
         }
 
-		for (i = 0; i < MAC_ADDR_LEN; i++) {
+        for (i = 0; i < MAC_ADDR_LEN; i++) {
             pktData[MAC_ADDR_LEN + i] = _srcMac[i];
         }
 
         pktData[ETH_HEADER_LEN - 2] = ((_etherType >> 8) & 0xFF);
-        pktData[ETH_HEADER_LEN - 1] = ((_etherType) & 0xFF);
+        pktData[ETH_HEADER_LEN - 1] = ((_etherType)&0xFF);
 
-		int pktDataLen = convertHexPktStrToPkt(_etherPayload, 
-				  							   &pktData[ETH_HEADER_LEN], 
-											   pktDataBuffLen - ETH_HEADER_LEN);
-	    return (ETH_HEADER_LEN + pktDataLen);
-	}
+        int pktDataLen =
+            convertHexPktStrToPkt(_etherPayload, &pktData[ETH_HEADER_LEN],
+                                  pktDataBuffLen - ETH_HEADER_LEN);
+        return (ETH_HEADER_LEN + pktDataLen);
+    }
 
-private:
-	int  _srcMac[MAC_ADDR_LEN];
-	int  _dstMac[MAC_ADDR_LEN];
+ private:
+    int _srcMac[MAC_ADDR_LEN];
+    int _dstMac[MAC_ADDR_LEN];
 
-	// ETH_P_IP =  0x0800
-	int  _etherType;
-	char _etherPayload[ETHER_PAYLOAD_BUF_SIZE];
+    // ETH_P_IP =  0x0800
+    int  _etherType;
+    char _etherPayload[ETHER_PAYLOAD_BUF_SIZE];
 };
 
 class TestPacketLibrary
 {
-public:
-    //  
+ public:
+    //
     // Test Packet Id.
-    //  
-	typedef enum {
+    //
+    enum TestPacketId {
         TestPacketIdInvalid = 0,
-		TEST_PKT_ID_IPV4_ECHO_REQ_TO_TAP1,
-		TEST_PKT_ID_IPV4_ECHO_REQ_TO_TAP2,
-		TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3,
-		VMXZT_TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3,
-        TEST_PKT_ID_PUNT_ICMP_ECHO, 
-		TEST_PKT_ID_IPV4_VLAN,
-		TEST_PKT_ID_MPLS_L2VLAN,
-		TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP7,
-		TEST_PKT_ID_BRCM_TEST_INJECT,
-		TEST_PKT_ID_BRCM_TEST_TRANSIT_INJECT,
-		TEST_PKT_ID_BRCM_TEST_TRANSIT_PUNT,
+        TEST_PKT_ID_IPV4_ECHO_REQ_TO_TAP1,
+        TEST_PKT_ID_IPV4_ECHO_REQ_TO_TAP2,
+        TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3,
+        VMXZT_TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP3,
+        TEST_PKT_ID_PUNT_ICMP_ECHO,
+        TEST_PKT_ID_IPV4_VLAN,
+        TEST_PKT_ID_MPLS_L2VLAN,
+        TEST_PKT_ID_IPV4_ROUTER_ICMP_ECHO_TO_TAP7,
+      	TEST_PKT_ID_BRCM_TEST_INJECT,
+        TEST_PKT_ID_BRCM_TEST_TRANSIT_INJECT,
+        TEST_PKT_ID_BRCM_TEST_TRANSIT_PUNT,
         TestPacketIdMax,
-	} TestPacketId;
+    };
 
     TestPacketLibrary() { buildTestPacketLibrary(); }
 
@@ -143,15 +146,15 @@ public:
 
     void buildTestPacketLibrary(void);
 
-private:
+ private:
     using TestPacketLibraryMap = std::map<TestPacketId, TestPacket>;
 
     TestPacketLibraryMap _testPacketLibrary;
 };
 
 //
-// Test Packet Library 
+// Test Packet Library
 //
 extern TestPacketLibrary testPacketLibrary;
 
-#endif // __TestPacket__
+#endif  // TEST_GTEST_INCLUDE_TESTPACKET_H_

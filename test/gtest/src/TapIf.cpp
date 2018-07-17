@@ -19,35 +19,18 @@
 // as noted in the Third-Party source code file.
 //
 
-#include <memory>
-#include <cstring>
-#include <iostream>
-#include <signal.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include <unistd.h>
-#include <thread>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-#include <string.h>
-#include <net/if.h>
-#include <linux/if_tun.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <arpa/inet.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <errno.h>
-#include <stdarg.h>
-
 #include "TapIf.h"
+
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <cerrno>
+#include <cstdio>
+
+#include "Utils.h"
 
 //
 // @fn
@@ -64,39 +47,34 @@
 // @return  file descriptor
 //
 
-int 
-TapIf::tapAlloc(char *dev, int flags) 
+int
+TapIf::tapAlloc(char *dev, int flags)
 {
+    struct ifreq ifr;
+    int          fd, err;
 
-  struct ifreq ifr;
-  int fd, err;
-#define DEVICE_FILE_NAME_MAX_LEN 50
-  char clonedev[DEVICE_FILE_NAME_MAX_LEN];
+    if ((fd = open("/dev/net/tun", O_RDWR)) < 0) {
+        perror("Opening /dev/net/tun");
+        return fd;
+    }
 
-  snprintf(clonedev, DEVICE_FILE_NAME_MAX_LEN, "%s", "/dev/net/tun");
+    memset(&ifr, 0, sizeof(ifr));
 
-  if( (fd = open(clonedev , O_RDWR)) < 0 ) { 
-    perror("Opening /dev/net/tun");
-    return fd; 
-  }
+    ifr.ifr_flags = flags;
 
-  memset(&ifr, 0, sizeof(ifr));
+    if (*dev) {
+        strncpy(ifr.ifr_name, dev, IFNAMSIZ);
+    }
 
-  ifr.ifr_flags = flags;
+    if ((err = ioctl(fd, TUNSETIFF, reinterpret_cast<void *>(&ifr))) < 0) {
+        perror("ioctl(TUNSETIFF)");
+        close(fd);
+        return err;
+    }
 
-  if (*dev) {
-    strncpy(ifr.ifr_name, dev, IFNAMSIZ);
-  }
+    strncpy(dev, ifr.ifr_name, IFNAMSIZ);
 
-  if( (err = ioctl(fd, TUNSETIFF, (void *)&ifr)) < 0 ) { 
-    perror("ioctl(TUNSETIFF)");
-    close(fd);
-    return err;
-  }
-
-  strcpy(dev, ifr.ifr_name);
-
-  return fd; 
+    return fd;
 }
 
 //
@@ -110,26 +88,26 @@ TapIf::tapAlloc(char *dev, int flags)
 // @return  0 - Success, -1 - Error
 //
 
-int 
+int
 TapIf::ifRead(void)
 {
-    int ret;
-    int maxfd;
-    uint16_t nread;
-    fd_set rd_set;
-    enum { max_length = 2000 };
-    char data[max_length];
+    int              ret;
+    int              maxfd;
+    uint16_t         nread;
+    fd_set           rd_set;
+    constexpr size_t kMaxLen = 2000;
+    char             data[kMaxLen];
 
     FD_ZERO(&rd_set);
     FD_SET(_tapFd, &rd_set);
     maxfd = _tapFd;
 
-    struct timeval tv = {1, 0};   // 1 seconds!
-    std::cout << "Calling select for fd " << std::dec<< _tapFd ;
-    std::cout << "(interface "<< _ifName << ")"<< std::endl;
+    struct timeval tv = {1, 0};  // 1 seconds!
+    std::cout << "Calling select for fd " << std::dec << _tapFd << "(interface "
+              << _ifName << ")" << std::endl;
     ret = select(maxfd + 1, &rd_set, NULL, NULL, &tv);
 
-    while (ret < 0 && errno == EINTR){
+    while (ret < 0 && errno == EINTR) {
         std::cout << " select returned  " << ret << std::endl;
         ret = select(maxfd + 1, &rd_set, NULL, NULL, &tv);
         sleep(1);
@@ -138,14 +116,15 @@ TapIf::ifRead(void)
     if (FD_ISSET(_tapFd, &rd_set)) {
         /* data from tun/tap: just read it and write it to the network */
 
-        nread = read(_tapFd, data, max_length);
-        if (nread < 0){ 
+        nread = read(_tapFd, data, kMaxLen);
+        if (nread < 0) {
             perror("Reading data");
             exit(1);
         }
 
-        std::cout << "Read " << std::dec << nread << " bytes from the interface " ;
-        std::cout <<  "(fd " << std::dec<< _tapFd << "name "<< _ifName << ")"<< std::endl;
+        std::cout << "Read " << std::dec << nread
+                  << " bytes from the interface (fd " << std::dec << _tapFd
+                  << "name " << _ifName << ")" << std::endl;
         pktTrace("Packet data", data, nread);
 
     } else {

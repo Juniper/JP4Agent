@@ -32,7 +32,7 @@ CXXFLAGS += \
 	-L$(GTEST_DIR)/make \
 	-L$(CONTROLLER_DIR)/obj \
 	-std=c++14 \
-	-Wall \
+	-Wall -Werror
 
 ifdef DEBUG_BUILD
 	CXXFLAGS += -g -O0
