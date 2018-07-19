@@ -2,6 +2,12 @@
 // representation of a YANG schema.
 //
 // Input schema modules:
+//  - afi-cap-action.yang
+//  - afi-cap-entry-action.yang
+//  - afi-cap-entry-match.yang
+//  - afi-cap-entry.yang
+//  - afi-cap-match.yang
+//  - afi-cap.yang
 //  - afi-common.yang
 //  - afi-cos-classifier.yang
 //  - afi-counter.yang
