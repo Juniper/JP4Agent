@@ -24,6 +24,7 @@
 #include "ControllerConnection.h"
 #include "pvtPI.h"
 #include "JaegerLog.h"
+#include <vector>
 
 const std::string _debugmode = "debug-afi-objects:debug-pi";
 
@@ -70,8 +71,8 @@ P4RuntimeServiceImpl::SetForwardingPipelineConfig(
 
 
         P4InfoResourcePtr res(new P4InfoAction(action));
-        // P4Info::instance().insert2IdMap(res);
-        // P4Info::instance().insert2NameMap(res);
+        P4Info::instance().insert2IdMap(res);
+        P4Info::instance().insert2NameMap(res);
     }
 
     const auto &tables = p4info_proto.tables();
@@ -85,8 +86,8 @@ P4RuntimeServiceImpl::SetForwardingPipelineConfig(
         }
 
         P4InfoResourcePtr res(new P4InfoTable(table));
-        // P4Info::instance().insert2IdMap(res);
-        // P4Info::instance().insert2NameMap(res);
+        P4Info::instance().insert2IdMap(res);
+        P4Info::instance().insert2NameMap(res);
     }
 
     p4::tmp::P4DeviceConfig p4_device_config;
@@ -122,8 +123,6 @@ P4RuntimeServiceImpl::SetForwardingPipelineConfig(
 Status
 P4RuntimeServiceImpl::tableInsert(const p4::TableEntry &tableEntry)
 {
-    // P4InfoResourceId actionId;
-
     const auto tableId  = tableEntry.table_id();
     const auto priority = tableEntry.priority();
     Log(DEBUG) << "tableInsert: tableId: " << tableId;
@@ -152,6 +151,8 @@ P4RuntimeServiceImpl::tableInsert(const p4::TableEntry &tableEntry)
     Log(DEBUG) << "tableInsert: match size: "
                << static_cast<size_t>(tableEntry.match().size());
 
+    std::vector<AFIHAL::AfiTEntryMatchField> afiMFs;
+
     for (const auto &mf : tableEntry.match()) {
         Log(DEBUG) << "match field id: " << mf.field_id();
 
@@ -179,13 +180,42 @@ P4RuntimeServiceImpl::tableInsert(const p4::TableEntry &tableEntry)
             Log(DEBUG) << "prefixLen: " << prefixLen;
             AFIHAL::Afi::instance().addEntry(keystr, prefixLen);
         }
+
         if (mf.has_ternary()) {
             Log(DEBUG) << "match field has ternary: ";
+
+            auto ternary = mf.ternary();
+            AFIHAL::AfiTEntryMatchField afiMF(mf.field_id(),
+                                              ternary.value(),
+                                              ternary.mask());
+
+            afiMFs.push_back(afiMF);
+
         }
+
         if (mf.has_range()) {
             Log(DEBUG) << "match field has range: ";
         }
     }
+
+    std::vector<AFIHAL::AfiAEntry> afiActions;
+    P4InfoResourceId actionId;
+
+    const p4::TableAction &tableAction = tableEntry.action();
+    if (tableAction.type_case() == p4::TableAction::kAction) {
+        const p4::Action &action = tableAction.action();
+        actionId = tableAction.action().action_id();
+        for (const auto &p : action.params()) {
+            Log(DEBUG) << "paramt id: " << p.param_id();
+            AFIHAL::AfiAEntry afiAEntry(p.param_id(), p.value());
+            afiActions.push_back(afiAEntry);
+        }
+    }
+
+    AFIHAL::Afi::instance().afiAddObjEntry(tableId,
+                                           actionId,
+                                           afiMFs,
+                                           afiActions);
 
 #if 0
     uint16_t               portId      = 0;

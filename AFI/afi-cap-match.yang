@@ -1,0 +1,188 @@
+//
+// Juniper AFI : AFI Content Aware Processor Match Set
+//
+// Created by Sudheendra Gopinath, June 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-cap-match {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-cap-match/junos/17.3";
+    prefix "afi-cap-match";
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Content Aware Processor Match Set";
+
+    revision 2019-06-02 {
+        description "Initial revision.";
+    }
+
+    container afi-cap-match {
+        description "AFI Content Aware Processor Match Set";
+
+        leaf pipeline-id {
+            type empty;
+            description "Pipeline number";
+        }
+    
+        leaf virtual-slice-group {
+            type empty;
+            description "Virtual slice group";
+        }
+    
+        leaf vlan-outer-present {
+            type empty;
+            description "Packet Outer Vlan Tag Status";
+        }
+    
+        leaf outer-vlan-id {
+            type empty;
+            description "Outer Vlan Id";
+        }
+    
+        leaf outer-vlan-cfi {
+            type empty;
+            description "Outer Vlan CFI";
+        }
+    
+        leaf outer-vlan-dot1p {
+            type empty;
+            description "Outer Vlan Priority";
+        }
+    
+        leaf vlan-inner-present {
+            type empty;
+            description "Packet Outer Vlan Tag Status";
+        }
+    
+        leaf inner-vlan-id {
+            type empty;
+            description "Inner Vlan Id";
+        }
+    
+        leaf inner-vlan-cfi {
+            type empty;
+            description "Inner Vlan CFI";
+        }
+    
+        leaf inner-vlan-dot1p {
+            type empty;
+            description "Inner Vlan Priority";
+        }
+    
+        leaf inner-ip-proto {
+            type empty;
+            description "Inner IP Protocol";
+        }
+    
+        leaf outer-ip-proto {
+            type empty;
+            description "Outer IP Protocol";
+        }
+    
+        leaf tunnel-terminated {
+            type empty;
+            description "Tunnel terminated traffic";
+        }
+    
+        leaf ip-checksum-valid {
+            type empty;
+            description "Packet has matching IP Checksum.";
+        }
+    
+        leaf inner-tpid {
+            type empty;
+            description "Inner TPID of the Packet.";
+        }
+    
+        leaf outer-tpid {
+            type empty;
+            description "Outer TPID of the packet.";
+        }
+    
+        leaf src-trunk {
+            type empty;
+            description "Source Trunk Group ID.";
+        }
+    
+        leaf src-port {
+            type empty;
+            description "Source Port.";
+        }
+    
+        leaf system-port-class {
+            type empty;
+            description "Class Id from SOURCE_TRUNK_MAP.";
+        }
+    
+        leaf l4-packet {
+            type empty;
+            description "L4 Packet (has Valid L4 Source and Destination Port).";
+        }
+    
+        leaf ipv4-ttl {
+            type empty;
+            description "Packet TTL.";
+        }
+    
+        leaf tos {
+            type empty;
+            description "Packet TOS.";
+        }
+    
+        leaf l4-destination-port {
+            type empty;
+            description "L4 Header Destination Port.";
+        }
+    
+        leaf l4-source-port {
+            type empty;
+            description "L4 header Source Port.";
+        }
+    
+        leaf ip-protocol {
+            type empty;
+            description "IP Protocol.";
+        }
+    
+        leaf destination-ipv4-address {
+            type empty;
+            description "Destination IPv4 address.";
+        }
+    
+        leaf source-ipv4-address {
+            type empty;
+            description "Source IPv4 address.";
+        }
+    
+        leaf ethertype {
+            type empty;
+            description "Ethertype.";
+        }
+    
+        leaf source-mac-address {
+            type empty;
+            description "Source MAC address.";
+        }
+    
+        leaf destination-mac-address {
+            type empty;
+            description "Destination MAC address.";
+        }
+    
+        leaf l3-interface-class {
+            type empty;
+            description "L3 interface Class ID.";
+        }
+    }
+}

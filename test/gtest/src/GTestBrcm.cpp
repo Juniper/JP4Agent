@@ -63,7 +63,7 @@ protected:
     static void SetUpTestCase()
     {
         ControllerSetConfig();
-        sleep_thread_log(15s);
+        sleep_thread_log(5s);
     }
 };
 
@@ -79,7 +79,7 @@ TEST_F(P4BRCM, BrcmInjectPuntL2Pkt)
     std::string inject_l2_pkt{pktbuf, pktlen};
 
     // Print injected pkt
-    std::cout << "Injected pkt:" << std::hex << std::uppercase;
+    std::cout << "Injected pkt on port: " << port << std::hex << std::uppercase;
     for (size_t i = 0; i < pktlen; i++) {
         if (i % 16 == 0) std::cout << "\n";
         std::cout << " " << std::setfill('0') << std::setw(2)
@@ -113,7 +113,7 @@ TEST_F(P4BRCM, BrcmIpv4Router)
     std::string inject_l2_pkt{pktbuf, pktlen};
 
     // Print injected pkt
-    std::cout << "Injected pkt:" << std::hex << std::uppercase;
+    std::cout << "Injected pkt on port: " << iport << std::hex << std::uppercase;
     for (size_t i = 0; i < pktlen; i++) {
         if (i % 16 == 0) std::cout << "\n";
         std::cout << " " << std::setfill('0') << std::setw(2)

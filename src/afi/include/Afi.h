@@ -23,6 +23,12 @@
 #ifndef SRC_AFI_INCLUDE_AFI_H_
 #define SRC_AFI_INCLUDE_AFI_H_
 
+#include "google/rpc/code.pb.h"
+#include "p4/tmp/p4config.pb.h"
+#include "p4runtime.grpc.pb.h"
+#include "p4runtime.pb.h"
+#include "P4Info.h"
+
 #include <jaegertracing/Tracer.h>
 #include <jsoncpp/json/json.h>
 #include <map>
@@ -38,6 +44,12 @@
 #include "AfiObject.h"
 #include "AfiTree.h"
 #include "AfiTreeEntry.h"
+#include "AfiCap.h"
+#include "AfiCapMatch.h"
+#include "AfiCapAction.h"
+#include "AfiCapEntry.h"
+#include "AfiCapEntryMatch.h"
+#include "AfiCapEntryAction.h"
 #include "AfiTypes.h"
 #include "Log.h"
 
@@ -52,6 +64,118 @@ class Afi;
 using AfiUPtr          = std::unique_ptr<Afi>;
 using AfiObjectNameMap = std::map<std::string, AfiObjectPtr>;
 // using AfiObjectIdMap = std::map<uint32_t, AfiObjectPtr>;
+
+class Str2Uint {
+public:
+    Str2Uint(const std::string& s, uint16_t &v) {
+        v = *((uint16_t *) &s.c_str()[0]);
+        v = ntohs(v);
+    }
+
+    Str2Uint(const std::string& s, uint32_t &v) {
+        v = *((uint32_t *) &s.c_str()[0]);
+        v = ntohl(v);
+    }
+};
+
+class AfiTEntryMatchField {
+public:
+    AfiTEntryMatchField(int id,
+                        const std::string &value,
+                        const std::string &mask) : _id(id),
+                                                   _value(value),
+                                                   _mask(mask) { }
+    ~AfiTEntryMatchField() { }
+
+    const uint32_t id() const { return _id; }
+    const std::string& value() const { return _value; }
+    const std::string& mask() const { return _mask; }
+
+    std::ostream &description(std::ostream &os) const {
+        os << "_________ AfiTEntryMatchField _______" << std::endl;
+        os << "Match Field ID: " << _id << std::endl;
+
+        if (_value.size() == 2) {
+            uint16_t v, m;
+            Str2Uint(_value, v);
+            Str2Uint(_mask, m);
+            os << "Match Field Value: " << v << std::endl;
+            os << "Match Field Mask: "  << m << std::endl;
+        } else if (_value.size() == 4) {
+            uint32_t v, m;
+            Str2Uint(_value, v);
+            Str2Uint(_mask, m);
+            os << "Match Field Value: " << v << std::endl;
+            os << "Match Field Mask: "  << m << std::endl;
+        } else if (_value.size() == 6) {
+            os << "Match Field Value: ";
+            for (unsigned int i = 0; i < _value.size(); i++)
+                os << static_cast<unsigned>(_value[i]);
+            os << std::endl;
+            os << "Match Field Mask: ";
+            for (unsigned int i = 0; i < _value.size(); i++)
+                os << static_cast<unsigned>(_mask[i]);
+            os << std::endl;
+        }
+
+        return os;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os,
+                                    const AfiTEntryMatchField &mf)
+    {
+        return mf.description(os);
+    }
+
+private:
+    uint32_t _id;
+    const std::string _value;
+    const std::string _mask;
+};
+
+class AfiAEntry {
+public:
+    AfiAEntry(int id,
+              const std::string &value) : _id(id),
+                                          _value(value) { }
+    ~AfiAEntry() { }
+
+    const uint32_t id() const { return _id; }
+    const std::string& value() const { return _value; }
+
+    std::ostream &description(std::ostream &os) const {
+        os << "_________ AfiAEntry _______" << std::endl;
+        os << "Action ID: " << _id << std::endl;
+
+        if (_value.size() == 2) {
+            uint16_t v;
+            Str2Uint(_value, v);
+            os << "Action Value: " << v << std::endl;
+        } else if (_value.size() == 4) {
+            uint32_t v;
+            Str2Uint(_value, v);
+            os << "Action Value: " << v << std::endl;
+        } else if (_value.size() == 6) {
+            os << "Action Value: ";
+            for (unsigned int i = 0; i < _value.size(); i++)
+                os << static_cast<unsigned>(_value[i]);
+            os << std::endl;
+        }
+
+        return os;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os,
+                                    const AfiAEntry &ae)
+    {
+        return ae.description(os);
+    }
+
+private:
+    uint32_t _id;
+    const std::string _value;
+    const std::string _mask;
+};
 
 class Afi
 {
@@ -81,13 +205,25 @@ class Afi
             _afiDevice = createDevice(name);
     }
 
-    bool handleAfiJsonObject(const Json::Value &cfg_obj);
+    bool handleAfiJsonObject(const Json::Value &cfg_obj,
+                             const bool &pipeline_stage);
     bool handlePipelineConfig(const Json::Value &cfg_root);
     bool addAfiTree(const std::string &aftTreeName, const std::string &keyField,
                     const int protocol, const std::string &defaultNextObject,
                     const unsigned int treeSize);
 
     bool addEntry(const std::string &keystr, int pLen);
+
+    bool afiAddCapEntry(P4InfoTablePtr table,
+                        P4InfoActionPtr action,
+                        const std::vector<AfiTEntryMatchField> &mfs,
+                        const std::vector<AfiAEntry> &aes,
+                        Json::Value& result);
+
+    bool afiAddObjEntry(const uint32_t tId,
+                        const uint32_t aId,
+                        const std::vector<AfiTEntryMatchField> &mfs,
+                        const std::vector<AfiAEntry> &afiActions);
 
     const AfiObjectPtr getAfiObject(const std::string &name)
     {

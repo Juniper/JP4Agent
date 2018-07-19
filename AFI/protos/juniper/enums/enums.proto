@@ -2,6 +2,12 @@
 // representation of a YANG schema.
 //
 // Input schema modules:
+//  - afi-cap-action.yang
+//  - afi-cap-entry-action.yang
+//  - afi-cap-entry-match.yang
+//  - afi-cap-entry.yang
+//  - afi-cap-match.yang
+//  - afi-cap.yang
 //  - afi-common.yang
 //  - afi-cos-classifier.yang
 //  - afi-counter.yang
@@ -34,6 +40,42 @@ package juniper.enums;
 
 import "ywrapper/ywrapper.proto";
 import "yext/yext.proto";
+
+// AfiCapEntryMatchAfiField represents an enumerated type generated for the YANG enumerated type afi-field.
+enum AfiCapEntryMatchAfiField {
+  AFICAPENTRYMATCHAFIFIELD_UNSET = 0;
+  AFICAPENTRYMATCHAFIFIELD_ingress_port = 1 [(yext.yang_name) = "ingress-port"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ether_daddr = 2 [(yext.yang_name) = "packet-ether-daddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ether_saddr = 3 [(yext.yang_name) = "packet-ether-saddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ether_type = 4 [(yext.yang_name) = "packet-ether-type"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ether_vlan1_tag_vid = 5 [(yext.yang_name) = "packet-ether-vlan1-tag-vid"];
+  AFICAPENTRYMATCHAFIFIELD_packet_arp_target_proto_addr = 6 [(yext.yang_name) = "packet-arp-target-proto-addr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ether_vlan1_tag_pcp = 7 [(yext.yang_name) = "packet-ether-vlan1-tag-pcp"];
+  AFICAPENTRYMATCHAFIFIELD_packet_vrf_id = 8 [(yext.yang_name) = "packet-vrf-id"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_daddr = 9 [(yext.yang_name) = "packet-ip4-daddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_saddr = 10 [(yext.yang_name) = "packet-ip4-saddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_protocol = 11 [(yext.yang_name) = "packet-ip4-protocol"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_diffserv = 12 [(yext.yang_name) = "packet-ip4-diffserv"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_ttl = 13 [(yext.yang_name) = "packet-ip4-ttl"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_daddr = 14 [(yext.yang_name) = "packet-ip6-daddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_saddr = 15 [(yext.yang_name) = "packet-ip6-saddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_traffic_class = 16 [(yext.yang_name) = "packet-ip6-traffic-class"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_flow_label = 17 [(yext.yang_name) = "packet-ip6-flow-label"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_next_header = 18 [(yext.yang_name) = "packet-ip6-next-header"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_hop_limit = 19 [(yext.yang_name) = "packet-ip6-hop-limit"];
+  AFICAPENTRYMATCHAFIFIELD_packet_icmp_type = 20 [(yext.yang_name) = "packet-icmp-type"];
+  AFICAPENTRYMATCHAFIFIELD_packet_l4_sport = 21 [(yext.yang_name) = "packet-l4-sport"];
+  AFICAPENTRYMATCHAFIFIELD_packet_l4_dport = 22 [(yext.yang_name) = "packet-l4-dport"];
+}
+
+// AfiCapEntryMatchAfiInetFamily represents an enumerated type generated for the YANG enumerated type afi-inet-family.
+enum AfiCapEntryMatchAfiInetFamily {
+  AFICAPENTRYMATCHAFIINETFAMILY_UNSET = 0;
+  AFICAPENTRYMATCHAFIINETFAMILY_tcp = 1 [(yext.yang_name) = "tcp"];
+  AFICAPENTRYMATCHAFIINETFAMILY_udp = 2 [(yext.yang_name) = "udp"];
+  AFICAPENTRYMATCHAFIINETFAMILY_igmp = 3 [(yext.yang_name) = "igmp"];
+  AFICAPENTRYMATCHAFIINETFAMILY_icmp = 4 [(yext.yang_name) = "icmp"];
+}
 
 // AfiSwitchAfiField represents an enumerated type generated for the YANG enumerated type afi-field.
 enum AfiSwitchAfiField {

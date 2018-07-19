@@ -42,6 +42,8 @@ CPPFLAGS += \
 	-I../../../../include \
 	-I../../../../afi/include \
 	-I../../../../utils/include \
+	-I../../../../pi/protos \
+	-I../../../../pi/include \
 	-I../../../../../AFI/protos \
 	-I../../../../../AFI/protos/juniper \
 	-I/usr/include/jsoncpp \

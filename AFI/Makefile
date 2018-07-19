@@ -43,6 +43,12 @@ SRCS = \
 	protos/juniper/afi_tree/afi_tree.pb.cc \
 	protos/juniper/afi_tree_entry/afi_tree_entry.pb.cc \
 	protos/juniper/afi_encap/afi_encap.pb.cc \
+	protos/juniper/afi_cap/afi_cap.pb.cc \
+	protos/juniper/afi_cap_match/afi_cap_match.pb.cc \
+	protos/juniper/afi_cap_action/afi_cap_action.pb.cc \
+	protos/juniper/afi_cap_entry/afi_cap_entry.pb.cc \
+	protos/juniper/afi_cap_entry_match/afi_cap_entry_match.pb.cc \
+	protos/juniper/afi_cap_entry_action/afi_cap_entry_action.pb.cc \
 	protos/yext/yext.pb.cc \
 	protos/ywrapper/ywrapper.pb.cc
 
@@ -94,6 +100,48 @@ protos/juniper/afi_tree_entry/afi_tree_entry.pb.cc: protos/juniper/afi_tree_entr
 
 protos/juniper/afi_encap/afi_encap.pb.cc: protos/juniper/afi_encap/afi_encap.proto
 	$(PROTOC) --proto_path=protos/juniper/afi_encap/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_encap/ $<
+	sleep 2
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_ywrapper_2fywrapper_2eproto/protobuf_ywrapper_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_juniper_2fenums_2fenums_2eproto/protobuf_enums_2eproto/g' {} \;
+
+protos/juniper/afi_cap/afi_cap.pb.cc: protos/juniper/afi_cap/afi_cap.proto
+	$(PROTOC) --proto_path=protos/juniper/afi_cap/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_cap/ $<
+	sleep 2
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_ywrapper_2fywrapper_2eproto/protobuf_ywrapper_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_juniper_2fenums_2fenums_2eproto/protobuf_enums_2eproto/g' {} \;
+
+protos/juniper/afi_cap_match/afi_cap_match.pb.cc: protos/juniper/afi_cap_match/afi_cap_match.proto
+	$(PROTOC) --proto_path=protos/juniper/afi_cap_match/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_cap_match/ $<
+	sleep 2
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_ywrapper_2fywrapper_2eproto/protobuf_ywrapper_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_juniper_2fenums_2fenums_2eproto/protobuf_enums_2eproto/g' {} \;
+
+protos/juniper/afi_cap_action/afi_cap_action.pb.cc: protos/juniper/afi_cap_action/afi_cap_action.proto
+	$(PROTOC) --proto_path=protos/juniper/afi_cap_action/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_cap_action/ $<
+	sleep 2
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_ywrapper_2fywrapper_2eproto/protobuf_ywrapper_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_juniper_2fenums_2fenums_2eproto/protobuf_enums_2eproto/g' {} \;
+
+protos/juniper/afi_cap_entry/afi_cap_entry.pb.cc: protos/juniper/afi_cap_entry/afi_cap_entry.proto
+	$(PROTOC) --proto_path=protos/juniper/afi_cap_entry/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_cap_entry/ $<
+	sleep 2
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_ywrapper_2fywrapper_2eproto/protobuf_ywrapper_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_juniper_2fenums_2fenums_2eproto/protobuf_enums_2eproto/g' {} \;
+
+protos/juniper/afi_cap_entry_match/afi_cap_entry_match.pb.cc: protos/juniper/afi_cap_entry_match/afi_cap_entry_match.proto
+	$(PROTOC) --proto_path=protos/juniper/afi_cap_entry_match/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_cap_entry_match/ $<
+	sleep 2
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_ywrapper_2fywrapper_2eproto/protobuf_ywrapper_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/protobuf_juniper_2fenums_2fenums_2eproto/protobuf_enums_2eproto/g' {} \;
+
+protos/juniper/afi_cap_entry_action/afi_cap_entry_action.pb.cc: protos/juniper/afi_cap_entry_action/afi_cap_entry_action.proto
+	$(PROTOC) --proto_path=protos/juniper/afi_cap_entry_action/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_cap_entry_action/ $<
 	sleep 2
 	find protos -name '*.pb.*' -exec sed -i 's/protobuf_ywrapper_2fywrapper_2eproto/protobuf_ywrapper_2eproto/g' {} \;
 	find protos -name '*.pb.*' -exec sed -i 's/protobuf_yext_2fyext_2eproto/protobuf_yext_2eproto/g' {} \;

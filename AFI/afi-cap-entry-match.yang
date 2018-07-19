@@ -1,0 +1,192 @@
+//
+// Juniper AFI : AFI Cap Entry Match Set
+//
+// Created by Sudheendra Gopinath, June 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-cap-entry-match {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-cap-entry-match/junos/17.3";
+    prefix "afi-cap-entry-match";
+
+    import afi-types  { prefix "afi-types"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Content Aware Processor Entry Match Set";
+
+    revision 2018-06-02 {
+        description "Initial revision.";
+    }
+
+    container afi-cap-entry-match {
+        description "AFI Content Aware Processor Match Fields";
+    
+        leaf pipeline-id {
+            type uint8;
+            description "Pipeline number";
+        }
+    
+        leaf virtual-slice-group {
+            type uint8;
+            description "Virtual slice group";
+        }
+    
+        leaf vlan-outer-present {
+            type boolean;
+            description "Packet Outer Vlan Tag Status";
+        }
+    
+        leaf outer-vlan-id {
+            type uint16 {
+                range "1 .. 4095";
+            }
+            description "Outer Vlan Id";
+        }
+    
+        leaf outer-vlan-cfi {
+            type boolean;
+            description "Outer Vlan CFI";
+        }
+    
+        leaf outer-vlan-dot1p {
+            type uint8 {
+                range "0 .. 7";
+            }
+            description "Outer Vlan Priority";
+        }
+    
+        leaf vlan-inner-present {
+            type boolean;
+            description "Packet Outer Vlan Tag Status";
+        }
+    
+        leaf inner-vlan-id {
+            type uint16 {
+                range "1 .. 4095";
+            }
+            description "Inner Vlan Id";
+        }
+    
+        leaf inner-vlan-cfi {
+            type boolean;
+            description "Inner Vlan CFI";
+        }
+    
+        leaf inner-vlan-dot1p {
+            type uint8 {
+                range "0 .. 7";
+            }
+            description "Inner Vlan Priority";
+        }
+    
+        leaf inner-ip-proto {
+            type afi-types:afi-inet-family;
+            description "Inner IP Protocol";
+        }
+    
+        leaf outer-ip-proto {
+            type afi-types:afi-inet-family;
+            description "Outer IP Protocol";
+        }
+    
+        leaf tunnel-terminated {
+            type boolean;
+            description "Tunnel terminated traffic";
+        }
+    
+        leaf outer-tpid {
+            type afi-types:afi-field;
+            description "Outer TPID of the packet.";
+        }
+    
+        leaf src-trunk {
+            type afi-types:afi-trunk-group-id;
+            description "Source Trunk Group ID.";
+        }
+    
+        leaf src-port {
+            type afi-types:afi-port;
+            description "Source Port.";
+        }
+    
+        leaf system-port-class {
+            type afi-types:afi-class-id;
+            description "Class Id from SOURCE_TRUNK_MAP.";
+        }
+    
+        leaf l4-packet {
+            type boolean;
+            description "L4 Packet (has Valid L4 Source and Destination Port).";
+        }
+    
+        leaf ipv4-ttl {
+            type boolean;
+            description "Packet TTL.";
+        }
+    
+        leaf tos {
+            type uint8;
+            description "Packet TOS.";
+        }
+    
+        leaf l4-destination-port {
+            type uint16;
+            description "L4 Header Destination Port.";
+        }
+    
+        leaf l4-source-port {
+            type uint16;
+            description "L4 header Source Port.";
+        }
+    
+        leaf ip-protocol {
+            type afi-types:afi-field;
+            description "IP Protocol.";
+        }
+    
+        leaf destination-ipv4-address {
+            type uint32;
+            description "Destination IPv4 address.";
+        }
+    
+        leaf source-ipv4-address {
+            type uint32;
+            description "Source IPv4 address.";
+        }
+    
+        leaf ethertype {
+            type uint16;
+            description "Ethertype.";
+        }
+    
+        leaf source-mac-address {
+            type binary {
+                length "6";
+            }
+            description "Source MAC address.";
+        }
+    
+        leaf destination-mac-address {
+            type binary {
+                length "6";
+            }
+            description "Destination MAC address.";
+        }
+    
+        leaf l3-interface-class {
+            type uint16;
+            description "L3 interface Class ID.";
+        }
+    }
+}

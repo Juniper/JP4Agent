@@ -53,9 +53,9 @@ using grpc::Status;
 using google::protobuf::util::MessageDifferencer;
 using namespace std::chrono_literals;
 
-constexpr char test_json[] =
+char test_json[] =
     "/root/JP4Agent/test/controller/testdata/afi_switch.json";
-constexpr char test_proto_txt[] =
+char test_proto_txt[] =
     "/root/JP4Agent/test/controller/testdata/simple_router.proto.txt";
 
 // Static configuration for interfaces
@@ -65,6 +65,12 @@ constexpr interface_t intfs[] = {
     // ge-0.0.3-vmx1
     {1, {103, 30, 130, 1}, {0xfe, 0x26, 0x0a, 0x2e, 0xaa, 0xf3}}
 };
+
+void ControllerSetP4Input(std::string pipelineFile, std::string runtimeFile)
+{
+    strcpy(test_json, pipelineFile.c_str());
+    strcpy(test_proto_txt, runtimeFile.c_str());
+}
 
 class StreamChannelSyncClient
 {
@@ -500,6 +506,138 @@ ControllerAddRouteEntry(uint32_t dAddr,
         param->set_param_id(p1_id);
         // param->set_value(std::string("\x00\x09", 2));
         param->set_value(oPortStr);
+    }
+
+    // add entry
+    {
+        p4::WriteRequest request;
+        set_election_id(request.mutable_election_id());
+        request.set_device_id(dev_id);
+        auto update = request.add_updates();
+        update->set_type(p4::Update_Type_INSERT);
+        update->set_allocated_entity(&entity);
+        ClientContext context;
+        p4::WriteResponse rep;
+        auto status = pi_stub_->Write(&context, request, &rep);
+        assert(status.ok());
+        update->release_entity();
+    }
+
+    std::cout << "Done.\n";
+
+    // Close the bidirectional stream.
+    {
+        stream->WritesDone();
+        p4::StreamMessageResponse response;
+        while (stream->Read(&response)) {
+        }
+        auto status = stream->Finish();
+        assert(status.ok());
+    }
+
+    return 0;
+}
+
+int
+ControllerAddVrfEntry(uint16_t etype,
+                      std::string smacAddr, 
+                      uint32_t addr,
+                      uint32_t vrf)
+{
+    int dev_id = 0;
+    auto channel = grpc::CreateChannel("localhost:50051",
+                                       grpc::InsecureChannelCredentials());
+    std::unique_ptr<p4::P4Runtime::Stub> pi_stub_(
+        p4::P4Runtime::NewStub(channel));
+
+    auto p4info = parse_p4info(test_proto_txt);
+
+    auto set_election_id = [](p4::Uint128 *election_id) {
+        election_id->set_high(0);
+        election_id->set_low(1);
+    };
+
+    // Open bidirectional stream and advertise election id.
+    ClientContext stream_context;
+    auto stream = pi_stub_->StreamChannel(&stream_context);
+    {
+        p4::StreamMessageRequest request;
+        auto arbitration = request.mutable_arbitration();
+        arbitration->set_device_id(dev_id);
+        set_election_id(arbitration->mutable_election_id());
+        stream->Write(request);
+        p4::StreamMessageResponse response;
+        stream->Read(&response);
+        assert(response.update_case() ==
+               p4::StreamMessageResponse::kArbitration);
+        assert(response.arbitration().status().code() ==
+               ::google::rpc::Code::OK);
+    }
+
+    std::cout << "Write: Adding vrf table entry...";
+
+    Utils utils;
+    std::string ethType  = utils.uint2Str(etype);
+    std::string dstAddr  = utils.uint2Str(addr);
+
+    const uint16_t etMask = htons(0xffff);
+    const uint32_t dAddrMask = htonl(0xffffffff);
+    const uint64_t sAddrMask = 0xffffffffffff;
+
+    std::string ethTypeMask  = utils.uint2Str(etMask);
+    std::string dstAddrMask  = utils.uint2Str(dAddrMask);
+    //std::string smacAddrMask = utils.uint2Str(0xffffffffffff);
+
+    char tsmacMask[6];
+    memcpy(&tsmacMask[0], (char *) &sAddrMask, 6);
+    std::string smacAddrMask((char *) &tsmacMask[0], 6);
+
+    auto t_id = get_table_id(p4info, "ingress.vrf.vrf_classifier_table");
+    auto mf0_id = get_mf_id(p4info,
+                            "ingress.vrf.vrf_classifier_table",
+                            "hdr.ethernet.ether_type");
+    auto mf1_id = get_mf_id(p4info,
+                            "ingress.vrf.vrf_classifier_table",
+                            "hdr.ethernet.src_addr");
+    auto mf2_id = get_mf_id(p4info,
+                            "ingress.vrf.vrf_classifier_table",
+                            "hdr.ipv4_base.dst_addr");
+
+    p4::Entity entity;
+    auto table_entry = entity.mutable_table_entry();
+
+    table_entry->set_table_id(t_id);
+
+    auto match0 = table_entry->add_match();
+    match0->set_field_id(mf0_id);
+    auto tnary0 = match0->mutable_ternary();
+    tnary0->set_value(ethType);
+    tnary0->set_mask(ethTypeMask);
+
+    auto match1 = table_entry->add_match();
+    match1->set_field_id(mf1_id);
+    auto tnary1 = match1->mutable_ternary();
+    tnary1->set_value(smacAddr);
+    tnary1->set_mask(smacAddrMask);
+
+    auto match2 = table_entry->add_match();
+    match2->set_field_id(mf2_id);
+    auto tnary2 = match2->mutable_ternary();
+    tnary2->set_value(dstAddr);
+    tnary2->set_mask(dstAddrMask);
+
+    auto a_id = get_action_id(p4info, "ingress.vrf.set_vrf");
+    auto p0_id = get_param_id(p4info, "ingress.vrf.set_vrf", "vrf_id");
+
+    std::string vrfId = utils.uint2Str(vrf);
+
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(a_id);
+    {
+        auto param = action->add_params();
+        param->set_param_id(p0_id);
+        param->set_value(vrfId);
     }
 
     // add entry

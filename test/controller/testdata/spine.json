@@ -1,0 +1,20 @@
+[
+    {
+      "afi-object-name" : "ingress.vrf.vrf_classifier_table_action",
+      "afi-object-id" : 0,
+      "afi-object-type" : "afi-cap-action",
+      "afi-object" : "gt73fgIIAQ=="
+    },
+    {
+      "afi-object-name" : "ingress.vrf.vrf_classifier_table",
+      "afi-object-id" : 1,
+      "afi-object-type" : "afi-cap",
+      "afi-object" : "ioLC1gIoCiZpbmdyZXNzLnZyZi52cmZfY2xhc3NpZmllcl90YWJsZV9tYXRjaNK82IMJAOjPi40JAfKgn90KKQonaW5ncmVzcy52cmYudnJmX2NsYXNzaWZpZXJfdGFibGVfYWN0aW9u6oO6/g4CCAU="
+    },
+    {
+      "afi-object-name" : "ingress.vrf.vrf_classifier_table_match",
+      "afi-object-id" : 2,
+      "afi-object-type" : "afi-cap-match",
+      "afi-object" : "2q/uEAIIAcLO1LQIAggBsqiE/wkCCAE="
+    }
+]

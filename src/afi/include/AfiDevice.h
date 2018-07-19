@@ -69,7 +69,8 @@ class AfiDevice
 
     virtual void setObjectCreators() = 0;
 
-    AfiObjectPtr handleDMObject(const AfiJsonResource &res);
+    AfiObjectPtr handleDMObject(const AfiJsonResource &res,
+                                const bool &pipelineStage);
 
     void insertToObjectMap(const AfiObjectPtr &obj)
     {
@@ -81,6 +82,15 @@ class AfiDevice
     {
         Log(DEBUG) << "getAfiObject name:" << name;
         return _objectsMap[name];
+    }
+
+    void bindAfiObjects()
+    {
+        for (const auto &objpair : _objectsMap) {
+            if (!objpair.second->bind()) {
+                Log(ERROR) << ": Unable to bind afi object ";
+            }
+        }
     }
 
     const std::vector<AfiObjectPtr> getAfiObjects() const

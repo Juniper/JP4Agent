@@ -40,7 +40,7 @@ class AfiJsonResource
     std::string       _type;    ///< Name
     AfiJsonResourceId _id;      ///< Object Id
     std::string       _name;    ///< Name
-    std::string       _objStr;  ///< Name
+    std::string       _objStr;  ///< Object
 
  public:
     AfiJsonResource(const std::string &type, const AfiJsonResourceId id,

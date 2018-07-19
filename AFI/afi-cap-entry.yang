@@ -1,0 +1,46 @@
+//
+// Juniper AFI : AFI Cap Entry
+//
+// Created by Sudheendra Gopinath, June 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-cap-entry {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-cap-entry/junos/17.3";
+    prefix "afi-cap-entry";
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Content Aware Processor Entry";
+
+    revision 2018-06-02 {
+        description "Initial revision.";
+    }
+
+    container afi-cap-entry {
+        leaf parent-name {
+            type string;
+            description "Parent name";
+        }
+
+        leaf match-object {
+            type string;
+            description "Match set";
+        }
+
+        leaf action-object {
+            type string;
+            description "Action set";
+        }
+    }
+}

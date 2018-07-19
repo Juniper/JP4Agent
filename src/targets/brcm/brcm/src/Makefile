@@ -40,6 +40,8 @@ CPPFLAGS += \
 	-I../../../../include \
 	-I../../../../afi/include \
 	-I../../../../utils/include \
+        -I../../../../pi/protos \
+        -I../../../../pi/include \
 	-I../../../../../AFI/protos \
 	-I../../../../../AFI/protos/juniper \
 	-I/usr/include/jsoncpp
@@ -57,7 +59,9 @@ SRCS = \
 	Brcm.cpp \
 	BrcmDevice.cpp \
 	BrcmTree.cpp \
-	BrcmTreeEntry.cpp
+	BrcmTreeEntry.cpp \
+	BrcmCap.cpp \
+	BrcmCapEntry.cpp
 
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 OBJS := $(addprefix $(OBJDIR)/,$(OBJS))

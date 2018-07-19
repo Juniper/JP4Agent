@@ -1,0 +1,70 @@
+//
+// Juniper AFI : AFI Cap Entry Action Set
+//
+// Created by Sudheendra Gopinath, June 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-cap-entry-action {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-cap-entry-action/junos/17.3";
+    prefix "afi-cap-entry-action";
+
+    import afi-types  { prefix "afi-types"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Content Aware Processor Entry Action Set";
+
+    revision 2018-06-02 {
+        description "Initial revision.";
+    }
+
+    container afi-cap-entry-action {
+        description "AFI Content Aware Processor Action Fields";
+    
+        leaf drop {
+            type boolean;
+            description "Drop packet.";
+        }
+    
+        leaf drop-cancel {
+            type boolean;
+            description "Cancel lower priority Drop action.";
+        }
+    
+        leaf copy-to-cpu {
+            type boolean;
+            description "Copy to CPU.";
+        }
+    
+        leaf copy-to-cpu-cancel {
+            type boolean;
+            description "Cancel lower priority Copy to CPU Action.";
+        }
+    
+        leaf destination-class-id {
+            type afi-types:afi-class-id;
+            description "Set destination address lookup class ID.";
+        }
+    
+        leaf source-class-id {
+            type afi-types:afi-class-id;
+            description "Set source address lookup class ID.";
+        }
+    
+        leaf vrf {
+            type afi-types:afi-vrf-id;
+            description "Set VRF ID.";
+        }
+    }
+}

@@ -51,8 +51,9 @@ int get_mf_id(const p4::config::P4Info &p4info,
   for (const auto &table : p4info.tables()) {
     const auto &pre = table.preamble();
     if (pre.name() != t_name) continue;
-    for (const auto &mf : table.match_fields())
+    for (const auto &mf : table.match_fields()) {
       if (mf.name() == mf_name) return mf.id();
+    }
   }
   return -1;
 }
