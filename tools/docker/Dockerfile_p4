@@ -194,6 +194,7 @@ RUN cd /root/downloads/thrift && make install
 # Now install cpp client for Jaeger
 
 RUN cd /root/downloads && git clone https://github.com/jaegertracing/cpp-client
+RUN cd /root/downloads/cpp-client && git checkout v0.3.0
 RUN cd /root/downloads/cpp-client && mkdir .build
 RUN cd /root/downloads/cpp-client/.build && cmake ..
 RUN cd /root/downloads/cpp-client/.build && make

@@ -392,7 +392,7 @@ TEST_F(P4, sendArpReq)
 TEST_F(P4, ipv4Router)
 {
     // Launch controller to add route entry.
-    ControllerAddRouteEntry(0x0a000001, 16, 0x0a000001, 0x88a25e9175ff, 1);
+    ControllerAddRouteEntry(0x671e1e03, 16, 0x0a000001, 0x88a25e9175ff, 1);
     sleep_thread_log(5s);
 
     const int num_pkts_to_send = 1;

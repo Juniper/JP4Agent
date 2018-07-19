@@ -28,7 +28,7 @@
         },
         "JaegerConfig" : {
             "Note"                 : "Jaeger config",
-            "jaeger-config-file"   : "/root/JP4Agent/src/config.yaml"
+            "jaeger-config-file"   : ""
         }
     }
 }
