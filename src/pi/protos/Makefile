@@ -19,7 +19,9 @@
 # as noted in the Third-Party source code file.
 #
 
+ifdef UBUNTU
 CXX = g++
+endif
 TARGET_LIB = libpi_proto.so
 RM = rm -f
 
@@ -67,8 +69,8 @@ p4runtime.pb.cc: p4runtime.proto
 	$(PROTOC) --cpp_out=. $<
 	sleep 2
 	@echo Correcting strings ...
-	sed -i -e 's/protobuf_p4_2fconfig_2fp4info_2eproto/protobuf_p4info_2eproto/g' p4runtime.pb.cc
-	sed -i -e 's/protobuf_google_2frpc_2fstatus_2eproto/protobuf_status_2eproto/g' p4runtime.pb.cc
+	sed -i -e 's/_p4_2fconfig_2fp4info_2eproto/_p4info_2eproto/g' p4runtime.pb.cc
+	sed -i -e 's/_google_2frpc_2fstatus_2eproto/_status_2eproto/g' p4runtime.pb.cc
 
 p4runtime.grpc.pb.cc: p4runtime.proto
 	$(PROTOC) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<

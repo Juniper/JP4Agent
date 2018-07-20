@@ -423,7 +423,11 @@ P4RuntimeServiceImpl::Write(ServerContext *         context,
 
     auto status = _write(*request);
 
-    std::this_thread::sleep_for(std::chrono::seconds{5});
+    // Error on WRL : commenting from now
+    // P4RuntimeService.cpp:396:10: error: 'std::this_thread' has not been declared
+    //      std::this_thread::sleep_for(std::chrono::seconds{5});
+    //           ^~~~~~~~~~~                                    
+    //std::this_thread::sleep_for(std::chrono::seconds{5});
     // return Status::OK;
     return status;
 }

@@ -29,8 +29,11 @@
 #include "p4runtime.pb.h"
 #include "P4Info.h"
 
+#ifdef OPENTRACING
 #include <jaegertracing/Tracer.h>
-#include <jsoncpp/json/json.h>
+#endif // OPENTRACING
+//#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include <map>
 #include <memory>
 #include <string>

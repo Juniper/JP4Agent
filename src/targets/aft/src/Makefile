@@ -21,7 +21,9 @@
 
 AFI_LIB = /root/VMX/afi/lib
 
+ifdef UBUNTU
 CXX = g++
+endif
 PROG = jp4agent
 RM = rm -rf
 OBJDIR  = ../obj

@@ -81,7 +81,12 @@ PIServer::PIGrpcServerRun()
 
     // builder.RegisterService(&server_data->gnmi_service);
 
-    _piBuilder.SetMaxReceiveMessageSize(256 * 1024 * 1024);  // 256MB
+    // Error on WRL
+    // PIServer.cpp:84:16: error: 'class grpc::ServerBuilder' has no member named 'SetMaxReceiveMessageSize'; did you mean 'SetMaxMessageSize'
+    // _piBuilder.SetMaxReceiveMessageSize(256 * 1024 * 1024);  // 256MB
+    //            ^~~~~~~~~~~~~~~~~~~~~~~~                                 
+    //_piBuilder.SetMaxReceiveMessageSize(256 * 1024 * 1024);  // 256MB
+    _piBuilder.SetMaxMessageSize(256 * 1024 * 1024);  // 256MB
 
     _piServer = _piBuilder.BuildAndStart();
     Log(DEBUG) << "PI Server listening on " << _piServerAddr << "\n";

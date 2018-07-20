@@ -19,13 +19,18 @@
 # as noted in the Third-Party source code file.
 #
 
+ifdef UBUNTU
 CXX = g++
+endif
 RM = rm -rf
 PROG = jp4agent-gtest
 OBJDIR  = ../obj
 PROTOS = ../../../src/pi/protos
 # Points to the root of Google Test
+GTEST_DIR = 
+ifdef UBUNTU
 GTEST_DIR = /root/downloads/googletest-release-1.8.0/googletest
+endif
 CONTROLLER_DIR = ../../controller
 
 CXXFLAGS += \
@@ -89,9 +94,16 @@ LDLIBS = \
 	-lpcap \
 	-lnet \
 	-lutils \
-	-ljaegertracing \
-	-lyaml-cpp
+	-lyaml-cpp \
 
+# Needed for WRL
+ifndef UBUNTU
+	LDLIBS += -lgtest
+endif
+
+ifdef JAEGER
+	LDLIBS += -ljaegertracing
+endif
 
 ifdef CODE_COVERAGE
 	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov
@@ -102,7 +114,10 @@ LIBS = gtest.a
 all: $(OBJDIR)/$(PROG)
 	@echo $(PROG) has been compiled
 
-$(OBJDIR)/$(PROG): $(OBJS) $(OBJDIR)/gtest.a
+# For ubuntu
+#$(OBJDIR)/$(PROG): $(OBJS) $(OBJDIR)/gtest.a
+
+$(OBJDIR)/$(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(OBJDIR)/%.o : %.cpp

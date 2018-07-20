@@ -26,7 +26,9 @@ JaegerLog* JaegerLog::_instance = 0;
 
 JaegerLog::JaegerLog()
 {
+#ifdef OPENTRACING
   _span = NULL;
+#endif // OPENTRACING
 }
 
 JaegerLog::~JaegerLog()
@@ -47,6 +49,7 @@ JaegerLog* JaegerLog::getInstance()
 
 void JaegerLog::initTracing(std::string configFileName)
 {
+#ifdef OPENTRACING
   try {
     YAML::Node cfgFile = YAML::LoadFile(configFileName);
     const auto cfg = jaegertracing::Config::parse(cfgFile);
@@ -54,29 +57,38 @@ void JaegerLog::initTracing(std::string configFileName)
     opentracing::Tracer::InitGlobal(tracer);
     } catch (const std::exception& e) {
   }
+#endif // OPENTRACING
 }
 
 void JaegerLog::teardownTracing()
 {
+#ifdef OPENTRACING
   opentracing::Tracer::Global()->Close();
+#endif // OPENTRACING
 }
 
 void JaegerLog::startSpan(const std::string spanName)
 {
+#ifdef OPENTRACING
   auto tracer = opentracing::Tracer::Global();
   _span       = tracer->StartSpan(spanName);
   std::this_thread::sleep_for(std::chrono::milliseconds{10});
+#endif // OPENTRACING
 }
 
 void JaegerLog::finishSpan()
 {
+#ifdef OPENTRACING
   _span->Finish();
+#endif // OPENTRACING
 }
 
 void JaegerLog::Log(const std::string type, std::string val)
 {
+#ifdef OPENTRACING
   opentracing::string_view name(type);
   opentracing::string_view name_val(val);
   _span->SetBaggageItem(name, name_val);
+#endif // OPENTRACING
 
 }

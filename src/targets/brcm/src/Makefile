@@ -19,7 +19,9 @@
 # as noted in the Third-Party source code file.
 #
 
+ifdef UBUNTU
 CXX = g++
+endif
 PROG = jp4agent
 RM = rm -rf
 OBJDIR  = ../obj

@@ -30,9 +30,10 @@ components=(
     $REPO_DIR/src/afi/src
     $REPO_DIR/test/controller/src
     $REPO_DIR/test/gtest/src
-    $REPO_DIR/src/targets/brcm/brcm/src
-    $REPO_DIR/src/targets/brcm/src
 )
+
+#    $REPO_DIR/src/targets/brcm/brcm/src
+#    $REPO_DIR/src/targets/brcm/src
 
 if [ "_$1" == "_clean" ]
 then

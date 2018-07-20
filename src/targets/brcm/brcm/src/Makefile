@@ -19,7 +19,9 @@
 # as noted in the Third-Party source code file.
 #
 
+ifdef UBUNTU
 CXX = g++
+endif
 TARGET_LIB = libbrcm_target_halp.so
 RM = rm -rf
 OBJDIR  = ../obj

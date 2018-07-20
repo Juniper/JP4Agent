@@ -19,9 +19,11 @@
 # as noted in the Third-Party source code file.
 #
 
-CXX = g++
 PROG = afi-controller
 
+ifdef UBUNTU
+CXX = g++
+endif
 CXXFLAGS += -g -O0 -std=c++14 
 
 CPPFLAGS += \

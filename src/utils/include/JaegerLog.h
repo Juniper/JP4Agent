@@ -27,14 +27,18 @@
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
+#ifdef OPENTRACING
 #include <jaegertracing/Tracer.h>
+#endif // OPENTRACING
 
 
 class JaegerLog
 {
   private:
     static JaegerLog* _instance;
+#ifdef OPENTRACING
     std::unique_ptr<opentracing::v1::Span> _span; 
+#endif // OPENTRACING
     JaegerLog();
     ~JaegerLog();
   public:

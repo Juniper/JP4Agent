@@ -19,7 +19,9 @@
 # as noted in the Third-Party source code file.
 #
 
+ifdef UBUNTU
 CXX = g++
+endif
 RM = rm -rf
 PROG = controller
 LIB  = libcontroller.a
