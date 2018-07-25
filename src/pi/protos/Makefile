@@ -47,6 +47,7 @@ PROTOS_PATH = .
 
 vpath %.proto $(PROTOS_PATH)
 
+ifdef UBUNTU
 SRCS = \
 	p4/config/p4info.pb.cc \
 	p4/config/p4info.grpc.pb.cc \
@@ -58,6 +59,19 @@ SRCS = \
 	p4runtime.grpc.pb.cc \
 	cli/jp4cli.pb.cc \
 	cli/jp4cli.grpc.pb.cc
+else
+SRCS = \
+	p4info.pb.cc \
+	p4info.grpc.pb.cc \
+	p4/tmp/p4config.pb.cc \
+	p4/tmp/p4config.grpc.pb.cc \
+	status.pb.cc \
+	google/rpc/code.pb.cc \
+	p4runtime.pb.cc \
+	p4runtime.grpc.pb.cc \
+	cli/jp4cli.pb.cc \
+	cli/jp4cli.grpc.pb.cc
+endif
 
 PROTO_GENERATED_HEADERS=$(subst .cc,.h, $(SRCS))
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
@@ -81,17 +95,30 @@ p4/tmp/p4config.pb.cc: p4/tmp/p4config.proto
 p4/tmp/p4config.grpc.pb.cc: p4/tmp/p4config.proto
 	$(PROTOC) --proto_path=p4/tmp --grpc_out=p4/tmp --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
 
+ifdef UBUNTU
 p4/config/p4info.pb.cc: p4/config/p4info.proto
 	$(PROTOC) --proto_path=p4/config --cpp_out=p4/config/ $<
 
 p4/config/p4info.grpc.pb.cc: p4/config/p4info.proto
 	$(PROTOC) --proto_path=p4/config --grpc_out=p4/config --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
+else
+p4info.pb.cc: p4info.proto
+	$(PROTOC) --cpp_out=. $<
+
+p4info.grpc.pb.cc: p4info.proto
+	$(PROTOC) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
+endif
 
 google/rpc/code.pb.cc: google/rpc/code.proto
 	$(PROTOC) --proto_path=google/rpc --cpp_out=google/rpc/ $<
 
+ifdef UBUNTU
 google/rpc/status.pb.cc: google/rpc/status.proto
 	$(PROTOC) --proto_path=google/rpc --cpp_out=google/rpc/ $<
+else
+status.pb.cc: status.proto
+	$(PROTOC) --cpp_out=. $<
+endif
 
 cli/jp4cli.pb.cc: cli/jp4cli.proto
 	$(PROTOC) --cpp_out=. $<
