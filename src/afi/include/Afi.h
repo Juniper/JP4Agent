@@ -23,6 +23,7 @@
 #ifndef SRC_AFI_INCLUDE_AFI_H_
 #define SRC_AFI_INCLUDE_AFI_H_
 
+#include "arpa/inet.h"
 #include "google/rpc/code.pb.h"
 #include "p4/tmp/p4config.pb.h"
 #include "p4runtime.grpc.pb.h"

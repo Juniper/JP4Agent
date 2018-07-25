@@ -44,11 +44,10 @@ then
     echo "===== Deleting all obj directories ====="
     cd $REPO_DIR; find . -name obj | xargs rm -rf
 else
-    make srcs -C $REPO_DIR/AFI
     for component in "${components[@]}"
     do
         echo "===== Running make under ${component} ====="
-        make -j4 -C ${component} UBUNTU=1 DEBUG_BUILD=1 CODE_COVERAGE=1
+        make -j4 -C ${component} DEBUG_BUILD=1 CODE_COVERAGE=1
         if [ $? -ne 0 ]
         then
           echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 

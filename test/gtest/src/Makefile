@@ -114,10 +114,11 @@ LIBS = gtest.a
 all: $(OBJDIR)/$(PROG)
 	@echo $(PROG) has been compiled
 
-# For ubuntu
-#$(OBJDIR)/$(PROG): $(OBJS) $(OBJDIR)/gtest.a
-
+ifdef UBUNTU
+$(OBJDIR)/$(PROG): $(OBJS) $(OBJDIR)/gtest.a
+else
 $(OBJDIR)/$(PROG): $(OBJS)
+endif
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(OBJDIR)/%.o : %.cpp

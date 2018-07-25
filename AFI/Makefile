@@ -40,6 +40,7 @@ LDFLAGS = -shared
 all: $(TARGET_LIB)
 	@echo $(TARGET_LIB) compilation success!
 
+ifdef UBUNTU
 SRCS = \
 	protos/juniper/enums/enums.pb.cc \
 	protos/juniper/afi_tree/afi_tree.pb.cc \
@@ -53,6 +54,21 @@ SRCS = \
 	protos/juniper/afi_cap_entry_action/afi_cap_entry_action.pb.cc \
 	protos/yext/yext.pb.cc \
 	protos/ywrapper/ywrapper.pb.cc
+else
+SRCS = \
+	protos/yext/yext.pb.cc \
+	protos/ywrapper/ywrapper.pb.cc \
+	protos/juniper/enums/enums.pb.cc \
+	protos/juniper/afi_tree/afi_tree.pb.cc \
+	protos/juniper/afi_tree_entry/afi_tree_entry.pb.cc \
+	protos/juniper/afi_encap/afi_encap.pb.cc \
+	protos/juniper/afi_cap/afi_cap.pb.cc \
+	protos/juniper/afi_cap_match/afi_cap_match.pb.cc \
+	protos/juniper/afi_cap_action/afi_cap_action.pb.cc \
+	protos/juniper/afi_cap_entry/afi_cap_entry.pb.cc \
+	protos/juniper/afi_cap_entry_match/afi_cap_entry_match.pb.cc \
+	protos/juniper/afi_cap_entry_action/afi_cap_entry_action.pb.cc
+endif
 
 
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
@@ -157,7 +173,9 @@ protos/juniper/enums/enums.pb.cc: protos/juniper/enums/enums.proto
 	find protos -name '*.pb.*' -exec sed -i 's/_juniper_2fenums_2fenums_2eproto/_enums_2eproto/g' {} \;
 
 clean:
+ifdef UBUNTU
 	rm -rf protos/juniper protos/yext/yext.pb.* protos/ywrapper/ywrapper.pb.*
+endif
 	$(RM) -f $(OBJS) $(TARGET_LIB) ./.depend
 
 #depend: .depend

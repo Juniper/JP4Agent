@@ -23,6 +23,7 @@
 #ifndef __pvtPI__
 #define __pvtPI__
 
+#include <arpa/inet.h>
 #include <grpc++/grpc++.h>
 
 #include "Afi.h"
