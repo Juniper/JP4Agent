@@ -21,7 +21,9 @@
 
 ifdef UBUNTU
 CXX = g++
+CPPFLAGS += -DUBUNTU
 endif
+
 TARGET_LIB = libpi_proto.so
 RM = rm -f
 
@@ -67,8 +69,8 @@ SRCS = \
 	p4/tmp/p4config.grpc.pb.cc \
 	status.pb.cc \
 	google/rpc/code.pb.cc \
-	p4runtime.pb.cc \
-	p4runtime.grpc.pb.cc \
+	p4runtime_wrl.pb.cc \
+	p4runtime_wrl.grpc.pb.cc \
 	cli/jp4cli.pb.cc \
 	cli/jp4cli.grpc.pb.cc
 endif
@@ -79,6 +81,7 @@ OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 $(TARGET_LIB): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
+ifdef UBUNTU
 p4runtime.pb.cc: p4runtime.proto
 	$(PROTOC) --cpp_out=. $<
 	sleep 2
@@ -88,6 +91,19 @@ p4runtime.pb.cc: p4runtime.proto
 
 p4runtime.grpc.pb.cc: p4runtime.proto
 	$(PROTOC) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
+
+else
+
+p4runtime_wrl.pb.cc: p4runtime_wrl.proto
+	$(PROTOC) --cpp_out=. $<
+	sleep 2
+	@echo Correcting strings ...
+	sed -i -e 's/_p4_2fconfig_2fp4info_2eproto/_p4info_2eproto/g' p4runtime_wrl.pb.cc
+	sed -i -e 's/_google_2frpc_2fstatus_2eproto/_status_2eproto/g' p4runtime_wrl.pb.cc
+
+p4runtime_wrl.grpc.pb.cc: p4runtime_wrl.proto
+	$(PROTOC) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
+endif
 
 p4/tmp/p4config.pb.cc: p4/tmp/p4config.proto
 	$(PROTOC) --proto_path=p4/tmp --cpp_out=p4/tmp/ $<

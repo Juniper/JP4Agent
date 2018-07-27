@@ -21,7 +21,9 @@
 
 ifdef UBUNTU
 CXX = g++
+CPPFLAGS += -DUBUNTU
 endif
+
 TARGET_LIB = libnull_target_halp.so
 RM = rm -rf
 OBJDIR  = ../obj

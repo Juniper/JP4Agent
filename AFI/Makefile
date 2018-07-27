@@ -24,7 +24,9 @@ PROTOG=/root/go/src/github.com/openconfig/ygot/proto_generator/proto_generator
 
 ifdef UBUNTU
 CXX = g++
+CPPFLAGS += -DUBUNTU
 endif
+
 TARGET_LIB = libafi_yang.so
 RM = rm -f
 

@@ -31,8 +31,13 @@
 #include "Utils.h"
 #include "google/rpc/code.pb.h"
 #include "p4/tmp/p4config.pb.h"
+#ifdef UBUNTU
 #include "p4runtime.grpc.pb.h"
 #include "p4runtime.pb.h"
+#else
+#include "p4runtime_wrl.grpc.pb.h"
+#include "p4runtime_wrl.pb.h"
+#endif
 #include "uint128.h"
 
 using SandboxId       = uint16_t;  ///< Sandbox Id

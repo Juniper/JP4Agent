@@ -21,7 +21,9 @@
 
 ifdef UBUNTU
 CXX = g++
+CPPFLAGS += -DUBUNTU
 endif
+
 PROG = jp4agent
 RM = rm -rf
 OBJDIR  = ../obj
@@ -49,8 +51,12 @@ CPPFLAGS += \
 	-I../../../pi/protos/p4/config \
 	-I../../../pi/protos/p4/tmp \
 	-I../../../utils/include/ \
-	-I/usr/include/jsoncpp \
+	-I/usr/include/jsoncpp
+
+ifdef OPENTRACING
+CPPFLAGS += \
 	-I/root/downloads/cpp-client/src
+endif
 
 LDLIBS = \
 	-ljp4agent \
@@ -69,8 +75,12 @@ LDLIBS = \
 	-lboost_system \
 	-lpthread \
 	-ljsoncpp \
-	-ljaegertracing \
 	-lyaml-cpp
+
+ifdef OPENTRACING
+LDLIBS += \
+	-ljaegertracing
+endif
 
 ifdef CODE_COVERAGE
 	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov

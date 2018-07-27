@@ -22,7 +22,11 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#ifdef UBUNTU
 #include <p4/config/p4info.grpc.pb.h>
+#else
+#include <p4info.grpc.pb.h>
+#endif
 
 #include <string>
 

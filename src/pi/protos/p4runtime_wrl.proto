@@ -1,0 +1,431 @@
+// Copyright (c) 2016, Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "status.proto";
+import "p4info.proto";
+
+// P4_14 spec: http://p4.org/wp-content/uploads/2015/04/p4-latest.pdf
+
+// This package and its contents are a work-in-progress.
+
+package p4;
+
+service P4Runtime {
+  // Update one or more P4 entities on the target.
+  rpc Write(WriteRequest) returns (WriteResponse) {
+  }
+  // Read one or more P4 entities from the target.
+  rpc Read(ReadRequest) returns (stream ReadResponse) {
+  }
+
+  // Sets the P4 fowarding-pipeline config.
+  rpc SetForwardingPipelineConfig(SetForwardingPipelineConfigRequest)
+      returns (SetForwardingPipelineConfigResponse) {
+  }
+  // Gets the current P4 fowarding-pipeline config.
+  rpc GetForwardingPipelineConfig(GetForwardingPipelineConfigRequest)
+      returns (GetForwardingPipelineConfigResponse) {
+  }
+
+  // Represents the bidirectional stream between the controller and the
+  // switch (initiated by the controller), and is managed for the following
+  // purposes: - connection initiation through master arbitration -
+  // indicating switch session liveness: the session is live when switch
+  // sends
+  //   a positive master arbitration update to the controller, and is
+  //   considered dead when either the stream breaks or the switch sends a
+  //   negative update for master arbitration
+  // - the controller sending/receiving packets to/from the switch
+  rpc StreamChannel(stream StreamMessageRequest)
+      returns (stream StreamMessageResponse) {
+  }
+}
+
+//------------------------------------------------------------------------------
+message WriteRequest {
+  uint64 device_id = 1;
+  Uint128 election_id = 2;
+  repeated Update updates = 3;
+}
+
+message WriteResponse {
+}
+
+message ReadRequest {
+  uint64 device_id = 1;
+  repeated Entity entities = 2;
+}
+
+message ReadResponse {
+  repeated Entity entities = 1;
+  // Set to true if no responses will follow this one.
+  bool complete = 2;
+}
+
+message Update {
+  enum Type {
+    UNSPECIFIED = 0;
+    INSERT = 1;
+    MODIFY = 2;
+    DELETE = 3;
+  }
+  Type type = 1;
+  Entity entity = 2;
+}
+
+message Entity {
+  oneof entity {
+    ExternEntry extern_entry = 1;
+    TableEntry table_entry = 2;
+    ActionProfileMember action_profile_member = 3;
+    ActionProfileGroup action_profile_group = 4;
+    MeterEntry meter_entry = 5;
+    DirectMeterEntry direct_meter_entry = 6;
+    CounterEntry counter_entry = 7;
+    DirectCounterEntry direct_counter_entry = 8;
+  }
+}
+
+message ExternEntry {
+  // the extern_type_id is assigned during compilation. It is likely that this
+  // id will in fact come from a P4 annotation to the extern declaration and
+  // that each vendor will receive a prefix to avoid collisions.
+  uint32 extern_type_id = 1;
+  uint32 extern_id = 2;  // id of the instance
+  google.protobuf.Any entry = 3;
+}
+
+// From Section 11 of P4_14 spec:
+// At run time, the table entry insert operation (not part of P4) must specify:
+// - Values for each field specified in the reads entry.
+// - The name of the action from the action_specification or the
+//   action_profile_specification and the parameters to be passed to the action
+//   function when it is called.
+message TableEntry {
+  uint32 table_id = 1;
+  repeated FieldMatch match = 2;
+  TableAction action = 3;
+  // Ignored unless match implies a TCAM lookup, i.e. at least one of the
+  // match fields is Ternary or Range.
+  // A higher number indicates higher priority.
+  // Only the highest priority entry that matches the packet must be selected.
+  // Given an existing entry with prority k, if the controller tries to insert
+  // or modify another entry with priority k such that a packet may match both
+  // entries, an error is returned. This will be the case if the overlap is
+  // strict (entries are identical) or not.
+  // In the future, if there is a use-case, a table-level annotation may be
+  // introduced to make the overlap check non-strict. In that case, if there
+  // are multiple matching entries with the same highest priority, the selected
+  // entry will be explicitly undefined.
+  int32 priority = 4;
+  // Metadata (cookie) opaque to the target. There is no requirement of where
+  // this is stored, as long as it is returned with the rest of the entry in
+  // a Read RPC.
+  uint64 controller_metadata = 5;
+  // meter_config and counter_data are convenience fields that enable the
+  // controller to configure the direct resources associated with the table at
+  // the same time as a match-action entry is inserted or modified.
+  // Table write:
+  //   - If the table does not contain a direct resource, then setting the
+  //     corresponding direct resource field in any table write operation will
+  //     return an error.
+  //   - When inserting a new table entry, leaving these fields unset means that
+  //     the direct resources of this table (if any) will assume default values.
+  //     For counters, the default value is 0, and for meters, the default value
+  //     is always green.
+  //   - When updating a table entry, leaving these fields unset means that the
+  //     direct resources (if any) will not be updated.
+  // Table read:
+  //   - If the table does not contain a direct resource, then the corresponding
+  //     field will not be set in the read table entry.
+  //   - If the meter_config field has default value, it will not be set in the
+  //     read table entry.
+  //   - The counter_data field will always be set in a read table entry if the
+  //     table contains a direct counter.
+  MeterConfig meter_config = 6;
+  CounterData counter_data = 7;
+  // Set to true if the table entry is being used to update the non-const
+  // default action of the table. If true, the "match" field must be empty and
+  // the "action" field must be populated with a valid direct action.
+  bool is_default_action = 8;
+}
+
+// field_match_type ::= exact | ternary | lpm | range | valid
+message FieldMatch {
+  uint32 field_id = 1;
+
+  // Matches can be performed on arbitrarily-large inputs; the protobuf type
+  // 'bytes' is used to model arbitrarily-large values.
+  message Exact {
+    bytes value = 1;
+  }
+  message Ternary {
+    bytes value = 1;
+    bytes mask = 2;
+  }
+  message LPM {
+    bytes value = 1;
+    int32 prefix_len = 2;  // in bits
+  }
+  // A Range is logically a set that contains all values numerically between
+  // 'low' and 'high' inclusively.
+  message Range {
+    bytes low = 1;
+    bytes high = 2;
+  }
+  message Valid {
+    bool value = 1;
+  }
+
+  oneof field_match_type {
+    Exact exact = 2;
+    Ternary ternary = 3;
+    LPM lpm = 4;
+    Range range = 6;
+    Valid valid = 7;
+  }
+}
+
+// table_actions ::= action_specification | action_profile_specification
+message TableAction {
+  oneof type {
+    Action action = 1;
+    uint32 action_profile_member_id = 2;
+    uint32 action_profile_group_id = 3;
+  }
+}
+
+message Action {
+  uint32 action_id = 1;
+  message Param {
+    uint32 param_id = 2;
+    bytes value = 3;
+  }
+  repeated Param params = 4;
+}
+
+//------------------------------------------------------------------------------
+message ActionProfileMember {
+  uint32 action_profile_id = 1;
+  uint32 member_id = 2;
+  Action action = 3;
+}
+
+//------------------------------------------------------------------------------
+message ActionProfileGroup {
+  uint32 action_profile_id = 1;
+  uint32 group_id = 2;
+  enum Type {
+    UNSPECIFIED = 0;
+    SELECT = 1;
+    FAST_FAILOVER = 2;
+  }
+  Type type = 3;
+  message Member {
+    uint32 member_id = 1;
+    int32 weight = 2;
+    uint32 watch = 3;
+  }
+  repeated Member members = 4;
+  int32 max_size = 5;  // cannot be modified after a group has been created
+}
+
+//------------------------------------------------------------------------------
+// For WriteRequest, Update.Type must be MODIFY.
+// For ReadRequest, the scope is defined as follows:
+// - All meter cells for all meters if meter_id = 0 (default).
+// - All meter cells for given meter_id if index = 0 (default).
+message MeterEntry {
+  uint32 meter_id = 1;
+  int64 index = 2;
+  MeterConfig config = 3;
+}
+
+//------------------------------------------------------------------------------
+// For WriteRequest, Update.Type must be MODIFY. INSERT and DELETE on direct
+// meters is not allowed and will return an error. The insertion/deletion
+// should happen as part of INSERT/DELETE on the associated table-entry.
+// For ReadRequest, the scope is defined as follows:
+// - All meter cells for all meters if meter_id = 0 (default).
+// - All meter cells for given meter_id if table_entry.match is empty.
+message DirectMeterEntry {
+  uint32 meter_id = 1;
+  // The associated table entry match.
+  // table_entry.action is ignored. Other fields specify the match.
+  TableEntry table_entry = 2;
+  MeterConfig config = 3;
+}
+
+// Modeled as RFC 2698: A Two Rate Three Color Marker (trTCM)
+// The trTCM meters a packet stream and marks its packets based on two rates,
+// Peak Information Rate (PIR) and Committed Information Rate (CIR), and their
+// associated burst sizes to be either green, yellow, or red.  A packet is
+// marked red if it exceeds the PIR.  Otherwise it is marked either yellow or
+// green depending on whether it exceeds or doesn't exceed the CIR.
+//
+// TODO: This is not metering protocol-independent!
+message MeterConfig {
+  // Committed information rate (units per sec)
+  int64 cir = 1;
+  // Committed burst size
+  int64 cburst = 2;
+  // Peak information rate (units per sec)
+  int64 pir = 3;
+  // Peak burst size
+  int64 pburst = 4;
+}
+
+//------------------------------------------------------------------------------
+// For WriteRequest, Update.Type must be MODIFY.
+// For ReadRequest, the scope is defined as follows:
+// - All counter cells for all meters if counter_id = 0 (default).
+// - All counter cells for given counter_id if index = 0 (default).
+message CounterEntry {
+  uint32 counter_id = 1;
+  int64 index = 2;
+  CounterData data = 3;
+}
+
+//------------------------------------------------------------------------------
+// For WriteRequest, Update.Type must be MODIFY. INSERT and DELETE on direct
+// counters is not allowed and will return an error. The insertion/deletion
+// should happen as part of INSERT/DELETE on the associated table-entry.
+// For ReadRequest, the scope is defined as follows:
+// - All counter cells for all meters if counter_id = 0 (default).
+// - All counter cells for given counter_id if table_entry.match is empty.
+message DirectCounterEntry {
+  uint32 counter_id = 1;
+  // The associated table entry match.
+  // table_entry.action is ignored. Other fields specify the match.
+  TableEntry table_entry = 2;
+  CounterData data = 3;
+}
+
+message CounterData {
+  int64 byte_count = 1;
+  int64 packet_count = 2;
+}
+
+//------------------------------------------------------------------------------
+message StreamMessageRequest {
+  oneof update {
+    MasterArbitrationUpdate arbitration = 1;
+    PacketOut packet = 2;
+  }
+}
+
+// Packet sent from the controller to the switch.
+message PacketOut {
+  bytes payload = 1;
+  // This will be based on P4 header annotated as
+  // @controller_header("packet_out").
+  // At most one P4 header can have this annotation.
+  repeated PacketMetadata metadata = 2;
+}
+
+message StreamMessageResponse {
+  oneof update {
+    MasterArbitrationUpdate arbitration = 1;
+    PacketIn packet = 2;
+  }
+}
+
+// Packet sent from the switch to the controller.
+message PacketIn {
+  bytes payload = 1;
+  // This will be based on P4 header annotated as
+  // @controller_header("packet_in").
+  // At most one P4 header can have this annotation.
+  repeated PacketMetadata metadata = 2;
+}
+
+// Any metadata associated with Packet-IO (controller Packet-In or Packet-Out)
+// needs to be modeled as P4 headers carrying special annotations
+// @controller_metadata("packet_out") and @controller_metadata("packet_in")
+// respectively. There can be at most one header each with these annotations.
+// These special headers are captured in P4Info ControllerPacketMetadata.
+message PacketMetadata {
+  // This refers to Metadata.id coming from P4Info ControllerPacketMetadata.
+  uint32 metadata_id = 1;
+  bytes value = 2;
+}
+
+message MasterArbitrationUpdate {
+  uint64 device_id = 1;
+  // The stream RPC with the highest election_id is the master. The 'master'
+  // controller instance populates this with its latest election_id. Switch
+  // populates with the highest election ID it has received from all connected
+  // controllers.
+  Uint128 election_id = 2;
+  // Switch populates this with OK for the client that is the master, and with
+  // an error status for all other connected clients (at every mastership
+  // change). The controller does not populate this field.
+  .google.rpc.Status status = 3;
+}
+
+message Uint128 {
+  // Highest 64 bits of a 128 bit number.
+  uint64 high = 1;
+  // Lowest 64 bits of a 128 bit number.
+  uint64 low = 2;
+}
+
+//------------------------------------------------------------------------------
+message SetForwardingPipelineConfigRequest {
+  enum Action {
+    UNSPECIFIED = 0;
+    VERIFY = 1;
+    VERIFY_AND_SAVE = 2;
+    VERIFY_AND_COMMIT = 3;
+    COMMIT = 4;
+  }
+  uint64 device_id = 1;
+  Uint128 election_id = 2;
+  Action action = 3;
+  ForwardingPipelineConfig config = 4;
+
+  // TODO(wmohsin): Remove when clients have migrated to 'device_id' and
+  // 'config' above.
+  repeated ForwardingPipelineConfig configs = 5 [deprecated = true];
+}
+
+message SetForwardingPipelineConfigResponse {
+}
+
+message ForwardingPipelineConfig {
+  config.P4Info p4info = 1;
+  // Target-specific P4 configuration.
+  bytes p4_device_config = 2;
+
+  // TODO(wmohsin): Remove when clients have migrated to specifying 'device_id'
+  // in SetForwardingPipelineConfigRequest.
+  uint64 device_id = 3 [deprecated = true];
+}
+
+message GetForwardingPipelineConfigRequest {
+  uint64 device_id = 1;
+
+  // TODO(wmohsin): Remove when clients have migrated to 'device_id' above
+  repeated uint64 device_ids = 2 [deprecated = true];
+}
+
+message GetForwardingPipelineConfigResponse {
+  ForwardingPipelineConfig config = 1;
+
+  // TODO(wmohsin): Remove when clients have migrated to 'config' above
+  repeated ForwardingPipelineConfig configs = 2 [deprecated = true];
+}

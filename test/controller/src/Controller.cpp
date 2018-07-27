@@ -22,7 +22,11 @@
 #include <grpc++/grpc++.h>
 
 #include <google/rpc/code.pb.h>
+#ifdef UBUNTU
 #include <p4runtime.grpc.pb.h>
+#else
+#include <p4runtime_wrl.grpc.pb.h>
+#endif
 #include <p4/tmp/p4config.grpc.pb.h>
 
 #include <google/protobuf/util/message_differencer.h>

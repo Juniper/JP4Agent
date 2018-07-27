@@ -21,7 +21,9 @@
 
 ifdef UBUNTU
 CXX = g++
+CPPFLAGS += -DUBUNTU
 endif
+
 RM = rm -rf
 PROG = controller
 LIB  = libcontroller.a

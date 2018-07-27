@@ -23,7 +23,9 @@ AFI_INCLUDE = /root/VMX/afi/include
 
 ifdef UBUNTU
 CXX = g++
+CPPFLAGS += -DUBUNTU
 endif
+
 TARGET_LIB = libaft_target_halp.so
 RM = rm -rf
 OBJDIR  = ../obj
