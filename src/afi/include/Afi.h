@@ -77,12 +77,12 @@ using AfiObjectNameMap = std::map<std::string, AfiObjectPtr>;
 class Str2Uint {
 public:
     Str2Uint(const std::string& s, uint16_t &v) {
-        v = *((uint16_t *) &s.c_str()[0]);
+        v = *((const uint16_t *) &s.c_str()[0]);
         v = ntohs(v);
     }
 
     Str2Uint(const std::string& s, uint32_t &v) {
-        v = *((uint32_t *) &s.c_str()[0]);
+        v = *((const uint32_t *) &s.c_str()[0]);
         v = ntohl(v);
     }
 };
@@ -96,7 +96,7 @@ public:
                                                    _mask(mask) { }
     ~AfiTEntryMatchField() { }
 
-    const uint32_t id() const { return _id; }
+    uint32_t id() const { return _id; }
     const std::string& value() const { return _value; }
     const std::string& mask() const { return _mask; }
 
@@ -149,7 +149,7 @@ public:
                                           _value(value) { }
     ~AfiAEntry() { }
 
-    const uint32_t id() const { return _id; }
+    uint32_t id() const { return _id; }
     const std::string& value() const { return _value; }
 
     std::ostream &description(std::ostream &os) const {
