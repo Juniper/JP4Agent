@@ -47,7 +47,7 @@ else
     for component in "${components[@]}"
     do
         echo "===== Running make under ${component} ====="
-        make -j4 -C ${component} DEBUG_BUILD=1 CODE_COVERAGE=1
+        make -j1 -C ${component} DEBUG_BUILD=1 CODE_COVERAGE=1
         if [ $? -ne 0 ]
         then
           echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 
