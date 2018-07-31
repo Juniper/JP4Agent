@@ -50,8 +50,12 @@ CPPFLAGS += \
 	-I../../../pi/protos \
 	-I../../../pi/protos/p4/config \
 	-I../../../pi/protos/p4/tmp \
-	-I../../../utils/include/ \
-	-I/usr/include/jsoncpp
+	-I../../../utils/include/
+
+ifdef UBUNTU
+CPPFLAGS += \
+        -I/usr/include/jsoncpp
+endif
 
 ifdef OPENTRACING
 CPPFLAGS += \
@@ -87,7 +91,6 @@ ifdef CODE_COVERAGE
 endif
 
 LDFLAGS += \
-	-L/usr/local/lib \
 	-L../../../jp4agent/obj/ \
 	-L../../../utils/obj/ \
 	-L../../../pi/obj/ \

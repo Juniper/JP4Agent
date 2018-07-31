@@ -77,7 +77,6 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 LDFLAGS += \
-	-L/usr/local/lib \
 	-L../../../src/pi/protos \
 	-L../../../src/utils/obj
 

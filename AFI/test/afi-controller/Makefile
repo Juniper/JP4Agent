@@ -29,9 +29,12 @@ CXXFLAGS += -g -O0 -std=c++14
 CPPFLAGS += \
 	-I. \
 	-I../yang/AFI/protos/ \
-	-I../yang/AFI/protos/juniper/ \
-	-I/usr/include/jsoncpp
+	-I../yang/AFI/protos/juniper
 
+ifdef UBUNTU
+CPPFLAGS += \
+	-I/usr/include/jsoncpp
+endif
 
 LDLIBS = -lprotobuf \
 		 -lgrpc++ \

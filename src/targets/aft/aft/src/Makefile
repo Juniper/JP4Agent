@@ -50,9 +50,13 @@ CPPFLAGS += \
 	-I../../../../pi/include \
 	-I../../../../../AFI/protos \
 	-I../../../../../AFI/protos/juniper \
-	-I/usr/include/jsoncpp \
 	-I$(AFI_INCLUDE)/afi-transport \
 	-I$(AFI_INCLUDE)/aft-client
+
+ifdef UBUNTU
+CPPFLAGS += \
+        -I/usr/include/jsoncpp
+endif
 
 ifdef CODE_COVERAGE
 	LDLIBS += -fprofile-arcs -ftest-coverage -lgcov
