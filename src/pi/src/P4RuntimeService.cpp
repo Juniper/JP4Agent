@@ -161,7 +161,15 @@ P4RuntimeServiceImpl::tableInsert(const p4::TableEntry &tableEntry)
         }
         if (mf.has_exact()) {
             Log(DEBUG) << "match field has exact: ";
+
+            auto exact = mf.exact();
+            AFIHAL::AfiTEntryMatchField afiMF(mf.field_id(),
+                                              AFIHAL::AfiTEntryMatchField::MfType::EXACT,
+                                              exact.value(),
+                                              "");
+            afiMFs.push_back(afiMF);
         }
+
         if (mf.has_lpm()) {
             Log(DEBUG) << "match field has lpm: ";
 
@@ -186,11 +194,10 @@ P4RuntimeServiceImpl::tableInsert(const p4::TableEntry &tableEntry)
 
             auto ternary = mf.ternary();
             AFIHAL::AfiTEntryMatchField afiMF(mf.field_id(),
+                                              AFIHAL::AfiTEntryMatchField::MfType::TERNARY,
                                               ternary.value(),
                                               ternary.mask());
-
             afiMFs.push_back(afiMF);
-
         }
 
         if (mf.has_range()) {
@@ -206,7 +213,7 @@ P4RuntimeServiceImpl::tableInsert(const p4::TableEntry &tableEntry)
         const p4::Action &action = tableAction.action();
         actionId = tableAction.action().action_id();
         for (const auto &p : action.params()) {
-            Log(DEBUG) << "paramt id: " << p.param_id();
+            Log(DEBUG) << "param id: " << p.param_id();
             AFIHAL::AfiAEntry afiAEntry(p.param_id(), p.value());
             afiActions.push_back(afiAEntry);
         }

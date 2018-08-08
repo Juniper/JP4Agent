@@ -584,8 +584,8 @@ ControllerAddVrfEntry(uint16_t etype,
     std::string ethType  = utils.uint2Str(etype);
     std::string dstAddr  = utils.uint2Str(addr);
 
-    const uint16_t etMask = htons(0xffff);
-    const uint32_t dAddrMask = htonl(0xffffffff);
+    const uint16_t etMask = 0xffff;
+    const uint32_t dAddrMask = 0xffffffff;
     const uint64_t sAddrMask = 0xffffffffffff;
 
     std::string ethTypeMask  = utils.uint2Str(etMask);
@@ -642,6 +642,203 @@ ControllerAddVrfEntry(uint16_t etype,
         auto param = action->add_params();
         param->set_param_id(p0_id);
         param->set_value(vrfId);
+    }
+
+    // add entry
+    {
+        p4::WriteRequest request;
+        set_election_id(request.mutable_election_id());
+        request.set_device_id(dev_id);
+        auto update = request.add_updates();
+        update->set_type(p4::Update_Type_INSERT);
+        update->set_allocated_entity(&entity);
+        ClientContext context;
+        p4::WriteResponse rep;
+        auto status = pi_stub_->Write(&context, request, &rep);
+        assert(status.ok());
+        update->release_entity();
+    }
+
+    std::cout << "Done.\n";
+
+    // Close the bidirectional stream.
+    {
+        stream->WritesDone();
+        p4::StreamMessageResponse response;
+        while (stream->Read(&response)) {
+        }
+        auto status = stream->Finish();
+        assert(status.ok());
+    }
+
+    return 0;
+}
+
+int
+ControllerAddClassIdEntry(uint16_t vid,
+                          uint8_t  pcp,
+                          uint16_t etype,
+                          uint8_t  proto,
+                          uint8_t  ttl,
+                          uint32_t dAddr,
+                          uint16_t sPort,
+                          uint16_t dPort,
+                          uint8_t  classId)
+{
+    int dev_id = 0;
+    auto channel = grpc::CreateChannel("localhost:50051",
+                                       grpc::InsecureChannelCredentials());
+    std::unique_ptr<p4::P4Runtime::Stub> pi_stub_(
+        p4::P4Runtime::NewStub(channel));
+
+    auto p4info = parse_p4info(test_proto_txt);
+
+    auto set_election_id = [](p4::Uint128 *election_id) {
+        election_id->set_high(0);
+        election_id->set_low(1);
+    };
+
+    // Open bidirectional stream and advertise election id.
+    ClientContext stream_context;
+    auto stream = pi_stub_->StreamChannel(&stream_context);
+    {
+        p4::StreamMessageRequest request;
+        auto arbitration = request.mutable_arbitration();
+        arbitration->set_device_id(dev_id);
+        set_election_id(arbitration->mutable_election_id());
+        stream->Write(request);
+        p4::StreamMessageResponse response;
+        stream->Read(&response);
+        assert(response.update_case() ==
+               p4::StreamMessageResponse::kArbitration);
+        assert(response.arbitration().status().code() ==
+               ::google::rpc::Code::OK);
+    }
+
+    std::cout << "Write: Adding classId table entry...";
+
+    Utils utils;
+    std::string pcpS     = utils.uint2Str(pcp);
+    std::string protoS   = utils.uint2Str(proto);
+    std::string ttlS     = utils.uint2Str(ttl);
+    std::string classIdS = utils.uint2Str(classId);
+    std::string vidS     = utils.uint2Str(vid);
+    std::string etypeS   = utils.uint2Str(etype);
+    std::string dAddrS   = utils.uint2Str(dAddr);
+    std::string sPortS   = utils.uint2Str(sPort);
+    std::string dPortS   = utils.uint2Str(dPort);
+
+    const uint16_t vidMask = 0x0fff;
+    std::string vidMaskS   = utils.uint2Str(vidMask);
+
+    const uint8_t pcpMask = 0x07;
+    const uint8_t protoMask = 0xff;
+    const uint8_t ttlMask = 0xff;
+    const uint16_t etypeMask = 0xffff;
+    const uint16_t sPortMask = 0xffff;
+    const uint16_t dPortMask = 0xffff;
+    const uint32_t dAddrMask = 0xffffffff;
+
+    std::string pcpMaskS   = utils.uint2Str(pcpMask);
+    std::string protoMaskS = utils.uint2Str(protoMask);
+    std::string ttlMaskS   = utils.uint2Str(ttlMask);
+    std::string etypeMaskS = utils.uint2Str(etypeMask);
+    std::string sPortMaskS = utils.uint2Str(sPortMask);
+    std::string dPortMaskS = utils.uint2Str(dPortMask);
+    std::string dAddrMaskS = utils.uint2Str(dAddrMask);
+
+    auto t_id = get_table_id(p4info,
+                             "ingress.class_id.class_id_assignment_table");
+
+    auto mf0_id = get_mf_id(p4info,
+                            "ingress.class_id.class_id_assignment_table",
+                            "hdr.vlan_tag[0].vid");
+    auto mf1_id = get_mf_id(p4info,
+                            "ingress.class_id.class_id_assignment_table",
+                            "hdr.vlan_tag[0].pcp");
+    auto mf2_id = get_mf_id(p4info,
+                            "ingress.class_id.class_id_assignment_table",
+                            "hdr.ethernet.ether_type");
+    auto mf3_id = get_mf_id(p4info,
+                            "ingress.class_id.class_id_assignment_table",
+                            "hdr.ipv4_base.ttl");
+    auto mf4_id = get_mf_id(p4info,
+                            "ingress.class_id.class_id_assignment_table",
+                            "hdr.ipv4_base.protocol");
+    auto mf5_id = get_mf_id(p4info,
+                            "ingress.class_id.class_id_assignment_table",
+                            "hdr.ipv4_base.dst_addr");
+    auto mf6_id = get_mf_id(p4info,
+                            "ingress.class_id.class_id_assignment_table",
+                            "local_metadata.l4_src_port");
+    auto mf7_id = get_mf_id(p4info,
+                            "ingress.class_id.class_id_assignment_table",
+                            "local_metadata.l4_dst_port");
+
+    p4::Entity entity;
+    auto table_entry = entity.mutable_table_entry();
+
+    table_entry->set_table_id(t_id);
+
+    auto match0 = table_entry->add_match();
+    match0->set_field_id(mf0_id);
+    auto tnary0 = match0->mutable_ternary();
+    tnary0->set_value(vidS);
+    tnary0->set_mask(vidMaskS);
+
+    auto match1 = table_entry->add_match();
+    match1->set_field_id(mf1_id);
+    auto tnary1 = match1->mutable_ternary();
+    tnary1->set_value(pcpS);
+    tnary1->set_mask(pcpMaskS);
+
+    auto match2 = table_entry->add_match();
+    match2->set_field_id(mf2_id);
+    auto exact2 = match2->mutable_exact();
+    exact2->set_value(etypeS);
+
+    auto match3 = table_entry->add_match();
+    match3->set_field_id(mf3_id);
+    auto tnary3 = match3->mutable_ternary();
+    tnary3->set_value(ttlS);
+    tnary3->set_mask(ttlMaskS);
+
+    auto match4 = table_entry->add_match();
+    match4->set_field_id(mf4_id);
+    auto tnary4 = match4->mutable_ternary();
+    tnary4->set_value(protoS);
+    tnary4->set_mask(protoMaskS);
+
+    auto match5 = table_entry->add_match();
+    match5->set_field_id(mf5_id);
+    auto tnary5 = match5->mutable_ternary();
+    tnary5->set_value(dAddrS);
+    tnary5->set_mask(dAddrMaskS);
+
+    auto match6 = table_entry->add_match();
+    match6->set_field_id(mf6_id);
+    auto tnary6 = match6->mutable_ternary();
+    tnary6->set_value(sPortS);
+    tnary6->set_mask(sPortMaskS);
+
+    auto match7 = table_entry->add_match();
+    match7->set_field_id(mf7_id);
+    auto tnary7 = match7->mutable_ternary();
+    tnary7->set_value(dPortS);
+    tnary7->set_mask(dPortMaskS);
+
+    auto a_id = get_action_id(p4info, "ingress.class_id.set_class_id");
+    auto p0_id = get_param_id(p4info,
+                              "ingress.class_id.set_class_id",
+                              "class_id_value");
+
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(a_id);
+    {
+        auto param = action->add_params();
+        param->set_param_id(p0_id);
+        param->set_value(classIdS);
     }
 
     // add entry

@@ -29,6 +29,7 @@
 
 #include "AfiJsonResource.h"
 #include "AfiNext.h"
+#include <json/json.h>
 
 namespace AFIHAL
 {
@@ -39,6 +40,10 @@ using AfiObjectWeakPtr = std::weak_ptr<AfiObject>;
 
 using AfiObjectNameMap = std::map<std::string, AfiObjectPtr>;
 using AfiObjectIdMap   = std::map<uint32_t, AfiObjectPtr>;
+
+// Forward declarations.
+class AfiTEntryMatchField;
+class AfiAEntry;
 
 class AfiObject : public AfiNext
 {
@@ -56,6 +61,15 @@ class AfiObject : public AfiNext
 
     // virtual bool update(void);
     // virtual bool change(void);
+
+    virtual bool createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
+                                    const uint32_t aId, //P4InfoActionPtr action,
+                                    const std::vector<AfiTEntryMatchField> &mfs,
+                                    const std::vector<AfiAEntry> &aes,
+                                    Json::Value& result)
+    {
+        return false;
+    }
 
     /// @returns AfiObject id
     AfiObjectId id() const

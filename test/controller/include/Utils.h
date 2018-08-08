@@ -35,7 +35,9 @@ public:
     {
         std::string ret;
 
-        if (typeid(T) == typeid(uint16_t)) {
+        if (typeid(T) == typeid(uint8_t)) {
+            ret = std::string(reinterpret_cast<char *>(&i), sizeof(i));
+        } else if (typeid(T) == typeid(uint16_t)) {
             i = htons(i);
             ret = std::string(reinterpret_cast<char *>(&i), sizeof(i));
         } else if (typeid(T) == typeid(uint32_t)) {

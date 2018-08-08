@@ -39,7 +39,7 @@ then
     for component in "${components[@]}"
     do
         echo "===== Running make clean under ${component} ====="
-        make clean -C ${component} 
+        make clean -C ${component} UBUNTU=1
     done
     echo "===== Deleting all obj directories ====="
     cd $REPO_DIR; find . -name obj | xargs rm -rf

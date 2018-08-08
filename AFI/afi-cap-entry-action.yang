@@ -53,17 +53,17 @@ module afi-cap-entry-action {
         }
     
         leaf destination-class-id {
-            type afi-types:afi-class-id;
+            type uint16;
             description "Set destination address lookup class ID.";
         }
     
         leaf source-class-id {
-            type afi-types:afi-class-id;
+            type uint16;
             description "Set source address lookup class ID.";
         }
     
         leaf vrf {
-            type afi-types:afi-vrf-id;
+            type uint16;
             description "Set VRF ID.";
         }
     }

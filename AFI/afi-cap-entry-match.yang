@@ -37,14 +37,29 @@ module afi-cap-entry-match {
             description "Pipeline number";
         }
     
+        leaf pipeline-id-mask {
+            type uint8;
+            description "Pipeline number mask";
+        }
+    
         leaf virtual-slice-group {
             type uint8;
             description "Virtual slice group";
         }
     
+        leaf virtual-slice-group-mask {
+            type uint8;
+            description "Virtual slice group mask";
+        }
+    
         leaf vlan-outer-present {
             type boolean;
             description "Packet Outer Vlan Tag Status";
+        }
+    
+        leaf vlan-outer-present-mask {
+            type boolean;
+            description "Packet Outer Vlan Tag Status mask";
         }
     
         leaf outer-vlan-id {
@@ -54,9 +69,21 @@ module afi-cap-entry-match {
             description "Outer Vlan Id";
         }
     
+        leaf outer-vlan-id-mask {
+            type uint16 {
+                range "1 .. 4095";
+            }
+            description "Outer Vlan Id mask";
+        }
+    
         leaf outer-vlan-cfi {
             type boolean;
             description "Outer Vlan CFI";
+        }
+    
+        leaf outer-vlan-cfi-mask {
+            type boolean;
+            description "Outer Vlan CFI mask";
         }
     
         leaf outer-vlan-dot1p {
@@ -66,9 +93,21 @@ module afi-cap-entry-match {
             description "Outer Vlan Priority";
         }
     
+        leaf outer-vlan-dot1p-mask {
+            type uint8 {
+                range "0 .. 7";
+            }
+            description "Outer Vlan Priority mask";
+        }
+    
         leaf vlan-inner-present {
             type boolean;
             description "Packet Outer Vlan Tag Status";
+        }
+    
+        leaf vlan-inner-present-mask {
+            type boolean;
+            description "Packet Outer Vlan Tag Status mask";
         }
     
         leaf inner-vlan-id {
@@ -78,9 +117,21 @@ module afi-cap-entry-match {
             description "Inner Vlan Id";
         }
     
+        leaf inner-vlan-id-mask {
+            type uint16 {
+                range "1 .. 4095";
+            }
+            description "Inner Vlan Id mask";
+        }
+    
         leaf inner-vlan-cfi {
             type boolean;
             description "Inner Vlan CFI";
+        }
+    
+        leaf inner-vlan-cfi-mask {
+            type boolean;
+            description "Inner Vlan CFI mask";
         }
     
         leaf inner-vlan-dot1p {
@@ -90,14 +141,31 @@ module afi-cap-entry-match {
             description "Inner Vlan Priority";
         }
     
+        leaf inner-vlan-dot1p-mask {
+            type uint8 {
+                range "0 .. 7";
+            }
+            description "Inner Vlan Priority mask";
+        }
+    
         leaf inner-ip-proto {
-            type afi-types:afi-inet-family;
+            type uint8;
             description "Inner IP Protocol";
         }
     
+        leaf inner-ip-proto-mask {
+            type uint8;
+            description "Inner IP Protocol mask";
+        }
+    
         leaf outer-ip-proto {
-            type afi-types:afi-inet-family;
+            type uint8;
             description "Outer IP Protocol";
+        }
+    
+        leaf outer-ip-proto-mask {
+            type uint8;
+            description "Outer IP Protocol mask";
         }
     
         leaf tunnel-terminated {
@@ -105,9 +173,19 @@ module afi-cap-entry-match {
             description "Tunnel terminated traffic";
         }
     
+        leaf tunnel-terminated-mask {
+            type boolean;
+            description "Tunnel terminated traffic mask";
+        }
+    
         leaf outer-tpid {
             type afi-types:afi-field;
             description "Outer TPID of the packet.";
+        }
+    
+        leaf outer-tpid-mask {
+            type afi-types:afi-field;
+            description "Outer TPID of the packet mask.";
         }
     
         leaf src-trunk {
@@ -115,9 +193,19 @@ module afi-cap-entry-match {
             description "Source Trunk Group ID.";
         }
     
+        leaf src-trunk-mask {
+            type afi-types:afi-trunk-group-id;
+            description "Source Trunk Group ID mask.";
+        }
+    
         leaf src-port {
             type afi-types:afi-port;
             description "Source Port.";
+        }
+    
+        leaf src-port-mask {
+            type afi-types:afi-port;
+            description "Source Port mask.";
         }
     
         leaf system-port-class {
@@ -125,14 +213,29 @@ module afi-cap-entry-match {
             description "Class Id from SOURCE_TRUNK_MAP.";
         }
     
+        leaf system-port-class-mask {
+            type afi-types:afi-class-id;
+            description "Class Id from SOURCE_TRUNK_MAP mask.";
+        }
+    
         leaf l4-packet {
             type boolean;
             description "L4 Packet (has Valid L4 Source and Destination Port).";
         }
     
-        leaf ipv4-ttl {
+        leaf l4-packet-mask {
             type boolean;
+            description "L4 Packet mask (has Valid L4 Source and Destination Port).";
+        }
+    
+        leaf ipv4-ttl {
+            type uint8;
             description "Packet TTL.";
+        }
+    
+        leaf ipv4-ttl-mask {
+            type uint8;
+            description "Packet TTL mask.";
         }
     
         leaf tos {
@@ -140,9 +243,19 @@ module afi-cap-entry-match {
             description "Packet TOS.";
         }
     
+        leaf tos-mask {
+            type uint8;
+            description "Packet TOS mask.";
+        }
+    
         leaf l4-destination-port {
             type uint16;
             description "L4 Header Destination Port.";
+        }
+    
+        leaf l4-destination-port-mask {
+            type uint16;
+            description "L4 Header Destination Port mask.";
         }
     
         leaf l4-source-port {
@@ -150,9 +263,19 @@ module afi-cap-entry-match {
             description "L4 header Source Port.";
         }
     
+        leaf l4-source-port-mask {
+            type uint16;
+            description "L4 header Source Port mask.";
+        }
+    
         leaf ip-protocol {
-            type afi-types:afi-field;
+            type uint8;
             description "IP Protocol.";
+        }
+    
+        leaf ip-protocol-mask {
+            type uint8;
+            description "IP Protocol mask.";
         }
     
         leaf destination-ipv4-address {
@@ -160,14 +283,29 @@ module afi-cap-entry-match {
             description "Destination IPv4 address.";
         }
     
+        leaf destination-ipv4-address-mask {
+            type uint32;
+            description "Destination IPv4 address mask.";
+        }
+    
         leaf source-ipv4-address {
             type uint32;
             description "Source IPv4 address.";
         }
     
+        leaf source-ipv4-address-mask {
+            type uint32;
+            description "Source IPv4 address mask.";
+        }
+    
         leaf ethertype {
             type uint16;
             description "Ethertype.";
+        }
+    
+        leaf ethertype-mask {
+            type uint16;
+            description "Ethertype mask.";
         }
     
         leaf source-mac-address {
@@ -177,6 +315,13 @@ module afi-cap-entry-match {
             description "Source MAC address.";
         }
     
+        leaf source-mac-address-mask {
+            type binary {
+                length "6";
+            }
+            description "Source MAC address mask.";
+        }
+    
         leaf destination-mac-address {
             type binary {
                 length "6";
@@ -184,9 +329,21 @@ module afi-cap-entry-match {
             description "Destination MAC address.";
         }
     
+        leaf destination-mac-address-mask {
+            type binary {
+                length "6";
+            }
+            description "Destination MAC address mask.";
+        }
+    
         leaf l3-interface-class {
             type uint16;
             description "L3 interface Class ID.";
+        }
+
+        leaf l3-interface-class-mask {
+            type uint16;
+            description "L3 interface Class ID mask.";
         }
     }
 }

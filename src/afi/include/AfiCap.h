@@ -40,6 +40,12 @@ class AfiCap : public AfiObject
 
     ~AfiCap() {}
 
+    virtual bool createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
+                                    const uint32_t aId, //P4InfoActionPtr action,
+                                    const std::vector<AfiTEntryMatchField> &mfs,
+                                    const std::vector<AfiAEntry> &aes,
+                                    Json::Value& result) override;
+
     ::ywrapper::UintValue gid() { return _cap.group_id(); }
     ::ywrapper::UintValue gp() { return _cap.group_priority(); }
 

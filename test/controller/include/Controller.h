@@ -57,6 +57,17 @@ int ControllerAddVrfEntry(uint16_t etype,
                           uint32_t addr,
                           uint32_t vrf);
 
+int
+ControllerAddClassIdEntry(uint16_t vid,
+                          uint8_t  pcp,
+                          uint16_t etype,
+                          uint8_t  proto,
+                          uint8_t  ttl,
+                          uint32_t dAddr,
+                          uint16_t sPort,
+                          uint16_t dPort,
+                          uint8_t  classId);
+
 // Packet header definitions
 struct __attribute__((packed)) cpu_header_t {
     char     zeros[8];

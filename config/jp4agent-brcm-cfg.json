@@ -12,7 +12,7 @@
         },
         "DevicePktIOConfig" : {
             "Note"                 : "Address where PacketIO listens for hostpath packets from JP4Agent", 
-            "pktio-server-address" : "10.207.66.110:64014"
+            "pktio-server-address" : "0.0.0.0:64014"
         },
         "DebugConfig" : {
             "Note"                 : "Debug mode", 

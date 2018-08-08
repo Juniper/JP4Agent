@@ -9,12 +9,30 @@
       "afi-object-name" : "ingress.vrf.vrf_classifier_table",
       "afi-object-id" : 1,
       "afi-object-type" : "afi-cap",
-      "afi-object" : "ioLC1gIoCiZpbmdyZXNzLnZyZi52cmZfY2xhc3NpZmllcl90YWJsZV9tYXRjaNK82IMJAOjPi40JAfKgn90KKQonaW5ncmVzcy52cmYudnJmX2NsYXNzaWZpZXJfdGFibGVfYWN0aW9u6oO6/g4CCAU="
+      "afi-object" : "ioLC1gIoCiZpbmdyZXNzLnZyZi52cmZfY2xhc3NpZmllcl90YWJsZV9tYXRjaNK82IMJAggF6M+LjQkB8qCf3QopCidpbmdyZXNzLnZyZi52cmZfY2xhc3NpZmllcl90YWJsZV9hY3Rpb27qg7r+DgIIBQ=="
     },
     {
       "afi-object-name" : "ingress.vrf.vrf_classifier_table_match",
       "afi-object-id" : 2,
       "afi-object-type" : "afi-cap-match",
-      "afi-object" : "2q/uEAIIAcLO1LQIAggBsqiE/wkCCAE="
+      "afi-object" : "2q/uEAIIAbKe1oYCAggBws7UtAgCCAGyqIT/CQIIAQ=="
+    },
+    {
+      "afi-object-name" : "ingress.class_id.class_id_assignment_table_action",
+      "afi-object-id" : 3,
+      "afi-object-type" : "afi-cap-action",
+      "afi-object" : "ypCSmAECCAE="
+    },
+    {
+      "afi-object-name" : "ingress.class_id.class_id_assignment_table",
+      "afi-object-id" : 4,
+      "afi-object-type" : "afi-cap",
+      "afi-object" : "ioLC1gIyCjBpbmdyZXNzLmNsYXNzX2lkLmNsYXNzX2lkX2Fzc2lnbm1lbnRfdGFibGVfbWF0Y2jSvNiDCQIIBejPi40JAfKgn90KMwoxaW5ncmVzcy5jbGFzc19pZC5jbGFzc19pZF9hc3NpZ25tZW50X3RhYmxlX2FjdGlvbuqDuv4OAggJ"
+    },
+    {
+      "afi-object-name" : "ingress.class_id.class_id_assignment_table_match",
+      "afi-object-id" : 5,
+      "afi-object-type" : "afi-cap-match",
+      "afi-object" : "2q/uEAIIAYrdnyYCCAGSooLYAgIIAfL0380FAggBisXqqwcCCAHCvuSkCAIIAcLO1LQIAggB4oDmvQkCCAE="
     }
 ]

@@ -78,71 +78,12 @@ TEST_F(P4BRCMSPINE, VrfClassifier)
     std::string mac((char *) &m[0], 6);
     ControllerAddVrfEntry(0x800, mac, 0x37373702, 5);
     EXPECT_EQ(1, 1);
-#ifdef SUD
-    uint16_t port = 13;
-
-    TestPacket *testPkt = testPacketLibrary.getTestPacket(
-        TestPacketLibrary::TEST_PKT_ID_BRCM_TEST_INJECT);
-    char pktbuf[ETHER_PAYLOAD_BUF_SIZE];
-    size_t pktlen = testPkt->getEtherPacket(pktbuf, ETHER_PAYLOAD_BUF_SIZE);
-    std::string inject_l2_pkt{pktbuf, pktlen};
-
-    // Print injected pkt
-    std::cout << "Injected pkt on port: " << port << std::hex << std::uppercase;
-    for (size_t i = 0; i < pktlen; i++) {
-        if (i % 16 == 0) std::cout << "\n";
-        std::cout << " " << std::setfill('0') << std::setw(2)
-                  << +(uint8_t)inject_l2_pkt[i];
-    }
-    std::cout << std::endl << std::dec << std::nouppercase;
-
-    std::string recvd_pkt;
-    ControllerInjectPuntL2Pkt(inject_l2_pkt, recvd_pkt, port, port, 15s);
-    ASSERT_FALSE(recvd_pkt.empty()) << "Failed to read packet";
-
-    // Verify packets
-    EXPECT_EQ(0, memcmp(pktbuf, recvd_pkt.data(), pktlen))
-        << "Sent and received pkts differ";
-#endif // SUD
 }
 
-#ifdef SUD
-// Test2: Transit Packet Test.
-TEST_F(P4BRCMSPINE, BrcmIpv4Router)
+// Test2: Class ID Table
+TEST_F(P4BRCMSPINE, ClassId)
 {
-    uint16_t iport = 9;
-    uint16_t eport = 13;
-
-    // Launch controller to add route entry.
-    ControllerAddRouteEntry(0x37373702, 24, 0x0a000001, 0x88a25e9175ff, 13);
-    sleep_thread_log(5s);
-
-    TestPacket *injectPkt = testPacketLibrary.getTestPacket(
-        TestPacketLibrary::TEST_PKT_ID_BRCM_TEST_TRANSIT_INJECT);
-    char pktbuf[ETHER_PAYLOAD_BUF_SIZE];
-    size_t pktlen = injectPkt->getEtherPacket(pktbuf, ETHER_PAYLOAD_BUF_SIZE);
-    std::string inject_l2_pkt{pktbuf, pktlen};
-
-    // Print injected pkt
-    std::cout << "Injected pkt on port: " << iport << std::hex << std::uppercase;
-    for (size_t i = 0; i < pktlen; i++) {
-        if (i % 16 == 0) std::cout << "\n";
-        std::cout << " " << std::setfill('0') << std::setw(2)
-                  << +(uint8_t)inject_l2_pkt[i];
-    }
-    std::cout << std::endl << std::dec << std::nouppercase;
-
-    std::string recvd_pkt;
-    ControllerInjectPuntL2Pkt(inject_l2_pkt, recvd_pkt, eport, iport, 30s);
-    ASSERT_FALSE(recvd_pkt.empty()) << "Failed to read packet";
-
-    TestPacket *puntPkt = testPacketLibrary.getTestPacket(
-        TestPacketLibrary::TEST_PKT_ID_BRCM_TEST_TRANSIT_PUNT);
-    pktlen = puntPkt->getEtherPacket(pktbuf, ETHER_PAYLOAD_BUF_SIZE);
-
-    // Verify packets. Ignore checksum difference.
-    EXPECT_EQ(0, (memcmp(pktbuf, recvd_pkt.data(), 22) &&
-                  memcmp(pktbuf + 25, recvd_pkt.data() + 25, pktlen - 26)))
-        << "Sent and received pkts differ";
+    ControllerAddClassIdEntry(100, 5, 0x800, 6, 7, 0x37373702, 30, 40, 10);
+    EXPECT_EQ(1, 1);
 }
-#endif // SUD
+

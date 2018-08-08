@@ -29,10 +29,10 @@
 #ifdef UBUNTU
 #include "p4runtime.grpc.pb.h"
 #include "p4runtime.pb.h"
-#else
+#else // UBUNTU
 #include "p4runtime_wrl.grpc.pb.h"
 #include "p4runtime_wrl.pb.h"
-#endif
+#endif // UBUNTU
 #include "P4Info.h"
 
 #ifdef OPENTRACING
@@ -74,29 +74,31 @@ using AfiUPtr          = std::unique_ptr<Afi>;
 using AfiObjectNameMap = std::map<std::string, AfiObjectPtr>;
 // using AfiObjectIdMap = std::map<uint32_t, AfiObjectPtr>;
 
-class Str2Uint {
-public:
-    Str2Uint(const std::string& s, uint16_t &v) {
-        v = *((const uint16_t *) &s.c_str()[0]);
+template <class T> inline
+void str2Uint(const std::string& s, T &v) {
+    v = *((const T *) &s.c_str()[0]);
+    if (typeid(T) == typeid(uint16_t)) {
         v = ntohs(v);
-    }
-
-    Str2Uint(const std::string& s, uint32_t &v) {
-        v = *((const uint32_t *) &s.c_str()[0]);
+    } else if (typeid(T) == typeid(uint32_t)) {
         v = ntohl(v);
     }
-};
+}
 
 class AfiTEntryMatchField {
 public:
+    enum MfType { EXACT, LPM, TERNARY };
+
     AfiTEntryMatchField(int id,
+                        MfType t,
                         const std::string &value,
                         const std::string &mask) : _id(id),
+                                                   _type(t),
                                                    _value(value),
                                                    _mask(mask) { }
     ~AfiTEntryMatchField() { }
 
     uint32_t id() const { return _id; }
+    MfType type() const { return _type; }
     const std::string& value() const { return _value; }
     const std::string& mask() const { return _mask; }
 
@@ -104,27 +106,44 @@ public:
         os << "_________ AfiTEntryMatchField _______" << std::endl;
         os << "Match Field ID: " << _id << std::endl;
 
-        if (_value.size() == 2) {
-            uint16_t v, m;
-            Str2Uint(_value, v);
-            Str2Uint(_mask, m);
+        if (_value.size() == 1) {
+            uint8_t v;
+            str2Uint(_value, v);
             os << "Match Field Value: " << v << std::endl;
-            os << "Match Field Mask: "  << m << std::endl;
+            if (_type == MfType::TERNARY) {
+                uint8_t m;
+                str2Uint(_mask, m);
+                os << "Match Field Mask: "  << m << std::endl;
+            }
+        } else if (_value.size() == 2) {
+            uint16_t v;
+            str2Uint(_value, v);
+            os << "Match Field Value: " << v << std::endl;
+            if (_type == MfType::TERNARY) {
+                uint16_t m;
+                str2Uint(_mask, m);
+                os << "Match Field Mask: "  << m << std::endl;
+            }
         } else if (_value.size() == 4) {
-            uint32_t v, m;
-            Str2Uint(_value, v);
-            Str2Uint(_mask, m);
+            uint32_t v;
+            str2Uint(_value, v);
             os << "Match Field Value: " << v << std::endl;
-            os << "Match Field Mask: "  << m << std::endl;
+            if (_type == MfType::TERNARY) {
+                uint32_t m;
+                str2Uint(_mask, m);
+                os << "Match Field Mask: "  << m << std::endl;
+            }
         } else if (_value.size() == 6) {
             os << "Match Field Value: ";
             for (unsigned int i = 0; i < _value.size(); i++)
                 os << static_cast<unsigned>(_value[i]);
             os << std::endl;
-            os << "Match Field Mask: ";
-            for (unsigned int i = 0; i < _value.size(); i++)
-                os << static_cast<unsigned>(_mask[i]);
-            os << std::endl;
+            if (_type == MfType::TERNARY) {
+                os << "Match Field Mask: ";
+                for (unsigned int i = 0; i < _value.size(); i++)
+                    os << static_cast<unsigned>(_mask[i]);
+                os << std::endl;
+            }
         }
 
         return os;
@@ -138,6 +157,7 @@ public:
 
 private:
     uint32_t _id;
+    MfType _type;
     const std::string _value;
     const std::string _mask;
 };
@@ -158,11 +178,11 @@ public:
 
         if (_value.size() == 2) {
             uint16_t v;
-            Str2Uint(_value, v);
+            str2Uint(_value, v);
             os << "Action Value: " << v << std::endl;
         } else if (_value.size() == 4) {
             uint32_t v;
-            Str2Uint(_value, v);
+            str2Uint(_value, v);
             os << "Action Value: " << v << std::endl;
         } else if (_value.size() == 6) {
             os << "Action Value: ";

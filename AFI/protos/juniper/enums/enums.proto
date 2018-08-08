@@ -68,15 +68,6 @@ enum AfiCapEntryMatchAfiField {
   AFICAPENTRYMATCHAFIFIELD_packet_l4_dport = 22 [(yext.yang_name) = "packet-l4-dport"];
 }
 
-// AfiCapEntryMatchAfiInetFamily represents an enumerated type generated for the YANG enumerated type afi-inet-family.
-enum AfiCapEntryMatchAfiInetFamily {
-  AFICAPENTRYMATCHAFIINETFAMILY_UNSET = 0;
-  AFICAPENTRYMATCHAFIINETFAMILY_tcp = 1 [(yext.yang_name) = "tcp"];
-  AFICAPENTRYMATCHAFIINETFAMILY_udp = 2 [(yext.yang_name) = "udp"];
-  AFICAPENTRYMATCHAFIINETFAMILY_igmp = 3 [(yext.yang_name) = "igmp"];
-  AFICAPENTRYMATCHAFIINETFAMILY_icmp = 4 [(yext.yang_name) = "icmp"];
-}
-
 // AfiSwitchAfiField represents an enumerated type generated for the YANG enumerated type afi-field.
 enum AfiSwitchAfiField {
   AFISWITCHAFIFIELD_UNSET = 0;
