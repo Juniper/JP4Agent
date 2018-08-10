@@ -13,6 +13,7 @@
 //  - afi-counter.yang
 //  - afi-decap.yang
 //  - afi-discard.yang
+//  - afi-encap-entry.yang
 //  - afi-encap.yang
 //  - afi-filter.yang
 //  - afi-fwd-sandbox.yang
@@ -51,21 +52,93 @@ enum AfiCapEntryMatchAfiField {
   AFICAPENTRYMATCHAFIFIELD_packet_ether_vlan1_tag_vid = 5 [(yext.yang_name) = "packet-ether-vlan1-tag-vid"];
   AFICAPENTRYMATCHAFIFIELD_packet_arp_target_proto_addr = 6 [(yext.yang_name) = "packet-arp-target-proto-addr"];
   AFICAPENTRYMATCHAFIFIELD_packet_ether_vlan1_tag_pcp = 7 [(yext.yang_name) = "packet-ether-vlan1-tag-pcp"];
-  AFICAPENTRYMATCHAFIFIELD_packet_vrf_id = 8 [(yext.yang_name) = "packet-vrf-id"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip4_daddr = 9 [(yext.yang_name) = "packet-ip4-daddr"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip4_saddr = 10 [(yext.yang_name) = "packet-ip4-saddr"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip4_protocol = 11 [(yext.yang_name) = "packet-ip4-protocol"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip4_diffserv = 12 [(yext.yang_name) = "packet-ip4-diffserv"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip4_ttl = 13 [(yext.yang_name) = "packet-ip4-ttl"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip6_daddr = 14 [(yext.yang_name) = "packet-ip6-daddr"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip6_saddr = 15 [(yext.yang_name) = "packet-ip6-saddr"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip6_traffic_class = 16 [(yext.yang_name) = "packet-ip6-traffic-class"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip6_flow_label = 17 [(yext.yang_name) = "packet-ip6-flow-label"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip6_next_header = 18 [(yext.yang_name) = "packet-ip6-next-header"];
-  AFICAPENTRYMATCHAFIFIELD_packet_ip6_hop_limit = 19 [(yext.yang_name) = "packet-ip6-hop-limit"];
-  AFICAPENTRYMATCHAFIFIELD_packet_icmp_type = 20 [(yext.yang_name) = "packet-icmp-type"];
-  AFICAPENTRYMATCHAFIFIELD_packet_l4_sport = 21 [(yext.yang_name) = "packet-l4-sport"];
-  AFICAPENTRYMATCHAFIFIELD_packet_l4_dport = 22 [(yext.yang_name) = "packet-l4-dport"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_daddr = 8 [(yext.yang_name) = "packet-ip4-daddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_saddr = 9 [(yext.yang_name) = "packet-ip4-saddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_protocol = 10 [(yext.yang_name) = "packet-ip4-protocol"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_diffserv = 11 [(yext.yang_name) = "packet-ip4-diffserv"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip4_ttl = 12 [(yext.yang_name) = "packet-ip4-ttl"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_daddr = 13 [(yext.yang_name) = "packet-ip6-daddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_saddr = 14 [(yext.yang_name) = "packet-ip6-saddr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_traffic_class = 15 [(yext.yang_name) = "packet-ip6-traffic-class"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_flow_label = 16 [(yext.yang_name) = "packet-ip6-flow-label"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_next_header = 17 [(yext.yang_name) = "packet-ip6-next-header"];
+  AFICAPENTRYMATCHAFIFIELD_packet_ip6_hop_limit = 18 [(yext.yang_name) = "packet-ip6-hop-limit"];
+  AFICAPENTRYMATCHAFIFIELD_packet_icmp_type = 19 [(yext.yang_name) = "packet-icmp-type"];
+  AFICAPENTRYMATCHAFIFIELD_packet_l4_sport = 20 [(yext.yang_name) = "packet-l4-sport"];
+  AFICAPENTRYMATCHAFIFIELD_packet_l4_dport = 21 [(yext.yang_name) = "packet-l4-dport"];
+  AFICAPENTRYMATCHAFIFIELD_packet_l3_class_id = 22 [(yext.yang_name) = "packet-l3-class-id"];
+  AFICAPENTRYMATCHAFIFIELD_packet_encap_type = 23 [(yext.yang_name) = "packet-encap-type"];
+  AFICAPENTRYMATCHAFIFIELD_packet_outer_ipv4_src_addr = 24 [(yext.yang_name) = "packet-outer-ipv4-src-addr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_outer_ipv4_dst_addr = 25 [(yext.yang_name) = "packet-outer-ipv4-dst-addr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_outer_ipv6_src_addr = 26 [(yext.yang_name) = "packet-outer-ipv6-src-addr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_outer_ipv6_dst_addr = 27 [(yext.yang_name) = "packet-outer-ipv6-dst-addr"];
+  AFICAPENTRYMATCHAFIFIELD_packet_gre_flags = 28 [(yext.yang_name) = "packet-gre-flags"];
+}
+
+// AfiEncapAfiField represents an enumerated type generated for the YANG enumerated type afi-field.
+enum AfiEncapAfiField {
+  AFIENCAPAFIFIELD_UNSET = 0;
+  AFIENCAPAFIFIELD_ingress_port = 1 [(yext.yang_name) = "ingress-port"];
+  AFIENCAPAFIFIELD_packet_ether_daddr = 2 [(yext.yang_name) = "packet-ether-daddr"];
+  AFIENCAPAFIFIELD_packet_ether_saddr = 3 [(yext.yang_name) = "packet-ether-saddr"];
+  AFIENCAPAFIFIELD_packet_ether_type = 4 [(yext.yang_name) = "packet-ether-type"];
+  AFIENCAPAFIFIELD_packet_ether_vlan1_tag_vid = 5 [(yext.yang_name) = "packet-ether-vlan1-tag-vid"];
+  AFIENCAPAFIFIELD_packet_arp_target_proto_addr = 6 [(yext.yang_name) = "packet-arp-target-proto-addr"];
+  AFIENCAPAFIFIELD_packet_ether_vlan1_tag_pcp = 7 [(yext.yang_name) = "packet-ether-vlan1-tag-pcp"];
+  AFIENCAPAFIFIELD_packet_ip4_daddr = 8 [(yext.yang_name) = "packet-ip4-daddr"];
+  AFIENCAPAFIFIELD_packet_ip4_saddr = 9 [(yext.yang_name) = "packet-ip4-saddr"];
+  AFIENCAPAFIFIELD_packet_ip4_protocol = 10 [(yext.yang_name) = "packet-ip4-protocol"];
+  AFIENCAPAFIFIELD_packet_ip4_diffserv = 11 [(yext.yang_name) = "packet-ip4-diffserv"];
+  AFIENCAPAFIFIELD_packet_ip4_ttl = 12 [(yext.yang_name) = "packet-ip4-ttl"];
+  AFIENCAPAFIFIELD_packet_ip6_daddr = 13 [(yext.yang_name) = "packet-ip6-daddr"];
+  AFIENCAPAFIFIELD_packet_ip6_saddr = 14 [(yext.yang_name) = "packet-ip6-saddr"];
+  AFIENCAPAFIFIELD_packet_ip6_traffic_class = 15 [(yext.yang_name) = "packet-ip6-traffic-class"];
+  AFIENCAPAFIFIELD_packet_ip6_flow_label = 16 [(yext.yang_name) = "packet-ip6-flow-label"];
+  AFIENCAPAFIFIELD_packet_ip6_next_header = 17 [(yext.yang_name) = "packet-ip6-next-header"];
+  AFIENCAPAFIFIELD_packet_ip6_hop_limit = 18 [(yext.yang_name) = "packet-ip6-hop-limit"];
+  AFIENCAPAFIFIELD_packet_icmp_type = 19 [(yext.yang_name) = "packet-icmp-type"];
+  AFIENCAPAFIFIELD_packet_l4_sport = 20 [(yext.yang_name) = "packet-l4-sport"];
+  AFIENCAPAFIFIELD_packet_l4_dport = 21 [(yext.yang_name) = "packet-l4-dport"];
+  AFIENCAPAFIFIELD_packet_l3_class_id = 22 [(yext.yang_name) = "packet-l3-class-id"];
+  AFIENCAPAFIFIELD_packet_encap_type = 23 [(yext.yang_name) = "packet-encap-type"];
+  AFIENCAPAFIFIELD_packet_outer_ipv4_src_addr = 24 [(yext.yang_name) = "packet-outer-ipv4-src-addr"];
+  AFIENCAPAFIFIELD_packet_outer_ipv4_dst_addr = 25 [(yext.yang_name) = "packet-outer-ipv4-dst-addr"];
+  AFIENCAPAFIFIELD_packet_outer_ipv6_src_addr = 26 [(yext.yang_name) = "packet-outer-ipv6-src-addr"];
+  AFIENCAPAFIFIELD_packet_outer_ipv6_dst_addr = 27 [(yext.yang_name) = "packet-outer-ipv6-dst-addr"];
+  AFIENCAPAFIFIELD_packet_gre_flags = 28 [(yext.yang_name) = "packet-gre-flags"];
+}
+
+// AfiEncapEntryAfiField represents an enumerated type generated for the YANG enumerated type afi-field.
+enum AfiEncapEntryAfiField {
+  AFIENCAPENTRYAFIFIELD_UNSET = 0;
+  AFIENCAPENTRYAFIFIELD_ingress_port = 1 [(yext.yang_name) = "ingress-port"];
+  AFIENCAPENTRYAFIFIELD_packet_ether_daddr = 2 [(yext.yang_name) = "packet-ether-daddr"];
+  AFIENCAPENTRYAFIFIELD_packet_ether_saddr = 3 [(yext.yang_name) = "packet-ether-saddr"];
+  AFIENCAPENTRYAFIFIELD_packet_ether_type = 4 [(yext.yang_name) = "packet-ether-type"];
+  AFIENCAPENTRYAFIFIELD_packet_ether_vlan1_tag_vid = 5 [(yext.yang_name) = "packet-ether-vlan1-tag-vid"];
+  AFIENCAPENTRYAFIFIELD_packet_arp_target_proto_addr = 6 [(yext.yang_name) = "packet-arp-target-proto-addr"];
+  AFIENCAPENTRYAFIFIELD_packet_ether_vlan1_tag_pcp = 7 [(yext.yang_name) = "packet-ether-vlan1-tag-pcp"];
+  AFIENCAPENTRYAFIFIELD_packet_ip4_daddr = 8 [(yext.yang_name) = "packet-ip4-daddr"];
+  AFIENCAPENTRYAFIFIELD_packet_ip4_saddr = 9 [(yext.yang_name) = "packet-ip4-saddr"];
+  AFIENCAPENTRYAFIFIELD_packet_ip4_protocol = 10 [(yext.yang_name) = "packet-ip4-protocol"];
+  AFIENCAPENTRYAFIFIELD_packet_ip4_diffserv = 11 [(yext.yang_name) = "packet-ip4-diffserv"];
+  AFIENCAPENTRYAFIFIELD_packet_ip4_ttl = 12 [(yext.yang_name) = "packet-ip4-ttl"];
+  AFIENCAPENTRYAFIFIELD_packet_ip6_daddr = 13 [(yext.yang_name) = "packet-ip6-daddr"];
+  AFIENCAPENTRYAFIFIELD_packet_ip6_saddr = 14 [(yext.yang_name) = "packet-ip6-saddr"];
+  AFIENCAPENTRYAFIFIELD_packet_ip6_traffic_class = 15 [(yext.yang_name) = "packet-ip6-traffic-class"];
+  AFIENCAPENTRYAFIFIELD_packet_ip6_flow_label = 16 [(yext.yang_name) = "packet-ip6-flow-label"];
+  AFIENCAPENTRYAFIFIELD_packet_ip6_next_header = 17 [(yext.yang_name) = "packet-ip6-next-header"];
+  AFIENCAPENTRYAFIFIELD_packet_ip6_hop_limit = 18 [(yext.yang_name) = "packet-ip6-hop-limit"];
+  AFIENCAPENTRYAFIFIELD_packet_icmp_type = 19 [(yext.yang_name) = "packet-icmp-type"];
+  AFIENCAPENTRYAFIFIELD_packet_l4_sport = 20 [(yext.yang_name) = "packet-l4-sport"];
+  AFIENCAPENTRYAFIFIELD_packet_l4_dport = 21 [(yext.yang_name) = "packet-l4-dport"];
+  AFIENCAPENTRYAFIFIELD_packet_l3_class_id = 22 [(yext.yang_name) = "packet-l3-class-id"];
+  AFIENCAPENTRYAFIFIELD_packet_encap_type = 23 [(yext.yang_name) = "packet-encap-type"];
+  AFIENCAPENTRYAFIFIELD_packet_outer_ipv4_src_addr = 24 [(yext.yang_name) = "packet-outer-ipv4-src-addr"];
+  AFIENCAPENTRYAFIFIELD_packet_outer_ipv4_dst_addr = 25 [(yext.yang_name) = "packet-outer-ipv4-dst-addr"];
+  AFIENCAPENTRYAFIFIELD_packet_outer_ipv6_src_addr = 26 [(yext.yang_name) = "packet-outer-ipv6-src-addr"];
+  AFIENCAPENTRYAFIFIELD_packet_outer_ipv6_dst_addr = 27 [(yext.yang_name) = "packet-outer-ipv6-dst-addr"];
+  AFIENCAPENTRYAFIFIELD_packet_gre_flags = 28 [(yext.yang_name) = "packet-gre-flags"];
 }
 
 // AfiSwitchAfiField represents an enumerated type generated for the YANG enumerated type afi-field.
@@ -78,21 +151,27 @@ enum AfiSwitchAfiField {
   AFISWITCHAFIFIELD_packet_ether_vlan1_tag_vid = 5 [(yext.yang_name) = "packet-ether-vlan1-tag-vid"];
   AFISWITCHAFIFIELD_packet_arp_target_proto_addr = 6 [(yext.yang_name) = "packet-arp-target-proto-addr"];
   AFISWITCHAFIFIELD_packet_ether_vlan1_tag_pcp = 7 [(yext.yang_name) = "packet-ether-vlan1-tag-pcp"];
-  AFISWITCHAFIFIELD_packet_vrf_id = 8 [(yext.yang_name) = "packet-vrf-id"];
-  AFISWITCHAFIFIELD_packet_ip4_daddr = 9 [(yext.yang_name) = "packet-ip4-daddr"];
-  AFISWITCHAFIFIELD_packet_ip4_saddr = 10 [(yext.yang_name) = "packet-ip4-saddr"];
-  AFISWITCHAFIFIELD_packet_ip4_protocol = 11 [(yext.yang_name) = "packet-ip4-protocol"];
-  AFISWITCHAFIFIELD_packet_ip4_diffserv = 12 [(yext.yang_name) = "packet-ip4-diffserv"];
-  AFISWITCHAFIFIELD_packet_ip4_ttl = 13 [(yext.yang_name) = "packet-ip4-ttl"];
-  AFISWITCHAFIFIELD_packet_ip6_daddr = 14 [(yext.yang_name) = "packet-ip6-daddr"];
-  AFISWITCHAFIFIELD_packet_ip6_saddr = 15 [(yext.yang_name) = "packet-ip6-saddr"];
-  AFISWITCHAFIFIELD_packet_ip6_traffic_class = 16 [(yext.yang_name) = "packet-ip6-traffic-class"];
-  AFISWITCHAFIFIELD_packet_ip6_flow_label = 17 [(yext.yang_name) = "packet-ip6-flow-label"];
-  AFISWITCHAFIFIELD_packet_ip6_next_header = 18 [(yext.yang_name) = "packet-ip6-next-header"];
-  AFISWITCHAFIFIELD_packet_ip6_hop_limit = 19 [(yext.yang_name) = "packet-ip6-hop-limit"];
-  AFISWITCHAFIFIELD_packet_icmp_type = 20 [(yext.yang_name) = "packet-icmp-type"];
-  AFISWITCHAFIFIELD_packet_l4_sport = 21 [(yext.yang_name) = "packet-l4-sport"];
-  AFISWITCHAFIFIELD_packet_l4_dport = 22 [(yext.yang_name) = "packet-l4-dport"];
+  AFISWITCHAFIFIELD_packet_ip4_daddr = 8 [(yext.yang_name) = "packet-ip4-daddr"];
+  AFISWITCHAFIFIELD_packet_ip4_saddr = 9 [(yext.yang_name) = "packet-ip4-saddr"];
+  AFISWITCHAFIFIELD_packet_ip4_protocol = 10 [(yext.yang_name) = "packet-ip4-protocol"];
+  AFISWITCHAFIFIELD_packet_ip4_diffserv = 11 [(yext.yang_name) = "packet-ip4-diffserv"];
+  AFISWITCHAFIFIELD_packet_ip4_ttl = 12 [(yext.yang_name) = "packet-ip4-ttl"];
+  AFISWITCHAFIFIELD_packet_ip6_daddr = 13 [(yext.yang_name) = "packet-ip6-daddr"];
+  AFISWITCHAFIFIELD_packet_ip6_saddr = 14 [(yext.yang_name) = "packet-ip6-saddr"];
+  AFISWITCHAFIFIELD_packet_ip6_traffic_class = 15 [(yext.yang_name) = "packet-ip6-traffic-class"];
+  AFISWITCHAFIFIELD_packet_ip6_flow_label = 16 [(yext.yang_name) = "packet-ip6-flow-label"];
+  AFISWITCHAFIFIELD_packet_ip6_next_header = 17 [(yext.yang_name) = "packet-ip6-next-header"];
+  AFISWITCHAFIFIELD_packet_ip6_hop_limit = 18 [(yext.yang_name) = "packet-ip6-hop-limit"];
+  AFISWITCHAFIFIELD_packet_icmp_type = 19 [(yext.yang_name) = "packet-icmp-type"];
+  AFISWITCHAFIFIELD_packet_l4_sport = 20 [(yext.yang_name) = "packet-l4-sport"];
+  AFISWITCHAFIFIELD_packet_l4_dport = 21 [(yext.yang_name) = "packet-l4-dport"];
+  AFISWITCHAFIFIELD_packet_l3_class_id = 22 [(yext.yang_name) = "packet-l3-class-id"];
+  AFISWITCHAFIFIELD_packet_encap_type = 23 [(yext.yang_name) = "packet-encap-type"];
+  AFISWITCHAFIFIELD_packet_outer_ipv4_src_addr = 24 [(yext.yang_name) = "packet-outer-ipv4-src-addr"];
+  AFISWITCHAFIFIELD_packet_outer_ipv4_dst_addr = 25 [(yext.yang_name) = "packet-outer-ipv4-dst-addr"];
+  AFISWITCHAFIFIELD_packet_outer_ipv6_src_addr = 26 [(yext.yang_name) = "packet-outer-ipv6-src-addr"];
+  AFISWITCHAFIFIELD_packet_outer_ipv6_dst_addr = 27 [(yext.yang_name) = "packet-outer-ipv6-dst-addr"];
+  AFISWITCHAFIFIELD_packet_gre_flags = 28 [(yext.yang_name) = "packet-gre-flags"];
 }
 
 // AfiTreeAfiField represents an enumerated type generated for the YANG enumerated type afi-field.
@@ -105,19 +184,33 @@ enum AfiTreeAfiField {
   AFITREEAFIFIELD_packet_ether_vlan1_tag_vid = 5 [(yext.yang_name) = "packet-ether-vlan1-tag-vid"];
   AFITREEAFIFIELD_packet_arp_target_proto_addr = 6 [(yext.yang_name) = "packet-arp-target-proto-addr"];
   AFITREEAFIFIELD_packet_ether_vlan1_tag_pcp = 7 [(yext.yang_name) = "packet-ether-vlan1-tag-pcp"];
-  AFITREEAFIFIELD_packet_vrf_id = 8 [(yext.yang_name) = "packet-vrf-id"];
-  AFITREEAFIFIELD_packet_ip4_daddr = 9 [(yext.yang_name) = "packet-ip4-daddr"];
-  AFITREEAFIFIELD_packet_ip4_saddr = 10 [(yext.yang_name) = "packet-ip4-saddr"];
-  AFITREEAFIFIELD_packet_ip4_protocol = 11 [(yext.yang_name) = "packet-ip4-protocol"];
-  AFITREEAFIFIELD_packet_ip4_diffserv = 12 [(yext.yang_name) = "packet-ip4-diffserv"];
-  AFITREEAFIFIELD_packet_ip4_ttl = 13 [(yext.yang_name) = "packet-ip4-ttl"];
-  AFITREEAFIFIELD_packet_ip6_daddr = 14 [(yext.yang_name) = "packet-ip6-daddr"];
-  AFITREEAFIFIELD_packet_ip6_saddr = 15 [(yext.yang_name) = "packet-ip6-saddr"];
-  AFITREEAFIFIELD_packet_ip6_traffic_class = 16 [(yext.yang_name) = "packet-ip6-traffic-class"];
-  AFITREEAFIFIELD_packet_ip6_flow_label = 17 [(yext.yang_name) = "packet-ip6-flow-label"];
-  AFITREEAFIFIELD_packet_ip6_next_header = 18 [(yext.yang_name) = "packet-ip6-next-header"];
-  AFITREEAFIFIELD_packet_ip6_hop_limit = 19 [(yext.yang_name) = "packet-ip6-hop-limit"];
-  AFITREEAFIFIELD_packet_icmp_type = 20 [(yext.yang_name) = "packet-icmp-type"];
-  AFITREEAFIFIELD_packet_l4_sport = 21 [(yext.yang_name) = "packet-l4-sport"];
-  AFITREEAFIFIELD_packet_l4_dport = 22 [(yext.yang_name) = "packet-l4-dport"];
+  AFITREEAFIFIELD_packet_ip4_daddr = 8 [(yext.yang_name) = "packet-ip4-daddr"];
+  AFITREEAFIFIELD_packet_ip4_saddr = 9 [(yext.yang_name) = "packet-ip4-saddr"];
+  AFITREEAFIFIELD_packet_ip4_protocol = 10 [(yext.yang_name) = "packet-ip4-protocol"];
+  AFITREEAFIFIELD_packet_ip4_diffserv = 11 [(yext.yang_name) = "packet-ip4-diffserv"];
+  AFITREEAFIFIELD_packet_ip4_ttl = 12 [(yext.yang_name) = "packet-ip4-ttl"];
+  AFITREEAFIFIELD_packet_ip6_daddr = 13 [(yext.yang_name) = "packet-ip6-daddr"];
+  AFITREEAFIFIELD_packet_ip6_saddr = 14 [(yext.yang_name) = "packet-ip6-saddr"];
+  AFITREEAFIFIELD_packet_ip6_traffic_class = 15 [(yext.yang_name) = "packet-ip6-traffic-class"];
+  AFITREEAFIFIELD_packet_ip6_flow_label = 16 [(yext.yang_name) = "packet-ip6-flow-label"];
+  AFITREEAFIFIELD_packet_ip6_next_header = 17 [(yext.yang_name) = "packet-ip6-next-header"];
+  AFITREEAFIFIELD_packet_ip6_hop_limit = 18 [(yext.yang_name) = "packet-ip6-hop-limit"];
+  AFITREEAFIFIELD_packet_icmp_type = 19 [(yext.yang_name) = "packet-icmp-type"];
+  AFITREEAFIFIELD_packet_l4_sport = 20 [(yext.yang_name) = "packet-l4-sport"];
+  AFITREEAFIFIELD_packet_l4_dport = 21 [(yext.yang_name) = "packet-l4-dport"];
+  AFITREEAFIFIELD_packet_l3_class_id = 22 [(yext.yang_name) = "packet-l3-class-id"];
+  AFITREEAFIFIELD_packet_encap_type = 23 [(yext.yang_name) = "packet-encap-type"];
+  AFITREEAFIFIELD_packet_outer_ipv4_src_addr = 24 [(yext.yang_name) = "packet-outer-ipv4-src-addr"];
+  AFITREEAFIFIELD_packet_outer_ipv4_dst_addr = 25 [(yext.yang_name) = "packet-outer-ipv4-dst-addr"];
+  AFITREEAFIFIELD_packet_outer_ipv6_src_addr = 26 [(yext.yang_name) = "packet-outer-ipv6-src-addr"];
+  AFITREEAFIFIELD_packet_outer_ipv6_dst_addr = 27 [(yext.yang_name) = "packet-outer-ipv6-dst-addr"];
+  AFITREEAFIFIELD_packet_gre_flags = 28 [(yext.yang_name) = "packet-gre-flags"];
+}
+
+// AfiTreeAfiTreeType represents an enumerated type generated for the YANG enumerated type afi-tree-type.
+enum AfiTreeAfiTreeType {
+  AFITREEAFITREETYPE_UNSET = 0;
+  AFITREEAFITREETYPE_override = 1 [(yext.yang_name) = "override"];
+  AFITREEAFITREETYPE_vrf = 2 [(yext.yang_name) = "vrf"];
+  AFITREEAFITREETYPE_fallback = 3 [(yext.yang_name) = "fallback"];
 }

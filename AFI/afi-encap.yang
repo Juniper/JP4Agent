@@ -14,7 +14,6 @@ module afi-encap {
     prefix "afi-encap";
 
     import afi-types  { prefix "afi-types"; }
-    import afi-common { prefix "afi-cmn"; }
 
     organization
         "Juniper Networks, Inc.";
@@ -43,16 +42,9 @@ module afi-encap {
             description "Encapsulation name";
         }
 
-        list afi-key {
-            key "field-name";
-            unique "field-name";
-            leaf field-name {
-                type string;
-            }
-            leaf field-data {
-                type string;
-            }
+        leaf-list key-fields {
+            type afi-types:afi-field;
+            description "List of fields";
         }
-
     }
 }

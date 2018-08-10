@@ -48,6 +48,7 @@ SRCS = \
 	protos/juniper/afi_tree/afi_tree.pb.cc \
 	protos/juniper/afi_tree_entry/afi_tree_entry.pb.cc \
 	protos/juniper/afi_encap/afi_encap.pb.cc \
+	protos/juniper/afi_encap_entry/afi_encap_entry.pb.cc \
 	protos/juniper/afi_cap/afi_cap.pb.cc \
 	protos/juniper/afi_cap_match/afi_cap_match.pb.cc \
 	protos/juniper/afi_cap_action/afi_cap_action.pb.cc \
@@ -64,6 +65,7 @@ SRCS = \
 	protos/juniper/afi_tree/afi_tree.pb.cc \
 	protos/juniper/afi_tree_entry/afi_tree_entry.pb.cc \
 	protos/juniper/afi_encap/afi_encap.pb.cc \
+	protos/juniper/afi_encap_entry/afi_encap_entry.pb.cc \
 	protos/juniper/afi_cap/afi_cap.pb.cc \
 	protos/juniper/afi_cap_match/afi_cap_match.pb.cc \
 	protos/juniper/afi_cap_action/afi_cap_action.pb.cc \
@@ -120,6 +122,13 @@ protos/juniper/afi_tree_entry/afi_tree_entry.pb.cc: protos/juniper/afi_tree_entr
 
 protos/juniper/afi_encap/afi_encap.pb.cc: protos/juniper/afi_encap/afi_encap.proto
 	$(PROTOC) --proto_path=protos/juniper/afi_encap/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_encap/ $<
+	sleep 2
+	find protos -name '*.pb.*' -exec sed -i 's/_ywrapper_2fywrapper_2eproto/_ywrapper_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/_yext_2fyext_2eproto/_yext_2eproto/g' {} \;
+	find protos -name '*.pb.*' -exec sed -i 's/_juniper_2fenums_2fenums_2eproto/_enums_2eproto/g' {} \;
+
+protos/juniper/afi_encap_entry/afi_encap_entry.pb.cc: protos/juniper/afi_encap_entry/afi_encap_entry.proto
+	$(PROTOC) --proto_path=protos/juniper/afi_encap_entry/  -I $(AFI_PROTOS_PATH) --cpp_out=protos/juniper/afi_encap_entry/ $<
 	sleep 2
 	find protos -name '*.pb.*' -exec sed -i 's/_ywrapper_2fywrapper_2eproto/_ywrapper_2eproto/g' {} \;
 	find protos -name '*.pb.*' -exec sed -i 's/_yext_2fyext_2eproto/_yext_2eproto/g' {} \;

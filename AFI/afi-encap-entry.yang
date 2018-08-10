@@ -1,0 +1,70 @@
+//
+// Juniper AFI : AFI Encap Entry
+//
+// Created by Sudheendra Gopinath, August 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-encap-entry {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-encap-entry/junos/17.3";
+    prefix "afi-encap-entry";
+
+    import afi-types  { prefix "afi-types"; }
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Encap Entry in Juniper's Advanced Forwarding Interface";
+
+    revision 2018-02-12 {
+        description "Initial revision.";
+    }
+
+    container afi-encap-entry {
+        description "AFT Encap Entry";
+
+        leaf name {
+            description "Name";
+            type string;
+        }   
+
+        leaf parent-name {
+            description "Parent name";
+            type string;
+        }   
+
+        list afi-key {
+            key "field-name";
+            unique "field-name";
+
+            leaf field-name {
+                description "Encap field name";
+                type afi-types:afi-field;
+            }
+
+            leaf field-data {
+                description "Encap field data";
+                type string;
+            }
+        }
+
+        leaf-list dummy {
+            type afi-types:afi-field;
+            description "Dummy";
+        }
+
+        leaf target-afi-object {
+            description "Target afi object to execute on entry match";
+            type string;
+        }   
+    }
+}

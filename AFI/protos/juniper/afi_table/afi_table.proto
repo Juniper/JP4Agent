@@ -13,6 +13,7 @@
 //  - afi-counter.yang
 //  - afi-decap.yang
 //  - afi-discard.yang
+//  - afi-encap-entry.yang
 //  - afi-encap.yang
 //  - afi-filter.yang
 //  - afi-fwd-sandbox.yang

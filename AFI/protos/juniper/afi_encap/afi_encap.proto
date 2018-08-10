@@ -13,6 +13,7 @@
 //  - afi-counter.yang
 //  - afi-decap.yang
 //  - afi-discard.yang
+//  - afi-encap-entry.yang
 //  - afi-encap.yang
 //  - afi-filter.yang
 //  - afi-fwd-sandbox.yang
@@ -40,16 +41,10 @@ package juniper.afi_encap;
 
 import "ywrapper/ywrapper.proto";
 import "yext/yext.proto";
+import "juniper/enums/enums.proto";
 
 message AfiEncap {
-  message AfiKey {
-    ywrapper.StringValue field_data = 478994162;
-  }
-  message AfiKeyKey {
-    string field_name = 1;
-    AfiKey afi_key = 2;
-  }
-  repeated AfiKeyKey afi_key = 434159856;
   ywrapper.StringValue encap_name = 393899969;
+  repeated juniper.enums.AfiEncapAfiField key_fields = 103217797;
   ywrapper.StringValue name = 73308845;
 }

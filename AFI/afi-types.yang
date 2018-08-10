@@ -115,11 +115,6 @@ module afi-types {
               "Packet Ethernet vlan1 tag pcp";
             }
 
-            enum packet-vrf-id {
-             description
-              "VRF id";
-            }
-
             enum packet-ip4-daddr {
              description
               "Packet IPv4 destination address";
@@ -189,6 +184,41 @@ module afi-types {
              description
               "Packet layer 4 destination port";
             }
+
+            enum packet-l3-class-id {
+             description
+              "Packet layer 3 class-id";
+            }
+
+            enum packet-encap-type {
+             description
+              "Packet encapuslation type";
+            }
+
+            enum packet-outer-ipv4-src-addr {
+             description
+              "Packet Outer IPv4 source address";
+            }
+
+            enum packet-outer-ipv4-dst-addr {
+             description
+              "Packet Outer IPv4 destination address";
+            }
+
+            enum packet-outer-ipv6-src-addr {
+             description
+              "Packet Outer IPv6 source address";
+            }
+
+            enum packet-outer-ipv6-dst-addr {
+             description
+              "Packet Outer IPv6 destination address";
+            }
+
+            enum packet-gre-flags {
+             description
+              "Packet GRE flags";
+            }
         }
     }
 
@@ -217,6 +247,23 @@ module afi-types {
         // platform-specific type, range
         type int16 {
             range "0..4095";
+        }
+    }
+
+    typedef afi-tree-type {
+        description "AFI tree type";
+        type enumeration {
+            enum override {
+                description "Override table";
+            }
+
+            enum vrf {
+                description "VRF table";
+            }
+
+            enum fallback {
+                description "Fallback table";
+            }
         }
     }
 }

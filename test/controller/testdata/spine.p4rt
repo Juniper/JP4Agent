@@ -65,6 +65,7 @@ tables {
     id: 16777232
     annotations: "@proto_tag(1)"
   }
+  const_default_action_id: 16777232
   size: 1024
 }
 tables {
@@ -220,6 +221,7 @@ tables {
     annotations: "@defaultonly()"
   }
   size: 1024
+  is_const_table: true
 }
 tables {
   preamble {
@@ -238,6 +240,260 @@ tables {
   action_refs {
     id: 16777221
     annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554435
+    name: "ingress.l3_fwd.l3_ipv4_override_table"
+    alias: "l3_ipv4_override_table"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4_base.dst_addr"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16777222
+    annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16777223
+    annotations: "@proto_tag(2)"
+  }
+  action_refs {
+    id: 16777225
+    annotations: "@proto_tag(3)"
+  }
+  action_refs {
+    id: 16777226
+    annotations: "@proto_tag(4)"
+  }
+  action_refs {
+    id: 16777224
+    annotations: "@proto_tag(5)"
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554436
+    name: "ingress.l3_fwd.l3_ipv4_vrf_table"
+    alias: "l3_ipv4_vrf_table"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  match_fields {
+    id: 1
+    name: "local_metadata.vrf_id"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ipv4_base.dst_addr"
+    annotations: "@proto_tag(2)"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16777222
+    annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16777223
+    annotations: "@proto_tag(2)"
+  }
+  action_refs {
+    id: 16777225
+    annotations: "@proto_tag(3)"
+  }
+  action_refs {
+    id: 16777226
+    annotations: "@proto_tag(4)"
+  }
+  action_refs {
+    id: 16777224
+    annotations: "@proto_tag(5)"
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554437
+    name: "ingress.l3_fwd.l3_ipv4_fallback_table"
+    alias: "l3_ipv4_fallback_table"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4_base.dst_addr"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16777222
+    annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16777223
+    annotations: "@proto_tag(2)"
+  }
+  action_refs {
+    id: 16777225
+    annotations: "@proto_tag(3)"
+  }
+  action_refs {
+    id: 16777226
+    annotations: "@proto_tag(4)"
+  }
+  action_refs {
+    id: 16777224
+    annotations: "@proto_tag(5)"
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554438
+    name: "ingress.l3_fwd.l3_ipv6_override_table"
+    alias: "l3_ipv6_override_table"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6_base.dst_addr"
+    annotations: "@proto_tag(1)"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 16777222
+    annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16777223
+    annotations: "@proto_tag(2)"
+  }
+  action_refs {
+    id: 16777225
+    annotations: "@proto_tag(3)"
+  }
+  action_refs {
+    id: 16777226
+    annotations: "@proto_tag(4)"
+  }
+  action_refs {
+    id: 16777224
+    annotations: "@proto_tag(5)"
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554439
+    name: "ingress.l3_fwd.l3_ipv6_vrf_table"
+    alias: "l3_ipv6_vrf_table"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  match_fields {
+    id: 1
+    name: "local_metadata.vrf_id"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ipv6_base.dst_addr"
+    annotations: "@proto_tag(2)"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 16777222
+    annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16777223
+    annotations: "@proto_tag(2)"
+  }
+  action_refs {
+    id: 16777225
+    annotations: "@proto_tag(3)"
+  }
+  action_refs {
+    id: 16777226
+    annotations: "@proto_tag(4)"
+  }
+  action_refs {
+    id: 16777224
+    annotations: "@proto_tag(5)"
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33554440
+    name: "ingress.l3_fwd.l3_ipv6_fallback_table"
+    alias: "l3_ipv6_fallback_table"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6_base.dst_addr"
+    annotations: "@proto_tag(1)"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 16777222
+    annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16777223
+    annotations: "@proto_tag(2)"
+  }
+  action_refs {
+    id: 16777225
+    annotations: "@proto_tag(3)"
+  }
+  action_refs {
+    id: 16777226
+    annotations: "@proto_tag(4)"
+  }
+  action_refs {
+    id: 16777224
+    annotations: "@proto_tag(5)"
   }
   action_refs {
     id: 16779027
@@ -314,6 +570,172 @@ actions {
     name: "ingress.l3_admit.set_l3_admit"
     alias: "set_l3_admit"
     annotations: "@proto_package(\"l3_admit\")"
+  }
+}
+actions {
+  preamble {
+    id: 16777222
+    name: "ingress.l3_fwd.set_nexthop"
+    alias: "set_nexthop"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  params {
+    id: 1
+    name: "port"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "smac"
+    annotations: "@proto_tag(2)"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "dmac"
+    annotations: "@proto_tag(3)"
+    bitwidth: 48
+  }
+  params {
+    id: 4
+    name: "l3_class_id"
+    annotations: "@proto_tag(4)"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 16777223
+    name: "ingress.l3_fwd.drop"
+    alias: "drop"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+}
+actions {
+  preamble {
+    id: 16777224
+    name: "ingress.l3_fwd.encap_ip_in_ip_and_set_nexthop"
+    alias: "encap_ip_in_ip_and_set_nexthop"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  params {
+    id: 1
+    name: "port"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "smac"
+    annotations: "@proto_tag(2)"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "dmac"
+    annotations: "@proto_tag(3)"
+    bitwidth: 48
+  }
+  params {
+    id: 4
+    name: "src_addr"
+    annotations: "@proto_tag(4)"
+    bitwidth: 32
+  }
+  params {
+    id: 5
+    name: "dst_addr"
+    annotations: "@proto_tag(5)"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16777225
+    name: "ingress.l3_fwd.encap_gre_ipv4_and_set_nexthop"
+    alias: "encap_gre_ipv4_and_set_nexthop"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  params {
+    id: 1
+    name: "port"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "smac"
+    annotations: "@proto_tag(2)"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "dmac"
+    annotations: "@proto_tag(3)"
+    bitwidth: 48
+  }
+  params {
+    id: 4
+    name: "src_addr"
+    annotations: "@proto_tag(4)"
+    bitwidth: 32
+  }
+  params {
+    id: 5
+    name: "dst_addr"
+    annotations: "@proto_tag(5)"
+    bitwidth: 32
+  }
+  params {
+    id: 6
+    name: "gre_flags"
+    annotations: "@proto_tag(6)"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 16777226
+    name: "ingress.l3_fwd.encap_gre_ipv6_and_set_nexthop"
+    alias: "encap_gre_ipv6_and_set_nexthop"
+    annotations: "@proto_package(\"l3_fwd\")"
+  }
+  params {
+    id: 1
+    name: "port"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "smac"
+    annotations: "@proto_tag(2)"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "dmac"
+    annotations: "@proto_tag(3)"
+    bitwidth: 48
+  }
+  params {
+    id: 4
+    name: "src_addr"
+    annotations: "@proto_tag(4)"
+    bitwidth: 128
+  }
+  params {
+    id: 5
+    name: "dst_addr"
+    annotations: "@proto_tag(5)"
+    bitwidth: 128
+  }
+  params {
+    id: 6
+    name: "gre_flags"
+    annotations: "@proto_tag(6)"
+    bitwidth: 16
   }
 }
 actions {

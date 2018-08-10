@@ -13,6 +13,7 @@
 //  - afi-counter.yang
 //  - afi-decap.yang
 //  - afi-discard.yang
+//  - afi-encap-entry.yang
 //  - afi-encap.yang
 //  - afi-filter.yang
 //  - afi-fwd-sandbox.yang
@@ -49,4 +50,5 @@ message AfiTree {
   ywrapper.StringValue name = 71110621;
   ywrapper.UintValue proto = 228442342;
   ywrapper.UintValue size = 287392455;
+  juniper.enums.AfiTreeAfiTreeType type = 184483852;
 }

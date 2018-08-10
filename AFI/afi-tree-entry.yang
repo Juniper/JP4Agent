@@ -14,7 +14,6 @@ module afi-tree-entry {
     prefix "afi-tree-entry";
 
     import afi-types  { prefix "afi-types"; }
-    import afi-common { prefix "afi-cmn"; }
 
     organization
         "Juniper Networks, Inc.";
@@ -31,7 +30,7 @@ module afi-tree-entry {
     }
 
     container afi-tree-entry {
-        description "AFT Tree";
+        description "AFT Tree Entry";
 
         leaf name {
             description "Name";
@@ -43,12 +42,12 @@ module afi-tree-entry {
             type string;
         }   
 
-        leaf  prefix-bytes {
+        leaf prefix-bytes {
             description "Prefix bytes";
             type string;
         }   
 
-        leaf  prefix-length {
+        leaf prefix-length {
             description "Prefix length";
             type uint16;
         }   
