@@ -31,6 +31,8 @@
 //  - afi-selector.yang
 //  - afi-switch.yang
 //  - afi-table.yang
+//  - afi-tree-encap-entry.yang
+//  - afi-tree-encap.yang
 //  - afi-tree-entry.yang
 //  - afi-tree.yang
 //  - afi-types.yang

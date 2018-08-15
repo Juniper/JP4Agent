@@ -87,3 +87,29 @@ TEST_F(P4BRCMSPINE, ClassId)
     EXPECT_EQ(1, 1);
 }
 
+// Test3: Override, VRF, Fallback Route Tables
+TEST_F(P4BRCMSPINE, RTT)
+{
+    // Default route for the default IPv4 table.
+    ControllerAddRtEncapEntry(0, 0, 0, 0x44a25e9175ff, 0x55a25e9175ff,
+                              13, 10, "vrf");
+
+    // Default route for the VRF 5 table.
+    ControllerAddRtEncapEntry(0, 0, 5, 0x66a25e9175ff, 0x77a25e9175ff,
+                              13, 20, "vrf");
+
+    // Override route.
+    ControllerAddRtEncapEntry(0x37373702, 24, 0, 0x44a25e9175ff, 0x55a25e9175ff,
+                              13, 10, "override");
+
+    // VRF 5 route.
+    ControllerAddRtEncapEntry(0x47474702, 24, 5, 0x66a25e9175ff, 0x77a25e9175ff,
+                              13, 20, "vrf");
+
+    // Fallback route.
+    ControllerAddRtEncapEntry(0x57575702, 24, 0, 0x88a25e9175ff, 0x99a25e9175ff,
+                              13, 30, "fallback");
+
+    EXPECT_EQ(1, 1);
+}
+

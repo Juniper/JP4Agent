@@ -52,6 +52,11 @@ module afi-tree-entry {
             type uint16;
         }   
 
+        leaf vrf-id {
+            description "VRF ID";
+            type uint32;
+        }
+
         leaf target-afi-object {
             description "Target afi object to execute this entry matches";
             type string;

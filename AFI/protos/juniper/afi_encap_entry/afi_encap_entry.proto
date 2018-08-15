@@ -31,6 +31,8 @@
 //  - afi-selector.yang
 //  - afi-switch.yang
 //  - afi-table.yang
+//  - afi-tree-encap-entry.yang
+//  - afi-tree-encap.yang
 //  - afi-tree-entry.yang
 //  - afi-tree.yang
 //  - afi-types.yang
@@ -45,7 +47,7 @@ import "juniper/enums/enums.proto";
 
 message AfiEncapEntry {
   message AfiKey {
-    ywrapper.StringValue field_data = 53072422;
+    ywrapper.BytesValue field_data = 53072422;
   }
   message AfiKeyKey {
     juniper.enums.AfiEncapEntryAfiField field_name = 1;

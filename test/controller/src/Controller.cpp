@@ -871,6 +871,147 @@ ControllerAddClassIdEntry(uint16_t vid,
     return 0;
 }
 
+int ControllerAddRtEncapEntry(uint32_t    dAddr,
+                              uint16_t    pLen,
+                              uint32_t    vrf,
+                              uint64_t    smac,
+                              uint64_t    dmac,
+                              uint16_t    oPort,
+                              uint8_t     l3ClassId,
+                              std::string type)
+{
+    int dev_id = 0;
+    auto channel = grpc::CreateChannel("localhost:50051",
+                                       grpc::InsecureChannelCredentials());
+    std::unique_ptr<p4::P4Runtime::Stub> pi_stub_(
+        p4::P4Runtime::NewStub(channel));
+
+    auto p4info = parse_p4info(test_proto_txt);
+
+    auto set_election_id = [](p4::Uint128 *election_id) {
+        election_id->set_high(0);
+        election_id->set_low(1);
+    };
+
+    // Open bidirectional stream and advertise election id.
+    ClientContext stream_context;
+    auto stream = pi_stub_->StreamChannel(&stream_context);
+    {
+        p4::StreamMessageRequest request;
+        auto arbitration = request.mutable_arbitration();
+        arbitration->set_device_id(dev_id);
+        set_election_id(arbitration->mutable_election_id());
+        stream->Write(request);
+        p4::StreamMessageResponse response;
+        stream->Read(&response);
+        assert(response.update_case() ==
+               p4::StreamMessageResponse::kArbitration);
+        assert(response.arbitration().status().code() ==
+               ::google::rpc::Code::OK);
+    }
+
+    std::cout << "Write: Adding RtEncap table entry...";
+
+    Utils utils;
+    std::string dAddrS     = utils.uint2Str(dAddr);
+    std::string vrfS       = utils.uint2Str(vrf);
+    std::string smacS      = utils.uint2Str(smac);
+    std::string dmacS      = utils.uint2Str(dmac);
+    std::string oPortS     = utils.uint2Str(oPort);
+    std::string l3ClassIdS = utils.uint2Str(l3ClassId);
+
+    std::string t_name;
+    if (type == "override")
+        t_name = std::string("ingress.l3_fwd.l3_ipv4_override_table");
+    else if (type == "vrf")
+        t_name = std::string("ingress.l3_fwd.l3_ipv4_vrf_table");
+    else if (type == "fallback")
+        t_name = std::string("ingress.l3_fwd.l3_ipv4_fallback_table");
+
+    auto t_id = get_table_id(p4info, t_name);
+    p4::Entity entity;
+    auto table_entry = entity.mutable_table_entry();
+    table_entry->set_table_id(t_id);
+
+    auto mf0_id = get_mf_id(p4info, t_name, "hdr.ipv4_base.dst_addr");
+    auto match0 = table_entry->add_match();
+    match0->set_field_id(mf0_id);
+    auto lpm0 = match0->mutable_lpm();
+    lpm0->set_value(dAddrS);
+    lpm0->set_prefix_len(pLen);
+
+    if (type == "vrf") {
+        auto mf1_id = get_mf_id(p4info, t_name, "local_metadata.vrf_id");
+        auto match1 = table_entry->add_match();
+        match1->set_field_id(mf1_id);
+        auto exact1 = match1->mutable_exact();
+        exact1->set_value(vrfS);
+    }
+
+    std::string a_name("ingress.l3_fwd.set_nexthop");
+    auto a_id = get_action_id(p4info, a_name);
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(a_id);
+
+    {
+        auto param = action->add_params();
+        auto p0_id = get_param_id(p4info, a_name, "port");
+        param->set_param_id(p0_id);
+        param->set_value(oPortS);
+    }
+
+    {
+        auto param = action->add_params();
+        auto p1_id = get_param_id(p4info, a_name, "smac");
+        param->set_param_id(p1_id);
+        param->set_value(smacS);
+    }
+
+    {
+        auto param = action->add_params();
+        auto p2_id = get_param_id(p4info, a_name, "dmac");
+        param->set_param_id(p2_id);
+        param->set_value(dmacS);
+    }
+
+    {
+        auto param = action->add_params();
+        auto p3_id = get_param_id(p4info, a_name, "l3_class_id");
+        param->set_param_id(p3_id);
+        param->set_value(l3ClassIdS);
+    }
+
+    // add entry
+    {
+        p4::WriteRequest request;
+        set_election_id(request.mutable_election_id());
+        request.set_device_id(dev_id);
+        auto update = request.add_updates();
+        update->set_type(p4::Update_Type_INSERT);
+        update->set_allocated_entity(&entity);
+        ClientContext context;
+        p4::WriteResponse rep;
+        auto status = pi_stub_->Write(&context, request, &rep);
+        assert(status.ok());
+        update->release_entity();
+    }
+
+    std::cout << "Done.\n";
+
+    // Close the bidirectional stream.
+    {
+        stream->WritesDone();
+        p4::StreamMessageResponse response;
+        while (stream->Read(&response)) {
+        }
+        auto status = stream->Finish();
+        assert(status.ok());
+    }
+
+    return 0;
+}
+
 int
 ControllerSetConfig()
 {

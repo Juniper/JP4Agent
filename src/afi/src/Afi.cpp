@@ -211,7 +211,7 @@ Afi::afiAddObjEntry (const uint32_t tId,
 
          Log(DEBUG) << "Match Field Name: "     << name;
          Log(DEBUG) << "Match Field BitWidth: " << bitWidth;
-         std::cout << mf;
+         Log(DEBUG) << mf;
     }
 
     auto action =

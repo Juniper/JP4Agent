@@ -53,7 +53,7 @@ module afi-encap-entry {
 
             leaf field-data {
                 description "Encap field data";
-                type string;
+                type binary;
             }
         }
 

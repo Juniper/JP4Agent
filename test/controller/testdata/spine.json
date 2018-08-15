@@ -36,75 +36,111 @@
       "afi-object" : "2q/uEAIIAYrdnyYCCAGSooLYAgIIAfL0380FAggBisXqqwcCCAHCvuSkCAIIAcLO1LQIAggB4oDmvQkCCAE="
     },
     {
-      "afi-object-name" : "ingress.l3_fwd.l3_ipv4_override_table-encap",
+      "afi-object-name" : "ingress.l3_fwd.l3_ipv4_override_table_encap",
       "afi-object-id" : 6,
-      "afi-object-type" : "afi-tree-encap-encap",
+      "afi-object-type" : "afi-encap",
       "afi-object" : "qqjfiQMMFhccGBkXHBobFxgZ"
     },
     {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv4_override_table_tree",
       "afi-object-id" : 7,
-      "afi-object-type" : "afi-tree-encap-tree",
+      "afi-object-type" : "afi-tree",
       "afi-object" : "4IDgvwUB"
     },
     {
-      "afi-object-name" : "ingress.l3_fwd.l3_ipv4_vrf_table_encap",
+      "afi-object-name" : "ingress.l3_fwd.l3_ipv4_override_table",
       "afi-object-id" : 8,
-      "afi-object-type" : "afi-tree-encap-encap",
+      "afi-object-type" : "afi-tree-encap",
+      "afi-object" : "6rDc3gYtCitpbmdyZXNzLmwzX2Z3ZC5sM19pcHY0X292ZXJyaWRlX3RhYmxlX2VuY2Fwwr6S5QcsCippbmdyZXNzLmwzX2Z3ZC5sM19pcHY0X292ZXJyaWRlX3RhYmxlX3RyZWU="
+    },
+    {
+      "afi-object-name" : "ingress.l3_fwd.l3_ipv4_vrf_table_encap",
+      "afi-object-id" : 9,
+      "afi-object-type" : "afi-encap",
       "afi-object" : "qqjfiQMMFhccGBkXHBobFxgZ"
     },
     {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv4_vrf_table_tree",
-      "afi-object-id" : 9,
-      "afi-object-type" : "afi-tree-encap-tree",
+      "afi-object-id" : 10,
+      "afi-object-type" : "afi-tree",
       "afi-object" : "4IDgvwUC"
     },
     {
+      "afi-object-name" : "ingress.l3_fwd.l3_ipv4_vrf_table",
+      "afi-object-id" : 11,
+      "afi-object-type" : "afi-tree-encap",
+      "afi-object" : "6rDc3gYoCiZpbmdyZXNzLmwzX2Z3ZC5sM19pcHY0X3ZyZl90YWJsZV9lbmNhcMK+kuUHJwolaW5ncmVzcy5sM19md2QubDNfaXB2NF92cmZfdGFibGVfdHJlZQ=="
+    },
+    {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv4_fallback_table_encap",
-      "afi-object-id" : 10,
-      "afi-object-type" : "afi-tree-encap-encap",
+      "afi-object-id" : 12,
+      "afi-object-type" : "afi-encap",
       "afi-object" : "qqjfiQMMFhccGBkXHBobFxgZ"
     },
     {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv4_fallback_table_tree",
-      "afi-object-id" : 11,
-      "afi-object-type" : "afi-tree-encap-tree",
+      "afi-object-id" : 13,
+      "afi-object-type" : "afi-tree",
       "afi-object" : "4IDgvwUD"
     },
     {
+      "afi-object-name" : "ingress.l3_fwd.l3_ipv4_fallback_table",
+      "afi-object-id" : 14,
+      "afi-object-type" : "afi-tree-encap",
+      "afi-object" : "6rDc3gYtCitpbmdyZXNzLmwzX2Z3ZC5sM19pcHY0X2ZhbGxiYWNrX3RhYmxlX2VuY2Fwwr6S5QcsCippbmdyZXNzLmwzX2Z3ZC5sM19pcHY0X2ZhbGxiYWNrX3RhYmxlX3RyZWU="
+    },
+    {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv6_override_table_encap",
-      "afi-object-id" : 12,
-      "afi-object-type" : "afi-tree-encap-encap",
+      "afi-object-id" : 15,
+      "afi-object-type" : "afi-encap",
       "afi-object" : "qqjfiQMMFhccGBkXHBobFxgZ"
     },
     {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv6_override_table_tree",
-      "afi-object-id" : 13,
-      "afi-object-type" : "afi-tree-encap-tree",
+      "afi-object-id" : 16,
+      "afi-object-type" : "afi-tree",
       "afi-object" : "4IDgvwUB"
     },
     {
+      "afi-object-name" : "ingress.l3_fwd.l3_ipv6_override_table",
+      "afi-object-id" : 17,
+      "afi-object-type" : "afi-tree-encap",
+      "afi-object" : "6rDc3gYtCitpbmdyZXNzLmwzX2Z3ZC5sM19pcHY2X292ZXJyaWRlX3RhYmxlX2VuY2Fwwr6S5QcsCippbmdyZXNzLmwzX2Z3ZC5sM19pcHY2X292ZXJyaWRlX3RhYmxlX3RyZWU="
+    },
+    {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv6_vrf_table_encap",
-      "afi-object-id" : 14,
-      "afi-object-type" : "afi-tree-encap-encap",
+      "afi-object-id" : 18,
+      "afi-object-type" : "afi-encap",
       "afi-object" : "qqjfiQMMFhccGBkXHBobFxgZ"
     },
     {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv6_vrf_table_tree",
-      "afi-object-id" : 15,
-      "afi-object-type" : "afi-tree-encap-tree",
+      "afi-object-id" : 19,
+      "afi-object-type" : "afi-tree",
       "afi-object" : "4IDgvwUC"
     },
     {
+      "afi-object-name" : "ingress.l3_fwd.l3_ipv6_vrf_table",
+      "afi-object-id" : 20,
+      "afi-object-type" : "afi-tree-encap",
+      "afi-object" : "6rDc3gYoCiZpbmdyZXNzLmwzX2Z3ZC5sM19pcHY2X3ZyZl90YWJsZV9lbmNhcMK+kuUHJwolaW5ncmVzcy5sM19md2QubDNfaXB2Nl92cmZfdGFibGVfdHJlZQ=="
+    },
+    {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv6_fallback_table_encap",
-      "afi-object-id" : 16,
-      "afi-object-type" : "afi-tree-encap-encap",
+      "afi-object-id" : 21,
+      "afi-object-type" : "afi-encap",
       "afi-object" : "qqjfiQMMFhccGBkXHBobFxgZ"
     },
     {
       "afi-object-name" : "ingress.l3_fwd.l3_ipv6_fallback_table_tree",
-      "afi-object-id" : 17,
-      "afi-object-type" : "afi-tree-encap-tree",
+      "afi-object-id" : 22,
+      "afi-object-type" : "afi-tree",
       "afi-object" : "4IDgvwUD"
+    },
+    {
+      "afi-object-name" : "ingress.l3_fwd.l3_ipv6_fallback_table",
+      "afi-object-id" : 23,
+      "afi-object-type" : "afi-tree-encap",
+      "afi-object" : "6rDc3gYtCitpbmdyZXNzLmwzX2Z3ZC5sM19pcHY2X2ZhbGxiYWNrX3RhYmxlX2VuY2Fwwr6S5QcsCippbmdyZXNzLmwzX2Z3ZC5sM19pcHY2X2ZhbGxiYWNrX3RhYmxlX3RyZWU="
     }
 ]

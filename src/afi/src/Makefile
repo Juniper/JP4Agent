@@ -72,7 +72,11 @@ SRCS = \
 	AfiCapAction.cpp \
 	AfiCapEntry.cpp \
 	AfiCapEntryMatch.cpp \
-	AfiCapEntryAction.cpp
+	AfiCapEntryAction.cpp \
+	AfiEncap.cpp \
+	AfiEncapEntry.cpp \
+	AfiTreeEncap.cpp \
+	AfiTreeEncapEntry.cpp
 
 OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 OBJS := $(addprefix $(OBJDIR)/,$(OBJS))

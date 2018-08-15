@@ -59,6 +59,10 @@
 #include "AfiCapEntry.h"
 #include "AfiCapEntryMatch.h"
 #include "AfiCapEntryAction.h"
+#include "AfiEncap.h"
+#include "AfiEncapEntry.h"
+#include "AfiTreeEncap.h"
+#include "AfiTreeEncapEntry.h"
 #include "AfiTypes.h"
 #include "Log.h"
 
@@ -91,15 +95,18 @@ public:
     AfiTEntryMatchField(int id,
                         MfType t,
                         const std::string &value,
+                        const uint16_t len,
                         const std::string &mask) : _id(id),
                                                    _type(t),
                                                    _value(value),
+                                                   _len(len),
                                                    _mask(mask) { }
     ~AfiTEntryMatchField() { }
 
     uint32_t id() const { return _id; }
     MfType type() const { return _type; }
     const std::string& value() const { return _value; }
+    uint16_t len() const { return _len; }
     const std::string& mask() const { return _mask; }
 
     std::ostream &description(std::ostream &os) const {
@@ -146,6 +153,9 @@ public:
             }
         }
 
+        if (_type == MfType::LPM)
+            os << "Match Field Len: " << _len << std::endl;
+
         return os;
     }
 
@@ -159,6 +169,7 @@ private:
     uint32_t _id;
     MfType _type;
     const std::string _value;
+    const uint16_t _len;
     const std::string _mask;
 };
 
@@ -176,7 +187,11 @@ public:
         os << "_________ AfiAEntry _______" << std::endl;
         os << "Action ID: " << _id << std::endl;
 
-        if (_value.size() == 2) {
+        if (_value.size() == 1) {
+            uint8_t v;
+            str2Uint(_value, v);
+            os << "Action Value: " << _value << "," << v << std::endl;
+        } else if (_value.size() == 2) {
             uint16_t v;
             str2Uint(_value, v);
             os << "Action Value: " << v << std::endl;

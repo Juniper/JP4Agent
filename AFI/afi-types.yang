@@ -85,6 +85,11 @@ module afi-types {
               "Ingress port";
             }
 
+            enum egress-port {
+             description
+              "Egress port";
+            }
+
             enum packet-ether-daddr {
              description
               "Packet Ethernet destination MAC address";

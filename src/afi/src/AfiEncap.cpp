@@ -1,8 +1,8 @@
 //
 // Juniper P4 Agent
 //
-/// @file  AfiCap.cpp
-/// @brief Afi Content Aware Processor
+/// @file  AfiEncap.cpp
+/// @brief Afi Packet Encapsulation
 //
 // Created by Sudheendra Gopinath, June 2018
 // Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
@@ -21,10 +21,8 @@
 //
 
 #include "Afi.h"
-#include "AfiCap.h"
-#include "AfiCapEntry.h"
-#include "AfiCapEntryMatch.h"
-#include "AfiCapEntryAction.h"
+#include "AfiEncap.h"
+//#include "AfiEncapEntry.h"
 #include "P4Info.h"
 #include <cstring>
 #include <memory>
@@ -39,26 +37,27 @@ namespace AFIHAL
 // Description
 //
 std::ostream &
-AfiCap::description(std::ostream &os) const
+AfiEncap::description(std::ostream &os) const
 {
-    os << "_________ AfiCap _______" << std::endl;
+    os << "_________ AfiEncap _______" << std::endl;
     return os;
 }
 
-AfiCap::AfiCap(const AfiJsonResource &jsonRes) : AfiObject(jsonRes)
+AfiEncap::AfiEncap(const AfiJsonResource &jsonRes) : AfiObject(jsonRes)
 {
     // TBD: FIXME magic number 5000
     char bytes_decoded[5000];
     memset(bytes_decoded, 0, sizeof(bytes_decoded));
     int num_decoded_bytes =
         base64_decode(jsonRes.objStr(), bytes_decoded, 5000);
-    _cap.ParseFromArray(bytes_decoded, num_decoded_bytes);
+    _encap.ParseFromArray(bytes_decoded, num_decoded_bytes);
 
     Log(DEBUG) << "num_decoded_bytes: " << num_decoded_bytes;
-    Log(DEBUG) << "cap.ByteSize(): " << _cap.ByteSize();
+    Log(DEBUG) << "encap.ByteSize(): " << _encap.ByteSize();
 
 }
 
+#ifdef SUD_T
 bool
 AfiCap::createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
                            const uint32_t aId, //P4InfoActionPtr action,
@@ -78,7 +77,7 @@ AfiCap::createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
     auto action =
         std::dynamic_pointer_cast<P4InfoAction>(P4Info::instance().p4InfoResource(aId));
     if (action == nullptr) {
-        Log(ERROR) << "Bad Action ID " << aId;
+        Log(ERROR) << "Bad Action ID " << tId;
         return false;
     }
 
@@ -295,5 +294,6 @@ AfiCap::createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
 
     return true;
 }
+#endif // SUD_T
 
 }  // namespace AFIHAL

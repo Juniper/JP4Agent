@@ -68,6 +68,15 @@ ControllerAddClassIdEntry(uint16_t vid,
                           uint16_t dPort,
                           uint8_t  classId);
 
+int ControllerAddRtEncapEntry(uint32_t    dAddr,
+                              uint16_t    pLen,
+                              uint32_t    vrf,
+                              uint64_t    smac,
+                              uint64_t    dmac,
+                              uint16_t    oPort,
+                              uint8_t     l3ClassId,
+                              std::string type);
+
 // Packet header definitions
 struct __attribute__((packed)) cpu_header_t {
     char     zeros[8];

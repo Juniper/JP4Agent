@@ -1,10 +1,10 @@
 //
 // Juniper P4 Agent
 //
-/// @file  AfiTree.h
-/// @brief Afi Tree
+/// @file  AfiEncap.h
+/// @brief Afi packet encapsulation
 //
-// Created by Sandesh Kumar Sodhi, January 2018
+// Created by Sudheendra Gopinath, August 2018
 // Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
 //
 // All rights reserved.
@@ -20,8 +20,8 @@
 // as noted in the Third-Party source code file.
 //
 
-#ifndef SRC_AFI_INCLUDE_AFITREE_H_
-#define SRC_AFI_INCLUDE_AFITREE_H_
+#ifndef SRC_AFI_INCLUDE_AFIENCAP_H_
+#define SRC_AFI_INCLUDE_AFIENCAP_H_
 
 #include <memory>
 #include "AfiDM.h"
@@ -29,33 +29,31 @@
 
 namespace AFIHAL
 {
-class AfiTree;
-using AfiTreePtr     = std::shared_ptr<AfiTree>;
-using AfiTreeWeakPtr = std::weak_ptr<AfiTree>;
+class AfiEncap;
+using AfiEncapPtr     = std::shared_ptr<AfiEncap>;
+using AfiEncapWeakPtr = std::weak_ptr<AfiEncap>;
 
-class AfiTree : public AfiObject
+class AfiEncap : public AfiObject
 {
  public:
-    explicit AfiTree(const AfiJsonResource &jsonRes);
+    explicit AfiEncap(const AfiJsonResource &jsonRes);
 
-    ~AfiTree() {}
-
-    ::juniper::enums::AfiTreeAfiTreeType type() { return _tree.type(); }
+    ~AfiEncap() {}
 
     //
     // Debug
     //
     std::ostream &description(std::ostream &os) const;
 
-    friend std::ostream &operator<<(std::ostream &os, const AfiTreePtr &afitree)
+    friend std::ostream &operator<<(std::ostream &os, const AfiEncapPtr &afiencap)
     {
-        return afitree->description(os);
+        return afiencap->description(os);
     }
 
  protected:
-    juniper::afi_tree::AfiTree _tree;
+    juniper::afi_encap::AfiEncap _encap;
 };
 
 }  // namespace AFIHAL
 
-#endif  // SRC_AFI_INCLUDE_AFITREE_H_
+#endif  // SRC_AFI_INCLUDE_AFIENCAP_H_

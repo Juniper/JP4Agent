@@ -1,0 +1,46 @@
+//
+// Juniper AFI : AFI Tree EnCap Entry
+//
+// Created by Sudheendra Gopinath, June 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-tree-encap-entry {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-tree-encap-entry/junos/17.3";
+    prefix "afi-tree-encap-entry";
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Tree and Packet Encapsulation Entry";
+
+    revision 2018-06-02 {
+        description "Initial revision.";
+    }
+
+    container afi-tree-encap-entry {
+        leaf parent-name {
+            type string;
+            description "Parent name";
+        }
+
+        leaf tree-entry-object {
+            type string;
+            description "Tree entry object";
+        }
+
+        leaf encap-entry-object {
+            type string;
+            description "Encap entry object";
+        }
+    }
+}

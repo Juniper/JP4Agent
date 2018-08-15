@@ -221,7 +221,6 @@ tables {
     annotations: "@defaultonly()"
   }
   size: 1024
-  is_const_table: true
 }
 tables {
   preamble {

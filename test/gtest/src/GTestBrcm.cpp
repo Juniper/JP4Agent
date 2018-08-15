@@ -102,7 +102,11 @@ TEST_F(P4BRCM, BrcmIpv4Router)
     uint16_t iport = 9;
     uint16_t eport = 13;
 
-    // Launch controller to add route entry.
+    // Launch controller to add route entries.
+    // First, the default route.
+    ControllerAddRouteEntry(0, 0, 0x0b000001, 0x88a25e91a2a8, 9);
+
+    // Next, the actual route
     ControllerAddRouteEntry(0x37373702, 24, 0x0a000001, 0x88a25e9175ff, 13);
     sleep_thread_log(5s);
 

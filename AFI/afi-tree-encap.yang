@@ -1,0 +1,41 @@
+//
+// Juniper AFI : AFI Tree_And_Encapuslation
+//
+// Created by Sudheendra Gopinath, August 2018
+// Copyright (c) [2018] Juniper Networks, Inc. All rights reserved.
+//
+//
+
+module afi-tree-encap {
+
+    yang-version "1";
+
+    namespace "http://yang.juniper.net/yang/1.1/jc/afi-tree-encap/junos/17.3";
+    prefix "afi-tree-encap";
+
+    organization
+        "Juniper Networks, Inc.";
+
+    contact
+        "Sudheendra Gopinath
+         sgopinath@juniper.net";
+
+    description
+      "This module provides data model for AFI Tree and Encapsulation";
+
+    revision 2019-06-02 {
+        description "Initial revision.";
+    }
+
+    container afi-tree-encap {
+        leaf tree-object {
+            type string;
+            description "Tree object";
+        }
+
+        leaf encap-object {
+            type string;
+            description "Encap object";
+        }
+    }
+}

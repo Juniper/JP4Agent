@@ -31,6 +31,8 @@
 //  - afi-selector.yang
 //  - afi-switch.yang
 //  - afi-table.yang
+//  - afi-tree-encap-entry.yang
+//  - afi-tree-encap.yang
 //  - afi-tree-entry.yang
 //  - afi-tree.yang
 //  - afi-types.yang
@@ -48,4 +50,5 @@ message AfiTreeEntry {
   ywrapper.StringValue prefix_bytes = 312714340;
   ywrapper.UintValue prefix_length = 35426751;
   ywrapper.StringValue target_afi_object = 227270412;
+  ywrapper.UintValue vrf_id = 245987046;
 }
