@@ -19,12 +19,14 @@
 # as noted in the Third-Party source code file.
 #
 
+VERSION = 0
+
 ifdef UBUNTU
 CXX = g++
 CPPFLAGS += -DUBUNTU
 endif
 
-TARGET_LIB = libpi_proto.so
+TARGET_LIB = libpi_proto.so.$(VERSION)
 RM = rm -f
 
 CXXFLAGS += -fPIC -g -O0 -std=c++14 
@@ -80,6 +82,8 @@ OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 
 $(TARGET_LIB): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $^
+	rm -f ${basename $@}
+	ln -s ${notdir $@} ${basename $@}
 
 ifdef UBUNTU
 p4runtime.pb.cc: p4runtime.proto

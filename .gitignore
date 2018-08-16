@@ -1,5 +1,6 @@
 # Compiled source #
 ###################
+*.so.*
 *.so
 *.o
 *.a

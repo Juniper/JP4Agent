@@ -19,12 +19,14 @@
 # as noted in the Third-Party source code file.
 #
 
+VERSION = 0
+
 ifdef UBUNTU
 CXX = g++
 CPPFLAGS += -DUBUNTU
 endif
 
-TARGET_LIB = libpi.so
+TARGET_LIB = libpi.so.$(VERSION)
 RM = rm -rf
 OBJDIR  = ../obj
 
@@ -76,6 +78,8 @@ OBJS := $(addprefix $(OBJDIR)/,$(OBJS))
 
 $(OBJDIR)/$(TARGET_LIB): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $^
+	rm -f ${basename $@}
+	ln -s ${notdir $@} ${basename $@}
 
 $(OBJDIR)/%.o : %.cpp
 	@mkdir -p $(OBJDIR)

@@ -19,6 +19,8 @@
 # as noted in the Third-Party source code file.
 #
 
+VERSION = 0
+
 PYANG=pyang
 PROTOG=/root/go/src/github.com/openconfig/ygot/proto_generator/proto_generator
 
@@ -27,7 +29,7 @@ CXX = g++
 CPPFLAGS += -DUBUNTU
 endif
 
-TARGET_LIB = libafi_yang.so
+TARGET_LIB = libafi_yang.so.$(VERSION)
 RM = rm -f
 
 CXXFLAGS += -fPIC -g -O0 -std=c++14 
@@ -83,6 +85,8 @@ OBJS=$(subst .cc,.o, $(subst .cpp,.o, $(SRCS)))
 
 $(TARGET_LIB): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $^
+	rm -f ${basename $@}
+	ln -s ${notdir $@} ${basename $@}
 
 srcs: generate_protobuf $(SRCS)
 	@echo Generated protobufs:
