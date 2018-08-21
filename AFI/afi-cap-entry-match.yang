@@ -188,24 +188,34 @@ module afi-cap-entry-match {
             description "Outer TPID of the packet mask.";
         }
     
-        leaf src-trunk {
+        leaf source-trunk {
             type afi-types:afi-trunk-group-id;
             description "Source Trunk Group ID.";
         }
     
-        leaf src-trunk-mask {
+        leaf source-trunk-mask {
             type afi-types:afi-trunk-group-id;
             description "Source Trunk Group ID mask.";
         }
     
-        leaf src-port {
+        leaf source-port {
             type afi-types:afi-port;
             description "Source Port.";
         }
     
-        leaf src-port-mask {
+        leaf source-port-mask {
             type afi-types:afi-port;
             description "Source Port mask.";
+        }
+    
+        leaf destination-port {
+            type afi-types:afi-port;
+            description "Destination Port.";
+        }
+    
+        leaf destination-port-mask {
+            type afi-types:afi-port;
+            description "Destination Port mask.";
         }
     
         leaf system-port-class {
@@ -344,6 +354,46 @@ module afi-cap-entry-match {
         leaf l3-interface-class-mask {
             type uint16;
             description "L3 interface Class ID mask.";
+        }
+    
+        leaf virtual-routing-and-forwarding-id {
+            type uint32;
+            description "VRF ID.";
+        }
+
+        leaf virtual-routing-and-forwarding-id-mask {
+            type uint32;
+            description "VRF ID mask.";
+        }
+
+        leaf ingress-class-id {
+            type uint8;
+            description "Class ID assigned by ingress stage.";
+        }
+
+        leaf ingress-class-id-mask {
+            type uint8;
+            description "Class ID mask.";
+        }
+
+        leaf arp-target-ipv4-address {
+            type uint32;
+            description "Target IPv4 Address in ARP header.";
+        }
+
+        leaf arp-target-ipv4-address-mask {
+            type uint32;
+            description "ARP Target IPv4 Address mask.";
+        }
+
+        leaf icmp-type {
+            type uint8;
+            description "ICMP type.";
+        }
+
+        leaf icmp-type-mask {
+            type uint8;
+            description "ICMP type mask.";
         }
     }
 }

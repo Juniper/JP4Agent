@@ -50,6 +50,16 @@ module afi-cap-action {
             description "Cancel lower priority Copy to CPU Action.";
         }
     
+        leaf cpu-queue {
+            type empty;
+            description "CPU queue.";
+        }
+    
+        leaf cpu-queue-mask {
+            type empty;
+            description "CPU queue mask.";
+        }
+    
         leaf destination-class-id {
             type empty;
             description "Set destination address lookup class ID.";

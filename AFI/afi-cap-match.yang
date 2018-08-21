@@ -110,14 +110,19 @@ module afi-cap-match {
             description "Outer TPID of the packet.";
         }
     
-        leaf src-trunk {
+        leaf source-trunk {
             type empty;
             description "Source Trunk Group ID.";
         }
     
-        leaf src-port {
+        leaf source-port {
             type empty;
-            description "Source Port.";
+            description "Input Port.";
+        }
+    
+        leaf destination-port {
+            type empty;
+            description "Output Port.";
         }
     
         leaf system-port-class {
@@ -183,6 +188,26 @@ module afi-cap-match {
         leaf l3-interface-class {
             type empty;
             description "L3 interface Class ID.";
+        }
+    
+        leaf virtual-routing-and-forwarding-id {
+            type empty;
+            description "VRF ID.";
+        }
+
+        leaf ingress-class-id {
+            type empty;
+            description "Class ID assigned by ingress stage.";
+        }
+
+        leaf arp-target-ipv4-address {
+            type empty;
+            description "Target IPv4 Address in ARP header.";
+        }
+
+        leaf icmp-type {
+            type empty;
+            description "ICMP type.";
         }
     }
 }

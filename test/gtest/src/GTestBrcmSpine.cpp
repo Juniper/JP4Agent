@@ -87,7 +87,16 @@ TEST_F(P4BRCMSPINE, ClassId)
     EXPECT_EQ(1, 1);
 }
 
-// Test3: Override, VRF, Fallback Route Tables
+// Test3: MyMAC Table
+TEST_F(P4BRCMSPINE, MyMac)
+{
+    unsigned char m[6] = {0x88, 0xa2, 0x5e, 0x91, 0x75, 0xff};
+    std::string mac((char *) &m[0], 6);
+    ControllerAddMyMacEntry(mac);
+    EXPECT_EQ(1, 1);
+}
+
+// Test4: Override, VRF, Fallback Route Tables
 TEST_F(P4BRCMSPINE, RTT)
 {
     // Default route for the default IPv4 table.
@@ -113,3 +122,13 @@ TEST_F(P4BRCMSPINE, RTT)
     EXPECT_EQ(1, 1);
 }
 
+// Test5: Punt Table
+TEST_F(P4BRCMSPINE, Punt)
+{
+    ControllerAddPuntEntry(9, 13, 0x800, 0x88a25e9175ff,
+                           6, 5, 0x10000001, 0x20000001,
+                           6, 0, 0, 12,
+                           4, 10, 5, 3);
+
+    EXPECT_EQ(1, 1);
+}

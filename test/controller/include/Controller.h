@@ -27,6 +27,17 @@
 #include <chrono>
 #include <string>
 
+#include <google/rpc/code.pb.h>
+#ifdef UBUNTU
+#include <p4runtime.grpc.pb.h>
+#else
+#include <p4runtime_wrl.grpc.pb.h>
+#endif
+#include <p4/tmp/p4config.grpc.pb.h>
+
+#include "P4InfoUtils.h"
+#include "Utils.h"
+
 void ControllerSetP4Input(std::string pipelineFile, std::string runtimeFile);
 
 int ControllerSetConfig();
@@ -68,6 +79,8 @@ ControllerAddClassIdEntry(uint16_t vid,
                           uint16_t dPort,
                           uint8_t  classId);
 
+int ControllerAddMyMacEntry(std::string mac);
+
 int ControllerAddRtEncapEntry(uint32_t    dAddr,
                               uint16_t    pLen,
                               uint32_t    vrf,
@@ -76,6 +89,23 @@ int ControllerAddRtEncapEntry(uint32_t    dAddr,
                               uint16_t    oPort,
                               uint8_t     l3ClassId,
                               std::string type);
+
+int ControllerAddPuntEntry(uint32_t iport,
+                           uint32_t oport,
+                           uint16_t etype,
+                           uint64_t dmac,
+                           uint8_t  tos,
+                           uint8_t  ttl,
+                           uint32_t saddr,
+                           uint32_t daddr,
+                           uint8_t  proto,
+                           uint32_t arpTAddr,
+                           uint8_t  icmpType,
+                           uint16_t vid,
+                           uint8_t  dot1p,
+                           uint8_t  ingressClassId,
+                           uint32_t vrfId,
+                           uint8_t qId);
 
 // Packet header definitions
 struct __attribute__((packed)) cpu_header_t {
@@ -98,5 +128,52 @@ struct interface_t {
     uint8_t  ip_addr[4];
     uint8_t  mac_addr[6];
 };
+
+template <typename T>
+void
+addTEntryMF(p4::config::P4Info p4info,
+            std::string        t_name,
+            ::p4::TableEntry*  t_entry,
+            std::string        mf_type,
+            std::string        mf_name,
+            T                  mf,
+            int                bitWidth) 
+{
+    Utils utils;
+    std::string mfS = utils.uint2Str(mf);
+
+    T mfMask = 0;
+    while (bitWidth--) {
+        mfMask <<= 1;
+        mfMask |= 1;
+    }
+    std::string mfMaskS = utils.uint2Str(mfMask);
+
+    auto mf_id = get_mf_id(p4info, t_name, mf_name);
+    auto match = t_entry->add_match();
+    match->set_field_id(mf_id);
+    if (mf_type == "ternary") {
+        auto tnary = match->mutable_ternary();
+        tnary->set_value(mfS);
+        tnary->set_mask(mfMaskS);
+    }
+}
+
+template <typename T>
+void
+addTEntryAction(p4::config::P4Info p4info,
+                std::string        a_name,
+                ::p4::Action*      action,
+                std::string        af_name,
+                T                  af)
+{
+    Utils utils;
+    std::string afS = utils.uint2Str(af);
+
+    auto p_id = get_param_id(p4info, a_name, af_name);
+    auto param = action->add_params();
+    param->set_param_id(p_id);
+    param->set_value(afS);
+}
 
 #endif // __Controller__

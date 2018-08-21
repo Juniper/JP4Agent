@@ -45,9 +45,13 @@ import "ywrapper/ywrapper.proto";
 import "yext/yext.proto";
 
 message AfiCapMatch {
+  ywrapper.BoolValue arp_target_ipv4_address = 183979878;
   ywrapper.BoolValue destination_ipv4_address = 4420347;
   ywrapper.BoolValue destination_mac_address = 354602281;
+  ywrapper.BoolValue destination_port = 378515304;
   ywrapper.BoolValue ethertype = 282240232;
+  ywrapper.BoolValue icmp_type = 136750768;
+  ywrapper.BoolValue ingress_class_id = 378178964;
   ywrapper.BoolValue inner_ip_proto = 214803407;
   ywrapper.BoolValue inner_tpid = 471227898;
   ywrapper.BoolValue inner_vlan_cfi = 127058409;
@@ -68,11 +72,12 @@ message AfiCapMatch {
   ywrapper.BoolValue pipeline_id = 215932380;
   ywrapper.BoolValue source_ipv4_address = 68858342;
   ywrapper.BoolValue source_mac_address = 335291014;
-  ywrapper.BoolValue src_port = 249907630;
-  ywrapper.BoolValue src_trunk = 214141755;
+  ywrapper.BoolValue source_port = 73969881;
+  ywrapper.BoolValue source_trunk = 431883282;
   ywrapper.BoolValue system_port_class = 536374618;
   ywrapper.BoolValue tos = 255672898;
   ywrapper.BoolValue tunnel_terminated = 473902200;
+  ywrapper.BoolValue virtual_routing_and_forwarding_id = 297947686;
   ywrapper.BoolValue virtual_slice_group = 521852650;
   ywrapper.BoolValue vlan_inner_present = 336905570;
   ywrapper.BoolValue vlan_outer_present = 468273823;

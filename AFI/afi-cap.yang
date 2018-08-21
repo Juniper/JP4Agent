@@ -33,6 +33,7 @@ module afi-cap {
                 enum "VLAN";
                 enum "INGRESS";
                 enum "EGRESS";
+                enum "MY-MAC";
             }
             description "Content Aware Processor Type";
         }

@@ -52,6 +52,11 @@ module afi-cap-entry-action {
             description "Cancel lower priority Copy to CPU Action.";
         }
     
+        leaf cpu-queue {
+            type uint8;
+            description "CPU queue.";
+        }
+
         leaf destination-class-id {
             type uint16;
             description "Set destination address lookup class ID.";

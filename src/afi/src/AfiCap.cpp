@@ -137,7 +137,13 @@ AfiCap::createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
 
             Log(DEBUG) << "Value, mask : " << v << " " << m;
 
-            if (name == "hdr.ethernet.ether_type") {
+            if (name == "standard_metadata.ingress_port") {
+                afiMatchObj.set_allocated_source_port(yv);
+                afiMatchObj.set_allocated_source_port_mask(ym);
+            } else if (name == "standard_metadata.egress_spec") {
+                afiMatchObj.set_allocated_destination_port(yv);
+                afiMatchObj.set_allocated_destination_port_mask(ym);
+            } else if (name == "hdr.ethernet.ether_type") {
                 afiMatchObj.set_allocated_ethertype(yv);
                 afiMatchObj.set_allocated_ethertype_mask(ym);
             } else if (name == "hdr.vlan_tag[0].vid") {
@@ -153,13 +159,14 @@ AfiCap::createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
                 afiMatchObj.set_allocated_ip_protocol(yv);
                 afiMatchObj.set_allocated_ip_protocol_mask(ym);
             } else if (name == "hdr.ipv4_base.diffserv") {
+                afiMatchObj.set_allocated_tos(yv);
+                afiMatchObj.set_allocated_tos_mask(ym);
             } else if (name == "hdr.ipv4_base.src_addr") {
                 afiMatchObj.set_allocated_source_ipv4_address(yv);
                 afiMatchObj.set_allocated_source_ipv4_address_mask(ym);
             } else if (name == "hdr.ipv4_base.dst_addr") {
                 afiMatchObj.set_allocated_destination_ipv4_address(yv);
                 afiMatchObj.set_allocated_destination_ipv4_address_mask(ym);
-            } else if (name == "hdr.standard_metadata.ingress_port") {
             } else if (name == "hdr.ipv6_base.traffic_class") {
             } else if (name == "hdr.ipv6_base.dst_addr") {
             } else if (name == "local_metadata.l4_src_port") {
@@ -168,6 +175,18 @@ AfiCap::createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
             } else if (name == "local_metadata.l4_dst_port") {
                 afiMatchObj.set_allocated_l4_destination_port(yv);
                 afiMatchObj.set_allocated_l4_destination_port_mask(ym);
+            } else if (name == "local_metadata.class_id") {
+                afiMatchObj.set_allocated_ingress_class_id(yv);
+                afiMatchObj.set_allocated_ingress_class_id_mask(ym);
+            } else if (name == "local_metadata.vrf_id") {
+                afiMatchObj.set_allocated_virtual_routing_and_forwarding_id(yv);
+                afiMatchObj.set_allocated_virtual_routing_and_forwarding_id_mask(ym);
+            } else if (name == "hdr.arp.target_proto_addr") {
+                afiMatchObj.set_allocated_arp_target_ipv4_address(yv);
+                afiMatchObj.set_allocated_arp_target_ipv4_address_mask(ym);
+            } else if (name == "hdr.icmp.type") {
+                afiMatchObj.set_allocated_icmp_type(yv);
+                afiMatchObj.set_allocated_icmp_type_mask(ym);
             }
         } else if (bitWidth <= 64) {
             unsigned char mc[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
@@ -237,6 +256,18 @@ AfiCap::createChildJsonRes(const uint32_t tId, //P4InfoTablePtr table,
             str2Uint(ae.value(), v);
             yv->set_value(v);
             afiActionObj.set_allocated_destination_class_id(yv);
+        } else if (name == "queue_id") {
+            ::ywrapper::UintValue* yv = new ::ywrapper::UintValue();
+            uint8_t v;
+            str2Uint(ae.value(), v);
+            yv->set_value(v);
+            afiActionObj.set_allocated_cpu_queue(yv);
+            // TODO: Following is hard-coded for now
+            {
+            ::ywrapper::BoolValue* yv = new ::ywrapper::BoolValue();
+            yv->set_value(1);
+            afiActionObj.set_allocated_copy_to_cpu(yv);
+            }
         } else if (name == "hdr.ethernet.src_addr") {
         } else if (name == "hdr.ipv4_base.diffserv") {
         } else if (name == "hdr.ipv4_base.dst_addr") {

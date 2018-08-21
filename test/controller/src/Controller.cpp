@@ -871,6 +871,89 @@ ControllerAddClassIdEntry(uint16_t vid,
     return 0;
 }
 
+int ControllerAddMyMacEntry(std::string mac)
+{
+    int dev_id = 0;
+    auto channel = grpc::CreateChannel("localhost:50051",
+                                       grpc::InsecureChannelCredentials());
+    std::unique_ptr<p4::P4Runtime::Stub> pi_stub_(
+        p4::P4Runtime::NewStub(channel));
+
+    auto p4info = parse_p4info(test_proto_txt);
+
+    auto set_election_id = [](p4::Uint128 *election_id) {
+        election_id->set_high(0);
+        election_id->set_low(1);
+    };
+
+    // Open bidirectional stream and advertise election id.
+    ClientContext stream_context;
+    auto stream = pi_stub_->StreamChannel(&stream_context);
+    {
+        p4::StreamMessageRequest request;
+        auto arbitration = request.mutable_arbitration();
+        arbitration->set_device_id(dev_id);
+        set_election_id(arbitration->mutable_election_id());
+        stream->Write(request);
+        p4::StreamMessageResponse response;
+        stream->Read(&response);
+        assert(response.update_case() ==
+               p4::StreamMessageResponse::kArbitration);
+        assert(response.arbitration().status().code() ==
+               ::google::rpc::Code::OK);
+    }
+
+    std::cout << "Write: Adding MyMac table entry...";
+
+    std::string t_name = "ingress.l3_admit.dst_mac_classifier_table";
+    auto t_id = get_table_id(p4info, t_name);
+    auto mf0_id = get_mf_id(p4info, t_name, "hdr.ethernet.dst_addr");
+
+    p4::Entity entity;
+    auto table_entry = entity.mutable_table_entry();
+
+    table_entry->set_table_id(t_id);
+
+    auto match0 = table_entry->add_match();
+    match0->set_field_id(mf0_id);
+    auto exact0 = match0->mutable_exact();
+    exact0->set_value(mac);
+
+    auto a_id = get_action_id(p4info, "ingress.l3_admit.set_l3_admit");
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(a_id);
+
+    // add entry
+    {
+        p4::WriteRequest request;
+        set_election_id(request.mutable_election_id());
+        request.set_device_id(dev_id);
+        auto update = request.add_updates();
+        update->set_type(p4::Update_Type_INSERT);
+        update->set_allocated_entity(&entity);
+        ClientContext context;
+        p4::WriteResponse rep;
+        auto status = pi_stub_->Write(&context, request, &rep);
+        assert(status.ok());
+        update->release_entity();
+    }
+
+    std::cout << "Done.\n";
+
+    // Close the bidirectional stream.
+    {
+        stream->WritesDone();
+        p4::StreamMessageResponse response;
+        while (stream->Read(&response)) {
+        }
+        auto status = stream->Finish();
+        assert(status.ok());
+    }
+
+    return 0;
+}
+
 int ControllerAddRtEncapEntry(uint32_t    dAddr,
                               uint16_t    pLen,
                               uint32_t    vrf,
@@ -1010,6 +1093,150 @@ int ControllerAddRtEncapEntry(uint32_t    dAddr,
     }
 
     return 0;
+}
+
+int ControllerAddPuntEntry(uint32_t iport,
+                           uint32_t oport,
+                           uint16_t etype,
+                           uint64_t dmac,
+                           uint8_t  tos,
+                           uint8_t  ttl,
+                           uint32_t saddr,
+                           uint32_t daddr,
+                           uint8_t  proto,
+                           uint32_t arpTAddr,
+                           uint8_t  icmpType,
+                           uint16_t vid,
+                           uint8_t  pcp,
+                           uint8_t  iClassId,
+                           uint32_t vrfId,
+                           uint8_t qId)
+{
+    int dev_id = 0;
+    auto channel = grpc::CreateChannel("localhost:50051",
+                                       grpc::InsecureChannelCredentials());
+    std::unique_ptr<p4::P4Runtime::Stub> pi_stub_(
+        p4::P4Runtime::NewStub(channel));
+
+    auto p4info = parse_p4info(test_proto_txt);
+
+    auto set_election_id = [](p4::Uint128 *election_id) {
+        election_id->set_high(0);
+        election_id->set_low(1);
+    };
+
+    // Open bidirectional stream and advertise election id.
+    ClientContext stream_context;
+    auto stream = pi_stub_->StreamChannel(&stream_context);
+    {
+        p4::StreamMessageRequest request;
+        auto arbitration = request.mutable_arbitration();
+        arbitration->set_device_id(dev_id);
+        set_election_id(arbitration->mutable_election_id());
+        stream->Write(request);
+        p4::StreamMessageResponse response;
+        stream->Read(&response);
+        assert(response.update_case() ==
+               p4::StreamMessageResponse::kArbitration);
+        assert(response.arbitration().status().code() ==
+               ::google::rpc::Code::OK);
+    }
+
+    std::cout << "Write: Adding punt table entry...";
+
+    auto t_name = "ingress.punt.punt_table";
+    auto t_id = get_table_id(p4info, t_name);
+    p4::Entity entity;
+    auto table_entry = entity.mutable_table_entry();
+    table_entry->set_table_id(t_id);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "standard_metadata.ingress_port", iport, 32);
+
+#ifdef SUD
+    // egress_spec falls in egress pipeline?
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "standard_metadata.egress_spec", oport, 32);
+#endif // SUD
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.ethernet.ether_type", etype, 16);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.ethernet.dst_addr", dmac, 64);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.ipv4_base.diffserv", tos, 8);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.ipv4_base.ttl", ttl, 8);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.ipv4_base.src_addr", saddr, 32);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.ipv4_base.dst_addr", daddr, 32);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.ipv4_base.protocol", proto, 8);
+
+#ifdef LATER
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.arp.target_proto_addr", arpTAddr, 32);
+#endif // LATER
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.icmp.type", icmpType, 8);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.vlan_tag[0].vid", vid, 16);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "hdr.vlan_tag[0].pcp", pcp, 8);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "local_metadata.class_id", iClassId, 8);
+
+    addTEntryMF(p4info, t_name, table_entry, "ternary",
+                "local_metadata.vrf_id", vrfId, 32);
+
+    std::string a_name = "ingress.punt.set_queue_and_clone_to_cpu";
+    auto a_id = get_action_id(p4info, a_name);
+    auto table_action = table_entry->mutable_action();
+    auto action = table_action->mutable_action();
+    action->set_action_id(a_id);
+
+    addTEntryAction(p4info, a_name, action, "queue_id", qId);
+
+    // add entry
+    {
+        p4::WriteRequest request;
+        set_election_id(request.mutable_election_id());
+        request.set_device_id(dev_id);
+        auto update = request.add_updates();
+        update->set_type(p4::Update_Type_INSERT);
+        update->set_allocated_entity(&entity);
+        ClientContext context;
+        p4::WriteResponse rep;
+        auto status = pi_stub_->Write(&context, request, &rep);
+        assert(status.ok());
+        update->release_entity();
+    }
+
+    std::cout << "Done.\n";
+
+    // Close the bidirectional stream.
+    {
+        stream->WritesDone();
+        p4::StreamMessageResponse response;
+        while (stream->Read(&response)) {
+        }
+        auto status = stream->Finish();
+        assert(status.ok());
+    }
+
+    return 0;
+
 }
 
 int

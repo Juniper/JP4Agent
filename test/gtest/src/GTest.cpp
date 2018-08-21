@@ -460,7 +460,7 @@ main(int argc, char **argv)
             ::testing::GTEST_FLAG(filter) = "P4BRCM.*";
     } else if (strcmp(argv[1], "brcmspine")  == 0) {
             ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.*";
-            //::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.ClassId";
+            //::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.Punt";
     } else {
         ::testing::GTEST_FLAG(filter) = "*nullTest*";
     }

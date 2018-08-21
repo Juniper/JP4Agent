@@ -50,6 +50,7 @@ message AfiCap {
     CAPTYPE_VLAN = 1 [(yext.yang_name) = "VLAN"];
     CAPTYPE_INGRESS = 2 [(yext.yang_name) = "INGRESS"];
     CAPTYPE_EGRESS = 3 [(yext.yang_name) = "EGRESS"];
+    CAPTYPE_MY_MAC = 4 [(yext.yang_name) = "MY-MAC"];
   }
   ywrapper.StringValue action_object = 359987726;
   CapType cap_type = 305421565;

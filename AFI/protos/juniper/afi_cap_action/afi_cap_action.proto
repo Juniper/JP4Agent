@@ -47,6 +47,8 @@ import "yext/yext.proto";
 message AfiCapAction {
   ywrapper.BoolValue copy_to_cpu = 503826992;
   ywrapper.BoolValue copy_to_cpu_cancel = 530999003;
+  ywrapper.BoolValue cpu_queue = 315246306;
+  ywrapper.BoolValue cpu_queue_mask = 451340863;
   ywrapper.BoolValue destination_class_id = 39883017;
   ywrapper.BoolValue drop = 334671545;
   ywrapper.BoolValue drop_cancel = 232920976;

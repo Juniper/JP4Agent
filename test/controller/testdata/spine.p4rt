@@ -502,6 +502,167 @@ tables {
 }
 tables {
   preamble {
+    id: 33554441
+    name: "ingress.punt.punt_table"
+    alias: "punt_table"
+    annotations: "@proto_package(\"punt\")"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    annotations: "@proto_tag(1)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "standard_metadata.egress_spec"
+    annotations: "@proto_tag(2)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "hdr.ethernet.ether_type"
+    annotations: "@proto_tag(3)"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "hdr.ethernet.dst_addr"
+    annotations: "@proto_tag(4)"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "hdr.ipv4_base.diffserv"
+    annotations: "@proto_tag(5)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "hdr.ipv6_base.traffic_class"
+    annotations: "@proto_tag(6)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "hdr.ipv4_base.ttl"
+    annotations: "@proto_tag(7)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "hdr.ipv6_base.hop_limit"
+    annotations: "@proto_tag(8)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "hdr.ipv4_base.src_addr"
+    annotations: "@proto_tag(9)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 10
+    name: "hdr.ipv4_base.dst_addr"
+    annotations: "@proto_tag(10)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 11
+    name: "hdr.ipv6_base.src_addr"
+    annotations: "@proto_tag(11)"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 12
+    name: "hdr.ipv6_base.dst_addr"
+    annotations: "@proto_tag(12)"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 13
+    name: "hdr.ipv4_base.protocol"
+    annotations: "@proto_tag(13)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 14
+    name: "hdr.ipv6_base.next_header"
+    annotations: "@proto_tag(14)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 15
+    name: "hdr.arp.target_proto_addr"
+    annotations: "@proto_tag(15)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 16
+    name: "hdr.icmp.type"
+    annotations: "@proto_tag(16)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 17
+    name: "hdr.vlan_tag[0].vid"
+    annotations: "@proto_tag(17)"
+    bitwidth: 12
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 18
+    name: "hdr.vlan_tag[0].pcp"
+    annotations: "@proto_tag(18)"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 19
+    name: "local_metadata.class_id"
+    annotations: "@proto_tag(19)"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 20
+    name: "local_metadata.vrf_id"
+    annotations: "@proto_tag(20)"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 16777228
+    annotations: "@proto_tag(1)"
+  }
+  action_refs {
+    id: 16777229
+    annotations: "@proto_tag(2)"
+  }
+  action_refs {
+    id: 16779027
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
     id: 33554461
     name: "egress.packetio_egress.packet_in_lag_table"
     alias: "packet_in_lag_table"
@@ -735,6 +896,34 @@ actions {
     name: "gre_flags"
     annotations: "@proto_tag(6)"
     bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 16777228
+    name: "ingress.punt.set_queue_and_clone_to_cpu"
+    alias: "set_queue_and_clone_to_cpu"
+    annotations: "@proto_package(\"punt\")"
+  }
+  params {
+    id: 1
+    name: "queue_id"
+    annotations: "@proto_tag(1)"
+    bitwidth: 5
+  }
+}
+actions {
+  preamble {
+    id: 16777229
+    name: "ingress.punt.set_queue_and_send_to_cpu"
+    alias: "set_queue_and_send_to_cpu"
+    annotations: "@proto_package(\"punt\")"
+  }
+  params {
+    id: 1
+    name: "queue_id"
+    annotations: "@proto_tag(1)"
+    bitwidth: 5
   }
 }
 actions {

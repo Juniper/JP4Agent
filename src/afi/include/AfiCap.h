@@ -46,6 +46,7 @@ class AfiCap : public AfiObject
                                     const std::vector<AfiAEntry> &aes,
                                     Json::Value& result) override;
 
+    ::juniper::afi_cap::AfiCap_CapType type() { return _cap.cap_type(); }
     ::ywrapper::UintValue gid() { return _cap.group_id(); }
     ::ywrapper::UintValue gp() { return _cap.group_priority(); }
 
