@@ -229,6 +229,66 @@ ControllerInjectPuntL2Pkt(const std::string &inject_l2_pkt,
     return true;
 }
 
+bool
+ControllerInjectPuntL2Pkts(const std::string &inject_l2_pkt,
+                           std::string &punt_l2_pkt1,
+                           std::string &punt_l2_pkt2,
+                           uint16_t egress_port,
+                           uint16_t ingress_port,
+                           std::chrono::milliseconds timeout_ms)
+{
+    // Create gRPC stub and open the stream channel
+    auto channel = grpc::CreateChannel("localhost:50051",
+                                       grpc::InsecureChannelCredentials());
+
+    StreamChannelSyncClient sc{channel, timeout_ms};
+
+    // Encapsulate L2 pkt with cpu_header
+    cpu_header_t cpu_hdr;
+    memset(&cpu_hdr, 0, cpu_hdr_sz);
+    cpu_hdr.port = htons(ingress_port);
+
+    std::string payload{(char *)&cpu_hdr, cpu_hdr_sz};
+    payload.append(inject_l2_pkt);
+
+    // Inject L2 pkt on the stream
+    sc.send_pkt_out(std::move(payload));
+
+    // Listen for L2 pkt on the stream channel
+    auto *stream = sc.get_stream();
+    p4::StreamMessageResponse response;
+    int first = 0;
+    bool rdstatus;
+    while ((rdstatus = stream->Read(&response))) {
+        if (response.update_case() != p4::StreamMessageResponse::kPacket) {
+            continue;
+        }
+        std::string recvd_pkt = response.packet().payload();
+
+        // Decapsulate cpu_header
+        char zero[8]{};
+        if ((recvd_pkt.size() <= cpu_hdr_sz) ||
+            (memcmp(zero, recvd_pkt.data(), 8) != 0)) {
+            return false;
+        }
+
+        egress_port = ntohs(((struct cpu_header_t *)recvd_pkt.data())->port);
+        std::cout << __PRETTY_FUNCTION__
+                  << ": Received L2 pkt (size: " << recvd_pkt.size() - cpu_hdr_sz
+                  << " bytes) on egress port " << egress_port << "\n";
+
+        // Copy L2 pkt payload alone
+        if (first == 0) {
+            punt_l2_pkt1.assign(recvd_pkt.begin() + cpu_hdr_sz, recvd_pkt.end());
+            first = 1;
+        } else {
+            punt_l2_pkt2.assign(recvd_pkt.begin() + cpu_hdr_sz, recvd_pkt.end());
+        }
+    }
+
+    return true;
+}
+
 uint16_t csum(uint16_t *addr, int len)
 {
     int nleft = len;
@@ -1104,10 +1164,6 @@ int ControllerAddPuntEntry(uint32_t iport,
                            uint32_t saddr,
                            uint32_t daddr,
                            uint8_t  proto,
-                           uint32_t arpTAddr,
-                           uint8_t  icmpType,
-                           uint16_t vid,
-                           uint8_t  pcp,
                            uint8_t  iClassId,
                            uint32_t vrfId,
                            uint8_t qId)
@@ -1183,7 +1239,6 @@ int ControllerAddPuntEntry(uint32_t iport,
 #ifdef LATER
     addTEntryMF(p4info, t_name, table_entry, "ternary",
                 "hdr.arp.target_proto_addr", arpTAddr, 32);
-#endif // LATER
 
     addTEntryMF(p4info, t_name, table_entry, "ternary",
                 "hdr.icmp.type", icmpType, 8);
@@ -1193,6 +1248,7 @@ int ControllerAddPuntEntry(uint32_t iport,
 
     addTEntryMF(p4info, t_name, table_entry, "ternary",
                 "hdr.vlan_tag[0].pcp", pcp, 8);
+#endif // LATER
 
     addTEntryMF(p4info, t_name, table_entry, "ternary",
                 "local_metadata.class_id", iClassId, 8);

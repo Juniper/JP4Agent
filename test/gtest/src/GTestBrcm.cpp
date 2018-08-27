@@ -91,8 +91,8 @@ TEST_F(P4BRCM, BrcmInjectPuntL2Pkt)
     ControllerInjectPuntL2Pkt(inject_l2_pkt, recvd_pkt, port, port, 15s);
     ASSERT_FALSE(recvd_pkt.empty()) << "Failed to read packet";
 
-    // Verify packets. Skip L2 header.
-    EXPECT_EQ(0, memcmp(pktbuf+14, recvd_pkt.data(), pktlen-14))
+    // Verify packets.
+    EXPECT_EQ(0, memcmp(pktbuf, recvd_pkt.data(), pktlen))
         << "Sent and received pkts differ";
 }
 
@@ -133,8 +133,8 @@ TEST_F(P4BRCM, BrcmIpv4Router)
         TestPacketLibrary::TEST_PKT_ID_BRCM_TEST_TRANSIT_PUNT);
     pktlen = puntPkt->getEtherPacket(pktbuf, ETHER_PAYLOAD_BUF_SIZE);
 
-    // Verify packets. Ignore L2 header and checksum difference.
-    EXPECT_EQ(0, (memcmp(pktbuf+14, recvd_pkt.data(), 8) &&
-                  memcmp(pktbuf + 25, recvd_pkt.data() + 11, pktlen - 40)))
+    // Verify packets. Ignore checksum difference.
+    EXPECT_EQ(0, (memcmp(pktbuf, recvd_pkt.data(), 22) &&
+                  memcmp(pktbuf + 25, recvd_pkt.data() + 25, pktlen - 26)))
         << "Sent and received pkts differ";
 }

@@ -53,6 +53,14 @@ ControllerInjectPuntL2Pkt(const std::string &inject_l2_pkt,
                           uint16_t ingress_port,
                           std::chrono::milliseconds timeout_ms);
 
+bool
+ControllerInjectPuntL2Pkts(const std::string &inject_l2_pkt,
+                           std::string &punt_l2_pkt1,
+                           std::string &punt_l2_pkt2,
+                           uint16_t egress_port,
+                           uint16_t ingress_port,
+                           std::chrono::milliseconds timeout_ms);
+
 bool ControllerICMPEcho(std::chrono::milliseconds);
 
 bool ControllerHandleArpReq(std::chrono::milliseconds);
@@ -99,13 +107,9 @@ int ControllerAddPuntEntry(uint32_t iport,
                            uint32_t saddr,
                            uint32_t daddr,
                            uint8_t  proto,
-                           uint32_t arpTAddr,
-                           uint8_t  icmpType,
-                           uint16_t vid,
-                           uint8_t  dot1p,
                            uint8_t  ingressClassId,
                            uint32_t vrfId,
-                           uint8_t qId);
+                           uint8_t  qId);
 
 // Packet header definitions
 struct __attribute__((packed)) cpu_header_t {

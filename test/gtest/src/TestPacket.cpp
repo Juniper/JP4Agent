@@ -242,7 +242,7 @@ TestPacketLibrary::buildTestPacketLibrary(void)
     //
     // TEST_PKT_ID_BRCM_TEST_TRANSIT_PUNT
     //
-        // Mac    : 88:a2:5e:91:a2:a8
+        // Mac    : 88:a2:5e:91:a2:a9
         // Src IP : 44.44.44.2
         // Dst IP : 55.55.55.2
     testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_TRANSIT_PUNT];
@@ -258,4 +258,193 @@ TestPacketLibrary::buildTestPacketLibrary(void)
                 "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
                 "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
                 "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_OVERRIDE_INJECT
+    //
+        // Dst Mac : 88:a2:5e:91:a2:a8
+        // Src Mac : 22:a1:a2:a3:a4:a5
+        // Src IP  : 3.3.3.3
+        // Dst IP  : 11.11.11.1
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_OVERRIDE_INJECT];
+
+    testPkt->setDstMac("88:a2:5e:91:a2:a8");
+    testPkt->setSrcMac("22:a1:a2:a3:a4:a5");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 5e3c 0000 4001 005c"
+                "0303 0303 0b0b 0b01"
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_OVERRIDE_PUNT
+    //
+        // Dst Mac : 55:a2:5e:91:75:ff
+        // Src Mac : 88:a2:5e:91:a2:a9
+        // Src IP  : 3.3.3.3
+        // Dst IP  : 11.11.11.1
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_OVERRIDE_PUNT];
+
+    testPkt->setDstMac("55:a2:5e:91:75:ff");
+    testPkt->setSrcMac("88:a2:5e:91:a2:a9");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 5e3c 0000 4001 005c"
+                "0303 0303 0b0b 0b01"
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_VRF_INJECT
+    //
+        // Dst Mac : 88:a2:5e:91:a2:a8
+        // Src Mac : 24:a1:a2:a3:a4:a5
+        // Src IP  : 4.4.4.4
+        // Dst IP  : 12.12.12.1
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_VRF_INJECT];
+
+    testPkt->setDstMac("88:a2:5e:91:a2:a8");
+    testPkt->setSrcMac("24:a1:a2:a3:a4:a5");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 5e3c 0000 4001 fc58"
+                "0404 0404 0c0c 0c01"
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_VRF_PUNT
+    //
+        // Dst Mac : 77:a2:5e:91:75:ff
+        // Src Mac : 88:a2:5e:91:a2:a9
+        // Src IP  : 4.4.4.4
+        // Dst IP  : 12.12.12.1
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_VRF_PUNT];
+
+    testPkt->setDstMac("77:a2:5e:91:75:ff");
+    testPkt->setSrcMac("88:a2:5e:91:a2:a9");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 5e3c 0000 4001 fc58"
+                "0404 0404 0c0c 0c01"
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_FALLBACK
+    //
+        // Dst Mac : 88:a2:5e:91:a2:a8
+        // Src Mac : 26:a1:a2:a3:a4:a5
+        // Src IP  : 5.5.5.5
+        // Dst IP  : 13.13.13.1
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_FALLBACK_INJECT];
+
+    testPkt->setDstMac("88:a2:5e:91:a2:a8");
+    testPkt->setSrcMac("26:a1:a2:a3:a4:a5");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 5e3c 0000 4001 f855"
+                "0505 0505 0d0d 0d01"
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_FALLBACK_PUNT
+    //
+        // Dst Mac : 99:a2:5e:91:75:ff
+        // Src Mac : 88:a2:5e:91:a2:a9
+        // Src IP  : 5.5.5.5
+        // Dst IP  : 13.13.13.1
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_FALLBACK_PUNT];
+
+    testPkt->setDstMac("99:a2:5e:91:75:ff");
+    testPkt->setSrcMac("88:a2:5e:91:a2:a9");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0054 5e3c 0000 4001 f855"
+                "0505 0505 0d0d 0d01"
+                "0800 5cba 492b 3942 ee7c 5658 0000"
+                "0000 0a30 0b00 0000 0000 1011 1213 1415"
+                "1617 1819 1a1b 1c1d 1e1f 2021 2223 2425"
+                "2627 2829 2a2b 2c2d 2e2f 3031 3233 3435"
+                "3637");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_PUNT_TBL_INJECT
+    //
+        // Dst Mac : 88:a2:5e:91:a2:a8
+        // Src Mac : 26:a1:a2:a3:a4:a5
+        // Src IP  : 139.133.217.110
+        // Dst IP  : 139.133.233.2
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_PUNT_TBL_INJECT];
+
+    testPkt->setDstMac("88:a2:5e:91:a2:a8");
+    testPkt->setSrcMac("26:a1:a2:a3:a4:a5");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0028"
+                "08bb 4000"
+                "ff06 9998"
+                "8b85 d96e"
+                "8b85 e902"
+                "9005 0017 7214 f130 9431 1028 5011 2238"
+                "1c64 0000");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_PUNT_TBL_PUNT1
+    //
+        // Dst Mac : 88:a2:5e:91:a2:a8
+        // Src Mac : 26:a1:a2:a3:a4:a5
+        // Src IP  : 139.133.217.110
+        // Dst IP  : 139.133.233.2
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_PUNT_TBL_PUNT1];
+
+    testPkt->setDstMac("88:a2:5e:91:a2:a8");
+    testPkt->setSrcMac("26:a1:a2:a3:a4:a5");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0028"
+                "08bb 4000"
+                "ff06 9998"
+                "8b85 d96e"
+                "8b85 e902"
+                "9005 0017 7214 f130 9431 1028 5011 2238"
+                "1c64 0000 0000 0000 0000");
+
+    //
+    // TEST_PKT_ID_BRCM_TEST_PUNT_TBL_PUNT2
+    //
+        // Dst Mac : 33:a2:5e:91:75:ff
+        // Src Mac : 88:a2:5e:91:a2:a9
+        // Src IP  : 139.133.217.110
+        // Dst IP  : 139.133.233.2
+    testPkt = &_testPacketLibrary[TEST_PKT_ID_BRCM_TEST_PUNT_TBL_PUNT2];
+
+    testPkt->setDstMac("33:a2:5e:91:75:ff");
+    testPkt->setSrcMac("88:a2:5e:91:a2:a9");
+    testPkt->setEtherType(ETH_P_IP); // 0x0800
+    testPkt->setEtherPayloadStr(
+                "4500 0028"
+                "08bb 4000"
+                "ff06 9998"
+                "8b85 d96e"
+                "8b85 e902"
+                "9005 0017 7214 f130 9431 1028 5011 2238"
+                "1c64 0000 0000 0000 0000");
 }
