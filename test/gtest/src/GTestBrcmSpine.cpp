@@ -71,6 +71,12 @@ protected:
     }
 };
 
+// Test0: Dummy
+TEST_F(P4BRCMSPINE, Foo)
+{
+    EXPECT_EQ(1, 1);
+}
+
 // Test1: VRF Classifier Table
 TEST_F(P4BRCMSPINE, VrfClassifier)
 {

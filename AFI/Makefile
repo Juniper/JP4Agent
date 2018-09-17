@@ -211,6 +211,18 @@ ifdef UBUNTU
 endif
 	$(RM) -f $(OBJS) $(TARGET_LIB) ./.depend
 
+ifeq ($(PREFIX),)
+    PREFIX := /usr/local
+endif
+
+.PHONY: install
+install: $(TARGET_LIB)
+	install -d $(DESTDIR)$(PREFIX)/lib64/
+	install -m 644 ./*so* $(DESTDIR)$(PREFIX)/lib64/
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/AFI
+	cp --parents `find -name \*.h` $(DESTDIR)$(PREFIX)/include/jp4agent/AFI/
+
 #depend: .depend
 #
 #.depend: $(SRCS)

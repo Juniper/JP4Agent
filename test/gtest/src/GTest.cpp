@@ -461,6 +461,28 @@ main(int argc, char **argv)
     } else if (strcmp(argv[1], "brcmspine")  == 0) {
             ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.*";
             //::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.Punt";
+    } else if (strcmp(argv[1], "brcmspine.init")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.Foo";
+    } else if (strcmp(argv[1], "brcmspine.vrf")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.VrfClassifier";
+    } else if (strcmp(argv[1], "brcmspine.classid")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.ClassId";
+    } else if (strcmp(argv[1], "brcmspine.mymac")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.MyMac";
+    } else if (strcmp(argv[1], "brcmspine.rtt")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.RTT";
+    } else if (strcmp(argv[1], "brcmspine.punt")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.Punt";
+    } else if (strcmp(argv[1], "brcmspine.VrfTraffic")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.VrfTraffic";
+    } else if (strcmp(argv[1], "brcmspine.OverrideTraffic")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.OverrideTraffic";
+    } else if (strcmp(argv[1], "brcmspine.FallbackTraffic")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.FallbackTraffic";
+    } else if (strcmp(argv[1], "brcmspine.PuntTableTraffic")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMSPINE.PuntTableTraffic";
+    } else if (strcmp(argv[1], "brcmvrf")  == 0) {
+            ::testing::GTEST_FLAG(filter) = "P4BRCMVRF.*";
     } else {
         ::testing::GTEST_FLAG(filter) = "*nullTest*";
     }

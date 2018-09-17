@@ -149,6 +149,18 @@ cli/jp4cli.grpc.pb.cc: cli/jp4cli.proto
 clean:
 	$(RM) $(OBJS) $(TARGET_LIB) $(SRCS) $(PROTO_GENERATED_HEADERS) ./.depend
 
+.PHONY: install
+install: $(TARGET_LIB)
+	install -d $(DESTDIR)$(PREFIX)/lib64/
+	install -m 644 $(wildcard *.so.*) $(DESTDIR)$(PREFIX)/lib64/
+	rm -f $(DESTDIR)$(PREFIX)/lib64/${basename $(TARGET_LIB)}
+	ln -s $(DESTDIR)$(PREFIX)/lib64/${notdir $(TARGET_LIB)} $(DESTDIR)$(PREFIX)/lib64/${basename $(TARGET_LIB)}
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src/pi
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src/pi/protos
+	cp --parents `find -name \*.h` $(DESTDIR)$(PREFIX)/include/jp4agent/src/pi/protos
+
 depend: .depend
 
 .depend: $(SRCS)

@@ -18,6 +18,20 @@
 # as noted in the Third-Party source code file.
 #
 
+#
+# Usage:
+#   make-all-null.sh clean
+#   make-all-null.sh
+#   make-all-null.sh install --destdir <destdir> --prefix <subdir> --confdir <subdir>
+#     destdir => installation directory
+#     prefix  => subdirectory under destdir
+#                JP4Agent lib64 and include sub-directories are created below this
+#     confdir => subdirectory under destdir
+#                JP4Agent config sub-directory is created below this
+#     Example command:
+#       make-all-null.sh install --destdir /opt --prefix /usr --confdir /etc
+#
+
 me=`basename "$0"`
 REPO_DIR=..
 
@@ -34,7 +48,42 @@ components=(
     $REPO_DIR/src/targets/null/src
 )
 
-if [ "_$1" == "_clean" ]
+# Parse arguments
+cmd=""
+
+while (( "$#" )); do
+  case "$1" in
+    --destdir)
+      destdir=$2
+      shift 2
+      ;;
+    --prefix)
+      prefix=$2
+      shift 2
+      ;;
+    --confdir)
+      confdir=$2
+      shift 2
+      ;;
+    --) # end
+      shift
+      break
+      ;;
+    -*|--*=) # unsupported flags
+      echo "Error: Unsupported flag $1" >&2
+      exit 1
+      ;;
+    *) # positional arguments
+      cmd="$cmd $1"
+      shift
+      ;;
+  esac
+done
+
+# set positional arguments in their proper place
+eval set -- "$cmd"
+
+if [ $cmd == "clean" ]
 then
     for component in "${components[@]}"
     do
@@ -43,6 +92,21 @@ then
     done
     echo "===== Deleting all obj directories ====="
     cd $REPO_DIR; find . -name obj | xargs rm -rf
+elif [ $cmd == "install" ]
+then
+    for component in "${components[@]}"
+    do
+        echo "===== Running make install under ${component} ====="
+        make install -C ${component} DESTDIR=${destdir} PREFIX=${prefix} CONFDIR=${confdir}
+        if [ $? -ne 0 ]
+        then
+          echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 
+          echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 
+          echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 
+          exit 1
+        fi
+    done
+    echo "Installation done!!!"
 else
     make srcs -C $REPO_DIR/AFI
     for component in "${components[@]}"

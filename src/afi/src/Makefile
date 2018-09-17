@@ -95,6 +95,21 @@ $(OBJDIR)/%.o : %.cpp
 clean:
 	$(RM) $(OBJDIR) ./.depend
 
+ifeq ($(PREFIX),)
+    PREFIX := /usr/local
+endif
+
+.PHONY: install
+install: $(OBJDIR)/$(TARGET_LIB)
+	install -d $(DESTDIR)$(PREFIX)/lib64/
+	install -m 644 $(OBJDIR)/$(TARGET_LIB) $(DESTDIR)$(PREFIX)/lib64/
+	rm -f $(DESTDIR)$(PREFIX)/lib64/${basename $(TARGET_LIB)}
+	ln -s $(DESTDIR)$(PREFIX)/lib64/${notdir $(TARGET_LIB)} $(DESTDIR)$(PREFIX)/lib64/${basename $(TARGET_LIB)}
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src
+	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src/afi
+	cd ../; cp --parents `find -name \*.h` $(DESTDIR)$(PREFIX)/include/jp4agent/src/afi/
+
 depend: .depend
 
 .depend: $(SRCS)

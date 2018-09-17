@@ -86,6 +86,9 @@ $(OBJDIR)/%.o : %.cpp
 clean:
 	$(RM) $(OBJDIR) ./.depend
 
+install:
+	@echo Nothing to install!
+
 depend: .depend
 
 .depend: $(SRCS)

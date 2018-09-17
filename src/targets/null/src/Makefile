@@ -121,6 +121,9 @@ $(OBJDIR)/%.o : %.cpp
 clean:
 	$(RM) $(OBJDIR) $(BINDIR)/$(PROG) ./.depend
 
+install:
+	@echo Nothing to install!
+
 depend: .depend
 
 .depend: $(SRCS)
