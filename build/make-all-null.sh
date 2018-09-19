@@ -58,7 +58,7 @@ while (( "$#" )); do
       shift 2
       ;;
     --prefix)
-      prefix=$2
+      pfx=$2
       shift 2
       ;;
     --confdir)
@@ -97,7 +97,7 @@ then
     for component in "${components[@]}"
     do
         echo "===== Running make install under ${component} ====="
-        make install -C ${component} DESTDIR=${destdir} PREFIX=${prefix} CONFDIR=${confdir}
+        make install -C ${component} DESTDIR=${destdir} prefix=${pfx} sysconfdir=${confdir}
         if [ $? -ne 0 ]
         then
           echo "$me: !!!!!!!!!!!ERROR!!!!!!!!!!" 

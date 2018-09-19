@@ -149,17 +149,21 @@ cli/jp4cli.grpc.pb.cc: cli/jp4cli.proto
 clean:
 	$(RM) $(OBJS) $(TARGET_LIB) $(SRCS) $(PROTO_GENERATED_HEADERS) ./.depend
 
+ifeq ($(prefix),)
+    prefix := /usr/local
+endif
+
 .PHONY: install
 install: $(TARGET_LIB)
-	install -d $(DESTDIR)$(PREFIX)/lib64/
-	install -m 644 $(wildcard *.so.*) $(DESTDIR)$(PREFIX)/lib64/
-	rm -f $(DESTDIR)$(PREFIX)/lib64/${basename $(TARGET_LIB)}
-	ln -s $(DESTDIR)$(PREFIX)/lib64/${notdir $(TARGET_LIB)} $(DESTDIR)$(PREFIX)/lib64/${basename $(TARGET_LIB)}
-	install -d $(DESTDIR)$(PREFIX)/include/jp4agent
-	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src
-	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src/pi
-	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src/pi/protos
-	cp --parents `find -name \*.h` $(DESTDIR)$(PREFIX)/include/jp4agent/src/pi/protos
+	install -d $(DESTDIR)$(prefix)/lib64/
+	install -m 644 $(wildcard *.so.*) $(DESTDIR)$(prefix)/lib64/
+	rm -f $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
+	ln -s $(DESTDIR)$(prefix)/lib64/${notdir $(TARGET_LIB)} $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
+	install -d $(DESTDIR)$(prefix)/include/jp4agent
+	install -d $(DESTDIR)$(prefix)/include/jp4agent/src
+	install -d $(DESTDIR)$(prefix)/include/jp4agent/src/pi
+	install -d $(DESTDIR)$(prefix)/include/jp4agent/src/pi/protos
+	cp --parents `find -name \*.h` $(DESTDIR)$(prefix)/include/jp4agent/src/pi/protos
 
 depend: .depend
 

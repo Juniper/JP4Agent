@@ -73,16 +73,20 @@ $(OBJDIR)/%.o : %.cpp
 clean:
 	$(RM) $(OBJDIR) ./.depend
 
+ifeq ($(prefix),)
+    prefix := /usr/local
+endif
+
 .PHONY: install
 install: $(OBJDIR)/$(TARGET_LIB)
-	install -d $(DESTDIR)$(PREFIX)/lib64/
-	install -m 644 $(OBJDIR)/$(TARGET_LIB) $(DESTDIR)$(PREFIX)/lib64/
-	rm -f $(DESTDIR)$(PREFIX)/lib64/${basename $(TARGET_LIB)}
-	ln -s $(DESTDIR)$(PREFIX)/lib64/${notdir $(TARGET_LIB)} $(DESTDIR)$(PREFIX)/lib64/${basename $(TARGET_LIB)}
-	install -d $(DESTDIR)$(PREFIX)/include/jp4agent
-	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src
-	install -d $(DESTDIR)$(PREFIX)/include/jp4agent/src/utils
-	cd ../; cp --parents `find -name \*.h` $(DESTDIR)$(PREFIX)/include/jp4agent/src/utils/
+	install -d $(DESTDIR)$(prefix)/lib64/
+	install -m 644 $(OBJDIR)/$(TARGET_LIB) $(DESTDIR)$(prefix)/lib64/
+	rm -f $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
+	ln -s $(DESTDIR)$(prefix)/lib64/${notdir $(TARGET_LIB)} $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
+	install -d $(DESTDIR)$(prefix)/include/jp4agent
+	install -d $(DESTDIR)$(prefix)/include/jp4agent/src
+	install -d $(DESTDIR)$(prefix)/include/jp4agent/src/utils
+	cd ../; cp --parents `find -name \*.h` $(DESTDIR)$(prefix)/include/jp4agent/src/utils/
 
 depend: .depend
 
