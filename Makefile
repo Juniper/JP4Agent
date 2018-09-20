@@ -20,22 +20,22 @@
 #
 
 COMPONENTS = \
-	../AFI \
-	../src/pi/protos \
-	../src/jp4agent/src \
-	../src/utils/src \
-	../src/pi/src \
-	../src/afi/src \
-	../test/controller/src \
-	../test/gtest/src \
-	../src/targets/null/null/src \
-	../src/targets/null/src
+	AFI \
+	src/pi/protos \
+	src/jp4agent/src \
+	src/utils/src \
+	src/pi/src \
+	src/afi/src \
+	test/controller/src \
+	test/gtest/src \
+	src/targets/null/null/src \
+	src/targets/null/src
 
 .PHONY: all $(COMPONENTS)
 all: $(COMPONENTS)
 $(COMPONENTS):
 ifeq ($(ubuntu), 1)
-	make -j1 srcs -C ../AFI
+	make -j1 srcs -C AFI
 endif
 	make -j1 -C $@ UBUNTU=${ubuntu} DEBUG_BUILD=1 CODE_COVERAGE=1
 
