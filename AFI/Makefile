@@ -219,6 +219,9 @@ endif
 install: $(TARGET_LIB)
 	install -d $(DESTDIR)$(prefix)/lib64/
 	install -m 644 ./*so* $(DESTDIR)$(prefix)/lib64/
+	install -m 644 $(TARGET_LIB) $(DESTDIR)$(prefix)/lib64/
+	rm -f $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
+	ln -s ${notdir $(TARGET_LIB)} $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
 	install -d $(DESTDIR)$(prefix)/include/jp4agent
 	install -d $(DESTDIR)$(prefix)/include/jp4agent/AFI
 	cp --parents `find -name \*.h` $(DESTDIR)$(prefix)/include/jp4agent/AFI/

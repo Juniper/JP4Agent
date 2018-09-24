@@ -33,16 +33,29 @@ COMPONENTS = \
 
 .PHONY: all $(COMPONENTS)
 all: $(COMPONENTS)
+
 $(COMPONENTS):
 ifeq ($(ubuntu), 1)
-	make -j1 srcs -C AFI
+	make srcs -C AFI
+	make -C $@ UBUNTU=1 DEBUG_BUILD=1 CODE_COVERAGE=1
 endif
-	make -j1 -C $@ UBUNTU=${ubuntu} DEBUG_BUILD=1 CODE_COVERAGE=1
+	make -C $@ DEBUG_BUILD=1 CODE_COVERAGE=1
+
+src/pi/protos: AFI
+src/pi/src: src/pi/protos
+src/jp4agent/src: src/pi/protos src/pi/src
+src/utils/src: src/pi/protos
+src/afi/src: src/pi/protos
+test/controller/src: src/pi/protos
+test/gtest/src: src/pi/protos
+src/targets/null/null/src: src/pi/protos
+src/targets/null/src: src/jp4agent/src
 
 INSTALL_COMPONENTS = $(COMPONENTS:%=install-%)
 .PHONY: install $(INSTALL_COMPONENTS)
 install: $(INSTALL_COMPONENTS)
 $(INSTALL_COMPONENTS):
+	echo $(DESTDIR) $(prefix) $(sysconfdir)
 	make install -C $(@:install-%=%)
 
 CLEAN_COMPONENTS = $(COMPONENTS:%=clean-%)

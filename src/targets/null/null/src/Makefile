@@ -95,7 +95,7 @@ install: $(OBJDIR)/$(TARGET_LIB)
 	install -d $(DESTDIR)$(prefix)/lib64/
 	install -m 644 $(OBJDIR)/$(TARGET_LIB) $(DESTDIR)$(prefix)/lib64/
 	rm -f $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
-	ln -s $(DESTDIR)$(prefix)/lib64/${notdir $(TARGET_LIB)} $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
+	ln -s ${notdir $(TARGET_LIB)} $(DESTDIR)$(prefix)/lib64/${basename $(TARGET_LIB)}
 	install -d $(DESTDIR)$(prefix)/include/jp4agent
 	install -d $(DESTDIR)$(prefix)/include/jp4agent/src
 	install -d $(DESTDIR)$(prefix)/include/jp4agent/src/targets
